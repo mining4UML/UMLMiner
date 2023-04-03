@@ -1,0 +1,27 @@
+<plugin
+	id="%plugin.id"
+	name="%plugin.name"
+	description="%plugin.description"
+	provider="%plugin.provider"
+	class="plugin.mining.plugin.MiningPlugin">
+
+	<runtime>
+		<library path="lib" relativePath="true" />
+	</runtime>
+
+	<actionSets>
+		<actionSet id="%plugin.actions.id">
+			<action
+				id="%plugin.actions.ReloadPlugin.id"
+				actionType="generalAction"
+				label="%plugin.actions.ReloadPlugin.label"
+				tooltip="%plugin.actions.ReloadPlugin.label"
+				icon="icons/reloadPlugin.png"
+				style="normal"
+				ribbonPath="Help/InstallPlugin">
+				<actionController class="plugin.mining.actions.ReloadPluginActionController" />
+			</action>
+		</actionSet>
+	</actionSets>
+
+</plugin>

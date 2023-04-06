@@ -3,18 +3,11 @@ package plugin.mining.listener;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import com.vp.plugin.diagram.IClassDiagramUIModel;
 import com.vp.plugin.diagram.IConnectorUIModel;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramElementListener;
 import com.vp.plugin.diagram.IShapeUIModel;
-import com.vp.plugin.diagram.property.IDiagramElementProperty;
-import com.vp.plugin.diagram.shape.IClassUIModel;
-import com.vp.plugin.model.IAttribute;
-import com.vp.plugin.model.IClass;
-import com.vp.plugin.model.IModel;
 import com.vp.plugin.model.IModelElement;
-import com.vp.plugin.model.property.IModelProperty;
 
 import plugin.mining.utils.Logger;
 
@@ -32,7 +25,7 @@ public class DiagramElementListener implements IDiagramElementListener {
     public void childAdded(IDiagramElement diagramElement, IShapeUIModel shapeUIModel) {
         IModelElement modelElement = diagramElement.getModelElement();
         IModelElement childElement = shapeUIModel.getModelElement();
-        logger.info("\"%s\" child added to \"%s\"", childElement.getName(),
+        logger.info("\"%s\" child added to %s \"%s\"", childElement.getName(), modelElement.getModelType(),
                 modelElement.getName());
     }
 
@@ -40,30 +33,36 @@ public class DiagramElementListener implements IDiagramElementListener {
     public void childRemoved(IDiagramElement diagramElement, IShapeUIModel shapeUIModel) {
         IModelElement modelElement = diagramElement.getModelElement();
         IModelElement childElement = shapeUIModel.getModelElement();
-        logger.info("\"%s\" child removed from \"%s\"", childElement.getName(),
+        logger.info("\"%s\" child removed from %s \"%s\"", childElement.getName(), modelElement.getModelType(),
                 modelElement.getName());
     }
 
     @Override
-    public void diagramElementPropertyChange(IDiagramElement diagramElement, String property) {
-        // Empty
+    public void diagramElementPropertyChange(IDiagramElement diagramElement, String propertyName) {
+        IModelElement modelElement = diagramElement.getModelElement();
+        logger.info("%s \"%s\" \"%s\" property change", modelElement.getModelType(),
+                modelElement.getName(), propertyName);
     }
 
     @Override
     public void diagramElementUndeleted(IDiagramElement diagramElement) {
         IModelElement modelElement = diagramElement.getModelElement();
-        logger.info("\"%s\" %s undeleted", modelElement.getModelType(),
+        logger.info("%s \"%s\" undeleted", modelElement.getModelType(),
                 modelElement.getName());
     }
 
     @Override
     public void fromConnectorAdded(IDiagramElement diagramElement, IConnectorUIModel connectorUIModel) {
-        // Empty
+        IModelElement modelElement = diagramElement.getModelElement();
+        logger.info("%s \"%s\" added from connector", modelElement.getModelType(),
+                modelElementName);
     }
 
     @Override
     public void fromConnectorRemoved(IDiagramElement diagramElement, IConnectorUIModel connectorUIModel) {
-        // Empty
+        IModelElement modelElement = diagramElement.getModelElement();
+        logger.info("%s \"%s\" removed from connector", modelElement.getModelType(),
+                modelElementName);
     }
 
     @Override
@@ -82,12 +81,16 @@ public class DiagramElementListener implements IDiagramElementListener {
 
     @Override
     public void toConnectorAdded(IDiagramElement diagramElement, IConnectorUIModel connectorUIModel) {
-        // Empty
+        IModelElement modelElement = diagramElement.getModelElement();
+        logger.info("%s \"%s\" added to connector", modelElement.getModelType(),
+                modelElementName);
     }
 
     @Override
     public void toConnectorRemoved(IDiagramElement diagramElement, IConnectorUIModel connectorUIModel) {
-        // Empty
+        IModelElement modelElement = diagramElement.getModelElement();
+        logger.info("%s \"%s\" removed to connector", modelElement.getModelType(),
+                modelElementName);
     }
 
 }

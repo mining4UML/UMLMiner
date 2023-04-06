@@ -62,11 +62,11 @@ public class DiagramListener implements IDiagramListener {
 	}
 
 	@Override
-	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String property,
+	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String propertyName,
 			Object propertyPreviousValue, Object propertyValue) {
-		if (propertyPreviousValue != null && propertyValue != null && !propertiesIgnored.contains(property))
-			logger.info("%s \"%s\" %s property changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
-					diagramUIModel.getName(), property, propertyPreviousValue, propertyValue);
+		if (propertyPreviousValue != null && propertyValue != null && !propertiesIgnored.contains(propertyName))
+			logger.info("%s \"%s\" %s propertyName changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
+					diagramUIModel.getName(), propertyName, propertyPreviousValue, propertyValue);
 	}
 
 }

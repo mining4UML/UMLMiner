@@ -1,10 +1,8 @@
 package plugin.mining.listener;
 
-import java.time.LocalDateTime;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectListener;
 
-import plugin.mining.utils.Application;
 import plugin.mining.utils.Logger;
 
 public class ProjectListener implements IProjectListener {

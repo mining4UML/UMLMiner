@@ -3,6 +3,7 @@ package plugin.mining.listener;
 import java.beans.PropertyChangeEvent;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IHasChildrenBaseModelElement;
@@ -11,7 +12,7 @@ import plugin.mining.utils.Logger;
 
 public class PropertyChangeListener implements java.beans.PropertyChangeListener {
 	private static final Logger logger = new Logger(PropertyChangeListener.class);
-	private static final HashSet<String> propertiesAllowed = new HashSet<>(
+	private static final Set<String> propertiesAllowed = new HashSet<>(
 			Arrays.asList("name", "childAdded", "childRemoved"));
 
 	public PropertyChangeListener() {

@@ -1,7 +1,10 @@
 package plugin.mining.listener;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
@@ -12,9 +15,10 @@ import plugin.mining.utils.Logger;
 
 public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);
-	private static final HashSet<String> propertiesAllowed = new HashSet<>(Arrays.asList());
+	private static final Set<String> propertiesAllowed = new HashSet<>(Arrays.asList());
 	private String diagramUIModelPreviousName;
-	private IModelElement[] modelElements;
+	private Map<String, DiagramElementListener> diagramElementListenerMap = new HashMap<>();
+	private Set<IModelElement> modelElements = new HashSet<>();
 
 	public DiagramListener() {
 		// Empty
@@ -23,32 +27,34 @@ public class DiagramListener implements IDiagramListener {
 	@Override
 	public void diagramElementAdded(IDiagramUIModel diagramUIModel, IDiagramElement diagramElement) {
 		IModelElement modelElement = diagramElement.getModelElement();
-		if (modelElement.getName() != null)
-			logger.info("%s element \"%s\" added to the diagram", modelElement.getModelType(),
-					modelElement.getName());
+		modelElements.add(modelElement);
 
-		diagramElement.addDiagramElementListener(new DiagramElementListener(modelElement));
+		if (diagramElementListenerMap.containsKey(diagramElement.getId()))
+			return;
 
-		modelElements = Arrays.stream(diagramUIModel.toDiagramElementArray())
-				.map(t -> t.getModelElement()).toArray(IModelElement[]::new);
+		logger.info("%s element %sadded to the diagram", modelElement.getModelType(),
+				modelElement.getName() != null ? String.format("\"%s\" ", modelElement.getName()) : "");
+		DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
+		diagramElementListenerMap.put(diagramElement.getId(), diagramElementListener);
+		diagramElement.addDiagramElementListener(diagramElementListener);
+
 	}
 
 	@Override
 	public void diagramElementRemoved(IDiagramUIModel diagramUIModel, IDiagramElement diagramElement) {
 		IDiagramElement[] diagramElements = diagramUIModel.toDiagramElementArray();
-		IModelElement modelElementRemoved = Arrays.stream(modelElements)
+		IModelElement modelElementRemoved = modelElements.stream()
 				.filter(modelElement -> Arrays.stream(diagramElements)
 						.noneMatch(t -> t.getModelElement().equals(modelElement)))
 				.findFirst().orElse(null);
 
-		if (modelElementRemoved != null) {
-			logger.info("%s element \"%s\" removed from the diagram", modelElementRemoved.getModelType(),
-					modelElementRemoved.getName());
-		}
+		if (modelElementRemoved == null)
+			return;
 
-		modelElements = Arrays.stream(
-				diagramElements)
-				.map(t -> t.getModelElement()).filter(t -> t != null).toArray(IModelElement[]::new);
+		logger.info("%s element \"%s\" removed from the diagram", modelElementRemoved.getModelType(),
+				modelElementRemoved.getName());
+		diagramElement.removeDiagramElementListener(diagramElementListenerMap.get(diagramElement.getId()));
+		modelElements.remove(modelElementRemoved);
 	}
 
 	@Override
@@ -56,12 +62,12 @@ public class DiagramListener implements IDiagramListener {
 		logger.info("%s \"%s\" loaded", diagramUIModel.getType(), diagramUIModel.getName());
 
 		IDiagramElement[] diagramElements = diagramUIModel.toDiagramElementArray();
-		modelElements = Arrays.stream(
-				diagramElements)
-				.map(t -> t.getModelElement()).toArray(IModelElement[]::new);
 		for (IDiagramElement diagramElement : diagramElements) {
 			IModelElement modelElement = diagramElement.getModelElement();
-			diagramElement.addDiagramElementListener(new DiagramElementListener(modelElement));
+			modelElements.add(modelElement);
+			DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
+			diagramElementListenerMap.put(diagramElement.getId(), diagramElementListener);
+			diagramElement.addDiagramElementListener(diagramElementListener);
 		}
 	}
 
@@ -71,15 +77,18 @@ public class DiagramListener implements IDiagramListener {
 			logger.info("%s \"%s\" renamed to \"%s\"", diagramUIModel.getType(),
 					diagramUIModelPreviousName,
 					diagramUIModel.getName());
+
 		diagramUIModelPreviousName = diagramUIModel.getName();
 	}
 
 	@Override
 	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String propertyName,
 			Object propertyPreviousValue, Object propertyValue) {
-		if (propertyPreviousValue != null && propertyValue != null && propertiesAllowed.contains(propertyName))
-			logger.info("%s \"%s\" %s property changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
-					diagramUIModel.getName(), propertyName, propertyPreviousValue, propertyValue);
+		if (propertyPreviousValue == null || propertyValue == null || !propertiesAllowed.contains(propertyName))
+			return;
+
+		logger.info("%s \"%s\" %s property changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
+				diagramUIModel.getName(), propertyName, propertyPreviousValue, propertyValue);
 	}
 
 }

@@ -10,6 +10,7 @@ import plugin.mining.utils.Logger;
 
 public class DiagramElementListener implements IDiagramElementListener {
     private static final Logger logger = new Logger(DiagramElementListener.class);
+    private static final PropertyChangeListener propertyChangeListener = new PropertyChangeListener();
     private IModelElement modelElement;
     private String modelElementPreviousName;
 
@@ -17,7 +18,7 @@ public class DiagramElementListener implements IDiagramElementListener {
         this.modelElement = modelElement;
         modelElementPreviousName = modelElement.getName();
 
-        modelElement.addPropertyChangeListener(new PropertyChangeListener());
+        modelElement.addPropertyChangeListener(propertyChangeListener);
     }
 
     @Override

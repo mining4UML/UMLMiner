@@ -6,16 +6,15 @@ import java.util.HashSet;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
 import com.vp.plugin.diagram.IDiagramUIModel;
-import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 
 import plugin.mining.utils.Logger;
 
 public class DiagramListener implements IDiagramListener {
-	private final Logger logger = new Logger(DiagramListener.class);
-	private static final HashSet<String> propertiesIgnored = new HashSet<>(Arrays.asList("modified", "lastModified",
-			"pmLastModified", "customizedSortDiagramElementIds"));
-	private String diagramUIModelName;
+	private static final Logger logger = new Logger(DiagramListener.class);
+	private static final HashSet<String> propertiesAllowed = new HashSet<>(Arrays.asList());
+	private String diagramUIModelPreviousName;
+	private IModelElement[] modelElements;
 
 	public DiagramListener() {
 		// Empty
@@ -28,44 +27,58 @@ public class DiagramListener implements IDiagramListener {
 			logger.info("%s element \"%s\" added to the diagram", modelElement.getModelType(),
 					modelElement.getName());
 
-		diagramElement.addDiagramElementListener(
-				modelElement instanceof IClass ? new ClassDiagramElementListener((IClass) modelElement)
-						: new DiagramElementListener(modelElement));
+		diagramElement.addDiagramElementListener(new DiagramElementListener(modelElement));
+
+		modelElements = Arrays.stream(diagramUIModel.toDiagramElementArray())
+				.map(t -> t.getModelElement()).toArray(IModelElement[]::new);
 	}
 
 	@Override
 	public void diagramElementRemoved(IDiagramUIModel diagramUIModel, IDiagramElement diagramElement) {
-		IModelElement modelElement = diagramElement.getModelElement();
-		logger.info("%s element \"%s\" removed from the diagram", modelElement.getModelType(),
-				modelElement.getName());
+		IDiagramElement[] diagramElements = diagramUIModel.toDiagramElementArray();
+		IModelElement modelElementRemoved = Arrays.stream(modelElements)
+				.filter(modelElement -> Arrays.stream(diagramElements)
+						.noneMatch(t -> t.getModelElement().equals(modelElement)))
+				.findFirst().orElse(null);
+
+		if (modelElementRemoved != null) {
+			logger.info("%s element \"%s\" removed from the diagram", modelElementRemoved.getModelType(),
+					modelElementRemoved.getName());
+		}
+
+		modelElements = Arrays.stream(
+				diagramElements)
+				.map(t -> t.getModelElement()).filter(t -> t != null).toArray(IModelElement[]::new);
 	}
 
 	@Override
 	public void diagramUIModelLoaded(IDiagramUIModel diagramUIModel) {
 		logger.info("%s \"%s\" loaded", diagramUIModel.getType(), diagramUIModel.getName());
 
-		for (IDiagramElement diagramElement : diagramUIModel.toDiagramElementArray()) {
+		IDiagramElement[] diagramElements = diagramUIModel.toDiagramElementArray();
+		modelElements = Arrays.stream(
+				diagramElements)
+				.map(t -> t.getModelElement()).toArray(IModelElement[]::new);
+		for (IDiagramElement diagramElement : diagramElements) {
 			IModelElement modelElement = diagramElement.getModelElement();
-			diagramElement.addDiagramElementListener(
-					modelElement instanceof IClass ? new ClassDiagramElementListener((IClass) modelElement)
-							: new DiagramElementListener(modelElement));
+			diagramElement.addDiagramElementListener(new DiagramElementListener(modelElement));
 		}
 	}
 
 	@Override
 	public void diagramUIModelRenamed(IDiagramUIModel diagramUIModel) {
-		String diagramUIModelNewName = diagramUIModel.getName();
-		if (diagramUIModelName != null)
-			logger.info("%s \"%s\" renamed to \"%s\"", diagramUIModel.getType(), diagramUIModelName,
-					diagramUIModelNewName);
-		diagramUIModelName = diagramUIModelNewName;
+		if (diagramUIModelPreviousName != null)
+			logger.info("%s \"%s\" renamed to \"%s\"", diagramUIModel.getType(),
+					diagramUIModelPreviousName,
+					diagramUIModel.getName());
+		diagramUIModelPreviousName = diagramUIModel.getName();
 	}
 
 	@Override
 	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String propertyName,
 			Object propertyPreviousValue, Object propertyValue) {
-		if (propertyPreviousValue != null && propertyValue != null && !propertiesIgnored.contains(propertyName))
-			logger.info("%s \"%s\" %s propertyName changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
+		if (propertyPreviousValue != null && propertyValue != null && propertiesAllowed.contains(propertyName))
+			logger.info("%s \"%s\" %s property changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
 					diagramUIModel.getName(), propertyName, propertyPreviousValue, propertyValue);
 	}
 

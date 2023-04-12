@@ -37,7 +37,6 @@ public class DiagramListener implements IDiagramListener {
 		DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
 		diagramElementListenerMap.put(diagramElement.getId(), diagramElementListener);
 		diagramElement.addDiagramElementListener(diagramElementListener);
-
 	}
 
 	@Override
@@ -51,8 +50,8 @@ public class DiagramListener implements IDiagramListener {
 		if (modelElementRemoved == null)
 			return;
 
-		logger.info("%s element \"%s\" removed from the diagram", modelElementRemoved.getModelType(),
-				modelElementRemoved.getName());
+		logger.info("%s element %sremoved from the diagram", modelElementRemoved.getModelType(),
+				modelElementRemoved.getName() != null ? String.format("\"%s\" ", modelElementRemoved.getName()) : "");
 		diagramElement.removeDiagramElementListener(diagramElementListenerMap.get(diagramElement.getId()));
 		modelElements.remove(modelElementRemoved);
 	}

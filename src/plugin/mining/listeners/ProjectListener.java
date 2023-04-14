@@ -1,4 +1,4 @@
-package plugin.mining.listener;
+package plugin.mining.listeners;
 
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectListener;

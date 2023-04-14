@@ -1,4 +1,4 @@
-package plugin.mining.listener;
+package plugin.mining.listeners;
 
 import java.util.Arrays;
 import java.util.HashMap;

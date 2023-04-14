@@ -4,7 +4,7 @@ import com.vp.plugin.VPPlugin;
 import com.vp.plugin.VPPluginInfo;
 import com.vp.plugin.model.IProject;
 
-import plugin.mining.listener.ProjectListener;
+import plugin.mining.listeners.ProjectListener;
 import plugin.mining.utils.Application;
 import plugin.mining.utils.Logger;
 

@@ -1,10 +1,13 @@
-package plugin.mining.listener;
+package plugin.mining.listeners;
 
 import com.vp.plugin.diagram.IConnectorUIModel;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramElementListener;
 import com.vp.plugin.diagram.IShapeUIModel;
+import com.vp.plugin.model.IAttribute;
+import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
+import com.vp.plugin.model.IOperation;
 
 import plugin.mining.utils.Logger;
 
@@ -19,6 +22,14 @@ public class DiagramElementListener implements IDiagramElementListener {
         modelElementPreviousName = modelElement.getName();
 
         modelElement.addPropertyChangeListener(propertyChangeListener);
+
+        if (modelElement instanceof IClass) {
+            IClass classElement = (IClass) modelElement;
+            for (IAttribute attribute : classElement.toAttributeArray())
+                attribute.addPropertyChangeListener(propertyChangeListener);
+            for (IOperation attribute : classElement.toOperationArray())
+                attribute.addPropertyChangeListener(propertyChangeListener);
+        }
     }
 
     @Override

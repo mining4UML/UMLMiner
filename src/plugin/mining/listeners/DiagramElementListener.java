@@ -13,7 +13,6 @@ import plugin.mining.utils.Logger;
 
 public class DiagramElementListener implements IDiagramElementListener {
     private static final Logger logger = new Logger(DiagramElementListener.class);
-    private static final PropertyChangeListener propertyChangeListener = new PropertyChangeListener();
     private IModelElement modelElement;
     private String modelElementPreviousName;
 
@@ -21,14 +20,14 @@ public class DiagramElementListener implements IDiagramElementListener {
         this.modelElement = modelElement;
         modelElementPreviousName = modelElement.getName();
 
-        modelElement.addPropertyChangeListener(propertyChangeListener);
+        modelElement.addPropertyChangeListener(new PropertyChangeListenerFactory(modelElement));
 
         if (modelElement instanceof IClass) {
             IClass classElement = (IClass) modelElement;
             for (IAttribute attribute : classElement.toAttributeArray())
-                attribute.addPropertyChangeListener(propertyChangeListener);
-            for (IOperation attribute : classElement.toOperationArray())
-                attribute.addPropertyChangeListener(propertyChangeListener);
+                attribute.addPropertyChangeListener(new PropertyChangeListenerFactory(attribute));
+            for (IOperation operation : classElement.toOperationArray())
+                operation.addPropertyChangeListener(new PropertyChangeListenerFactory(operation));
         }
     }
 

@@ -18,14 +18,16 @@ public class MiningPlugin implements VPPlugin {
 	private static final ProjectListener projectListener = new ProjectListener();
 
 	public void loaded(VPPluginInfo info) {
-		Logger.createLogFile();
 		logger.info("plugin loaded");
+		Logger.createLog();
 		IProject project = Application.getProject();
 		project.addProjectListener(projectListener);
+
 	}
 
 	public void unloaded() {
 		logger.info("plugin unloaded");
+		Logger.saveLog();
 		IProject project = Application.getProject();
 		project.removeProjectListener(projectListener);
 	}

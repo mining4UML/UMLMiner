@@ -21,7 +21,6 @@ public class PropertyChangeListenerFactory implements java.beans.PropertyChangeL
 		} else if (modelElement instanceof IOperation) {
 			propertyChangeListener = new OperationPropertyChangeListener((IOperation) modelElement);
 		}
-
 	}
 
 	@Override

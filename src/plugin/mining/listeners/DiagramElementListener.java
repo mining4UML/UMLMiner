@@ -9,6 +9,7 @@ import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 
+import plugin.mining.listeners.property.PropertyChangeListenerFactory;
 import plugin.mining.utils.Logger;
 
 public class DiagramElementListener implements IDiagramElementListener {
@@ -20,14 +21,18 @@ public class DiagramElementListener implements IDiagramElementListener {
         this.modelElement = modelElement;
         modelElementPreviousName = modelElement.getName();
 
-        modelElement.addPropertyChangeListener(new PropertyChangeListenerFactory(modelElement));
+        modelElement.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(modelElement));
 
         if (modelElement instanceof IClass) {
             IClass classElement = (IClass) modelElement;
             for (IAttribute attribute : classElement.toAttributeArray())
-                attribute.addPropertyChangeListener(new PropertyChangeListenerFactory(attribute));
+                attribute.addPropertyChangeListener(
+                        PropertyChangeListenerFactory
+                                .getInstance(attribute));
             for (IOperation operation : classElement.toOperationArray())
-                operation.addPropertyChangeListener(new PropertyChangeListenerFactory(operation));
+                operation.addPropertyChangeListener(
+                        PropertyChangeListenerFactory
+                                .getInstance(operation));
         }
     }
 

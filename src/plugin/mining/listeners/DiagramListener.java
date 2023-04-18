@@ -13,6 +13,7 @@ import com.vp.plugin.model.IModelElement;
 
 import plugin.mining.utils.Logger;
 
+
 public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);
 	private static final Set<String> propertiesAllowed = new HashSet<>(Arrays.asList());

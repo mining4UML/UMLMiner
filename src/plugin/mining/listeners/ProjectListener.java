@@ -5,6 +5,8 @@ import com.vp.plugin.model.IProjectListener;
 
 import plugin.mining.utils.Logger;
 
+
+
 public class ProjectListener implements IProjectListener {
 	private static final Logger logger = new Logger(ProjectListener.class);
 	private static final ProjectDiagramListener projectDiagramListener = new ProjectDiagramListener();

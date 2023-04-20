@@ -4,5 +4,5 @@ UML Miner is a Visual Paradigm plug-in that makes possible mining all the UML d
 
 UML Miner comes as a zip file. To install it in Visual Paradigm it only necessary to select  "Help > Install Plugin" from the application toolbar. 
 
-The development of UML Miner has been started by Ardimento Pasquale and afterwards by Pasquale Ardimento and Vito Alessandro Carella.
+The development of UML Miner has been started by Ardimento Pasquale and was later continued by Pasquale Ardimento and Vito Alessandro Carella.
 Currently is still under development (20th april 2023).

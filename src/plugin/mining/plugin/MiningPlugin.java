@@ -5,8 +5,8 @@ import com.vp.plugin.VPPluginInfo;
 import com.vp.plugin.model.IProject;
 
 import plugin.mining.listeners.ProjectListener;
-import plugin.mining.utils.Application;
-import plugin.mining.utils.Logger;
+import plugin.mining.logging.Logger;
+import plugin.mining.util.Application;
 
 /**
  * 
@@ -18,16 +18,17 @@ public class MiningPlugin implements VPPlugin {
 	private static final ProjectListener projectListener = new ProjectListener();
 
 	public void loaded(VPPluginInfo info) {
-		logger.info("plugin loaded");
 		Logger.createLog();
+		logger.info("Plugin loaded");
+
 		IProject project = Application.getProject();
 		project.addProjectListener(projectListener);
-
 	}
 
 	public void unloaded() {
-		logger.info("plugin unloaded");
 		Logger.saveLog();
+		logger.info("Plugin unloaded");
+
 		IProject project = Application.getProject();
 		project.removeProjectListener(projectListener);
 	}

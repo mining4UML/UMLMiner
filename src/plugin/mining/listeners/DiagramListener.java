@@ -18,7 +18,7 @@ import plugin.mining.logging.LogActivity.Type;
 public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);
 	private String diagramUIModelPreviousName;
-	private Set<IModelElement> modelElements = new HashSet<>();
+	private final Set<IModelElement> modelElements = new HashSet<>();
 
 	public DiagramListener() {
 		// Empty
@@ -47,6 +47,7 @@ public class DiagramListener implements IDiagramListener {
 		if (modelElementRemoved == null)
 			return;
 
+		Logger.createEvent(LogActivity.instance(Type.ADD, modelElementRemoved.getClass()), modelElementRemoved);
 		logger.info("%s element %sremoved from the diagram", modelElementRemoved.getModelType(),
 				modelElementRemoved.getName() != null ? String.format("\"%s\" ", modelElementRemoved.getName()) : "");
 		modelElements.remove(modelElementRemoved);

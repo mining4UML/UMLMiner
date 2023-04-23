@@ -1,10 +1,15 @@
 package plugin.mining.listeners.property;
 
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IHasChildrenBaseModelElement;
-import com.vp.plugin.model.IModelElement;
 
-import plugin.mining.utils.Logger;
+import plugin.mining.logging.LogActivity;
+import plugin.mining.logging.Logger;
+import plugin.mining.logging.LogActivity.Type;
 
 /**
  * 
@@ -13,20 +18,17 @@ import plugin.mining.utils.Logger;
  */
 
 class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass> {
-	private static final Logger logger = new Logger(ClassPropertyChangeListener.class);
 
 	public void propertyChange(IClass classElement, String propertyName, Object oldValue, Object newValue) {
 		if (propertyName.equals("childAdded")) {
 			IHasChildrenBaseModelElement childElement = (IHasChildrenBaseModelElement) newValue;
+
+			Logger.createEvent(LogActivity.instance(Type.ADD, childElement.getClass()), childElement);
 			childElement.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(childElement));
-			logger.info("%s \"%s\" \"%s\" %s added", classElement.getModelType(),
-					classElement.getName(), childElement.getName(),
-					childElement.getModelType());
 		} else if (propertyName.equals("childRemoved")) {
 			IHasChildrenBaseModelElement childElement = (IHasChildrenBaseModelElement) oldValue;
-			logger.info("%s \"%s\" \"%s\" %s removed", classElement.getModelType(),
-					classElement.getName(), childElement.getName(),
-					childElement.getModelType());
+
+			Logger.createEvent(LogActivity.instance(Type.REMOVE, childElement.getClass()), childElement);
 		}
 	}
 

@@ -10,7 +10,7 @@ import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 
 import plugin.mining.listeners.property.PropertyChangeListenerFactory;
-import plugin.mining.utils.Logger;
+import plugin.mining.logging.Logger;
 
 public class DiagramElementListener implements IDiagramElementListener {
     private static final Logger logger = new Logger(DiagramElementListener.class);

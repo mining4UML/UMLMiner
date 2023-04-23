@@ -4,8 +4,7 @@ import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectDiagramListener;
 
-import plugin.mining.utils.Logger;
-
+import plugin.mining.logging.Logger;
 
 public class ProjectDiagramListener implements IProjectDiagramListener {
 	private final Logger logger = new Logger(ProjectDiagramListener.class);

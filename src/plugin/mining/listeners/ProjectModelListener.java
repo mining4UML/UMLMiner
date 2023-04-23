@@ -4,7 +4,7 @@ import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectModelListener;
 
-import plugin.mining.utils.Logger;
+import plugin.mining.logging.Logger;
 
 public class ProjectModelListener implements IProjectModelListener {
 	private static final Logger logger = new Logger(ProjectModelListener.class);

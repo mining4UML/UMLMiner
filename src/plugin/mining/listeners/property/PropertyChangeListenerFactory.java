@@ -2,7 +2,6 @@ package plugin.mining.listeners.property;
 
 import com.vp.plugin.model.IAttribute;
 import com.vp.plugin.model.IClass;
-import com.vp.plugin.model.IModel;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 

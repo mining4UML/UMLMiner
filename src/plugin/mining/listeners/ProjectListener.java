@@ -3,9 +3,7 @@ package plugin.mining.listeners;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectListener;
 
-import plugin.mining.utils.Logger;
-
-
+import plugin.mining.logging.Logger;
 
 public class ProjectListener implements IProjectListener {
 	private static final Logger logger = new Logger(ProjectListener.class);
@@ -18,7 +16,7 @@ public class ProjectListener implements IProjectListener {
 
 	@Override
 	public void projectAfterOpened(IProject project) {
-		// Empty
+		Logger.createTrace(project);
 	}
 
 	@Override

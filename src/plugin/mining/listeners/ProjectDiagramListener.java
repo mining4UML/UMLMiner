@@ -25,7 +25,6 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 	public void diagramRemoved(IProject project, IDiagramUIModel diagramUIModel) {
 		logger.info(String.format("%s \"%s\" removed", diagramUIModel.getType(),
 				diagramUIModel.getName()));
-		diagramUIModel.removeDiagramListener(diagramListener);
 	}
 
 }

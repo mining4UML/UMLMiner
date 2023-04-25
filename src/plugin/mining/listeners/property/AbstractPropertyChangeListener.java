@@ -7,6 +7,8 @@ import java.util.Set;
 
 import com.vp.plugin.model.IModelElement;
 
+import plugin.mining.logging.Logger;
+
 /**
  * 
  * @author pasqualeardimento
@@ -14,6 +16,7 @@ import com.vp.plugin.model.IModelElement;
  */
 
 abstract class AbstractPropertyChangeListener<T extends IModelElement> implements PropertyChangeListener<T> {
+	private static final Logger logger = new Logger(AbstractPropertyChangeListener.class);
 	private static final Set<String> propertiesAllowed = new HashSet<>(
 			Arrays.asList("name", "initial value", "type", "scope", "visibility", "type modifier"));
 
@@ -25,6 +28,8 @@ abstract class AbstractPropertyChangeListener<T extends IModelElement> implement
 		Object oldValue = propertyChangeEvent.getOldValue();
 		Object newValue = propertyChangeEvent.getNewValue();
 
+		logger.info("%s property \"%s\" change to \"%s\"", ((IModelElement) source).getModelType(), propertyName,
+				newValue);
 		if (propertiesAllowed.contains(propertyName))
 			propertyChange((T) source, propertyName, oldValue, newValue);
 	}

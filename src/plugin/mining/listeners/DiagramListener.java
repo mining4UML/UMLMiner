@@ -1,9 +1,7 @@
 package plugin.mining.listeners;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.vp.plugin.diagram.IDiagramElement;
@@ -12,8 +10,8 @@ import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IModelElement;
 
 import plugin.mining.logging.LogActivity;
-import plugin.mining.logging.Logger;
 import plugin.mining.logging.LogActivity.ActionType;
+import plugin.mining.logging.Logger;
 
 public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);

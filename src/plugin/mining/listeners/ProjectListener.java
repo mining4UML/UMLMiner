@@ -10,27 +10,36 @@ public class ProjectListener implements IProjectListener {
 	private static final ProjectDiagramListener projectDiagramListener = new ProjectDiagramListener();
 	private String projectName;
 
-	public ProjectListener() {
-		// Empty
+	public ProjectListener(IProject project) {
+		projectName = project.getName();
+
+		if (project.getProjectFile() == null) {
+			Logger.createTrace(project);
+			logger.info("Temp project \"%s\" opened", projectName);
+			project.addProjectDiagramListener(projectDiagramListener);
+		}
 	}
 
 	@Override
 	public void projectAfterOpened(IProject project) {
-		Logger.createTrace(project);
+		logger.info("Project \"%s\" after opened", projectName);
 	}
 
 	@Override
 	public void projectNewed(IProject project) {
+		Logger.createTrace(project);
+		project.addProjectDiagramListener(projectDiagramListener);
 		projectName = project.getName();
 		logger.info("New project \"%s\" created", projectName);
-		project.addProjectDiagramListener(projectDiagramListener);
+
 	}
 
 	@Override
 	public void projectOpened(IProject project) {
+		Logger.createTrace(project);
+		project.addProjectDiagramListener(projectDiagramListener);
 		projectName = project.getName();
 		logger.info("Project \"%s\" opened", projectName);
-		project.addProjectDiagramListener(projectDiagramListener);
 	}
 
 	@Override

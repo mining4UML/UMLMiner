@@ -9,7 +9,7 @@ import com.vp.plugin.model.IHasChildrenBaseModelElement;
 
 import plugin.mining.logging.LogActivity;
 import plugin.mining.logging.Logger;
-import plugin.mining.logging.LogActivity.Type;
+import plugin.mining.logging.LogActivity.ActionType;
 
 /**
  * 
@@ -22,13 +22,15 @@ class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass>
 	public void propertyChange(IClass classElement, String propertyName, Object oldValue, Object newValue) {
 		if (propertyName.equals("childAdded")) {
 			IHasChildrenBaseModelElement childElement = (IHasChildrenBaseModelElement) newValue;
+			LogActivity logActivity = LogActivity.getInstance(ActionType.ADD, childElement.getModelType());
 
-			Logger.createEvent(LogActivity.instance(Type.ADD, childElement.getClass()), childElement);
+			Logger.createEvent(logActivity, childElement);
 			childElement.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(childElement));
 		} else if (propertyName.equals("childRemoved")) {
 			IHasChildrenBaseModelElement childElement = (IHasChildrenBaseModelElement) oldValue;
+			LogActivity logActivity = LogActivity.getInstance(ActionType.REMOVE, childElement.getModelType());
 
-			Logger.createEvent(LogActivity.instance(Type.REMOVE, childElement.getClass()), childElement);
+			Logger.createEvent(logActivity, childElement);
 		}
 	}
 

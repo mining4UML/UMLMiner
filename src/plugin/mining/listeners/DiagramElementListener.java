@@ -52,8 +52,7 @@ public class DiagramElementListener implements IDiagramElementListener {
 
     @Override
     public void diagramElementPropertyChange(IDiagramElement diagramElement, String propertyName) {
-        // logger.info("%s \"%s\" \"%s\" property change", modelElement.getModelType(),
-        // modelElement.getName(), propertyName);
+        // Empty
     }
 
     @Override

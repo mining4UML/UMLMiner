@@ -1,6 +1,9 @@
 package plugin.mining.listeners.property;
 
 import java.beans.PropertyChangeEvent;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.vp.plugin.model.IAttribute;
 

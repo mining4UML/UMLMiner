@@ -13,7 +13,7 @@ import com.vp.plugin.model.IModelElement;
 
 import plugin.mining.logging.LogActivity;
 import plugin.mining.logging.Logger;
-import plugin.mining.logging.LogActivity.Type;
+import plugin.mining.logging.LogActivity.ActionType;
 
 public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);
@@ -29,8 +29,9 @@ public class DiagramListener implements IDiagramListener {
 		IModelElement modelElement = diagramElement.getModelElement();
 		modelElements.add(modelElement);
 
-		Logger.createEvent(LogActivity.instance(Type.ADD, modelElement.getClass()), modelElement);
 		logger.info("%s element added to the diagram", modelElement.getModelType());
+		LogActivity logActivity = LogActivity.getInstance(ActionType.ADD, modelElement.getModelType());
+		Logger.createEvent(logActivity, modelElement);
 
 		DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
 		diagramElement.addDiagramElementListener(diagramElementListener);
@@ -47,9 +48,9 @@ public class DiagramListener implements IDiagramListener {
 		if (modelElementRemoved == null)
 			return;
 
-		Logger.createEvent(LogActivity.instance(Type.ADD, modelElementRemoved.getClass()), modelElementRemoved);
-		logger.info("%s element %sremoved from the diagram", modelElementRemoved.getModelType(),
-				modelElementRemoved.getName() != null ? String.format("\"%s\" ", modelElementRemoved.getName()) : "");
+		logger.info("%s element removed from the diagram", modelElementRemoved.getModelType());
+		LogActivity logActivity = LogActivity.getInstance(ActionType.REMOVE, modelElementRemoved.getModelType());
+		Logger.createEvent(logActivity, modelElementRemoved);
 		modelElements.remove(modelElementRemoved);
 	}
 
@@ -80,8 +81,10 @@ public class DiagramListener implements IDiagramListener {
 	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String propertyName,
 			Object oldValue, Object newValue) {
 
-		logger.info("%s \"%s\" %s property changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
-				diagramUIModel.getName(), propertyName, oldValue, newValue);
+		if (propertyName.equals("customizedSortDiagramElementIds"))
+			logger.info("%s \"%s\" %s property changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
+					diagramUIModel.getName(), propertyName, Arrays.toString((String[]) oldValue),
+					Arrays.toString((String[]) newValue));
 	}
 
 }

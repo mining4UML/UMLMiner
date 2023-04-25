@@ -1,59 +1,70 @@
 package plugin.mining.logging;
 
-import com.vp.plugin.model.IAttribute;
-import com.vp.plugin.model.IClass;
-import com.vp.plugin.model.IModelElement;
-import com.vp.plugin.model.IOperation;
-import com.vp.plugin.model.IUseCase;
-
 public enum LogActivity {
-    ADD_CLASS("Add class", Type.ADD, IClass.class),
-    ADD_ATTRIBUTE("Add class attribute", Type.ADD, IAttribute.class),
-    ADD_OPERATION("Add class operation", Type.ADD, IOperation.class),
-    ADD_CLASS_RELATION("Add class relation", Type.ADD, IClass.class),
-    ADD_CLASS_ASSOCIATION("Add class association", Type.ADD, IClass.class),
-    ADD_CLASS_GENERALIZATION("Add class generalization", Type.ADD, IClass.class),
-    ADD_USE_CASE("Add use case", Type.ADD, IUseCase.class),
-    ADD_USE_CASE_INCLUSION("Add use case inclusion", Type.ADD, IUseCase.class),
-    ADD_USE_CASE_EXTENSION("Add use case extension", Type.ADD, IUseCase.class),
-    UPDATE_CLASS("Update class", Type.UPDATE, IClass.class),
-    UPDATE_ATTRIBUTE("Update class attribute", Type.UPDATE, IAttribute.class),
-    UPDATE_OPERATION("Update class operation", Type.UPDATE, IOperation.class),
-    UPDATE_CLASS_RELATION("Update class relation", Type.UPDATE, IClass.class),
-    UPDATE_CLASS_ASSOCIATION("Update class association", Type.UPDATE, IClass.class),
-    UPDATE_CLASS_GENERALIZATION("Update class generalization", Type.UPDATE, IClass.class),
-    UPDATE_USE_CASE("Update use case", Type.UPDATE, IUseCase.class),
-    UPDATE_USE_CASE_INCLUSION("Update use case inclusion", Type.UPDATE, IUseCase.class),
-    UPDATE_USE_CASE_EXTENSION("Update use case extension", Type.UPDATE, IUseCase.class),
-    REMOVE_CLASS("Remove class", Type.REMOVE, IClass.class),
-    REMOVE_ATTRIBUTE("Remove class attribute", Type.REMOVE, IAttribute.class),
-    REMOVE_OPERATION("Remove class operation", Type.REMOVE, IOperation.class),
-    REMOVE_CLASS_RELATION("Remove class relation", Type.REMOVE, IClass.class),
-    REMOVE_CLASS_ASSOCIATION("Remove class association", Type.REMOVE, IClass.class),
-    REMOVE_CLASS_GENERALIZATION("Remove class generalization", Type.REMOVE, IClass.class),
-    REMOVE_USE_CASE("Remove use case", Type.REMOVE, IUseCase.class),
-    REMOVE_USE_CASE_INCLUSION("Remove use case inclusion", Type.REMOVE, IUseCase.class),
-    REMOVE_USE_CASE_EXTENSION("Remove use case extension", Type.REMOVE, IUseCase.class);
+    ADD_CLASS("Add class", ActionType.ADD, ModelType.CLASS),
+    ADD_ATTRIBUTE("Add class attribute", ActionType.ADD, ModelType.ATTRIBUTE),
+    ADD_OPERATION("Add class operation", ActionType.ADD, ModelType.OPERATION),
+    ADD_CLASS_RELATION("Add class relation", ActionType.ADD, ModelType.CLASS),
+    ADD_CLASS_ASSOCIATION("Add class association", ActionType.ADD, ModelType.CLASS),
+    ADD_CLASS_GENERALIZATION("Add class generalization", ActionType.ADD, ModelType.CLASS),
+    ADD_USE_CASE("Add use case", ActionType.ADD, ModelType.USE_CASE),
+    ADD_USE_CASE_INCLUSION("Add use case inclusion", ActionType.ADD, ModelType.USE_CASE),
+    ADD_USE_CASE_EXTENSION("Add use case extension", ActionType.ADD, ModelType.USE_CASE),
+    UPDATE_CLASS("Update class", ActionType.UPDATE, ModelType.CLASS),
+    UPDATE_ATTRIBUTE("Update class attribute", ActionType.UPDATE, ModelType.ATTRIBUTE),
+    UPDATE_OPERATION("Update class operation", ActionType.UPDATE, ModelType.OPERATION),
+    UPDATE_CLASS_RELATION("Update class relation", ActionType.UPDATE, ModelType.CLASS),
+    UPDATE_CLASS_ASSOCIATION("Update class association", ActionType.UPDATE, ModelType.CLASS),
+    UPDATE_CLASS_GENERALIZATION("Update class generalization", ActionType.UPDATE, ModelType.CLASS),
+    UPDATE_USE_CASE("Update use case", ActionType.UPDATE, ModelType.USE_CASE),
+    UPDATE_USE_CASE_INCLUSION("Update use case inclusion", ActionType.UPDATE, ModelType.USE_CASE),
+    UPDATE_USE_CASE_EXTENSION("Update use case extension", ActionType.UPDATE, ModelType.USE_CASE),
+    REMOVE_CLASS("Remove class", ActionType.REMOVE, ModelType.CLASS),
+    REMOVE_ATTRIBUTE("Remove class attribute", ActionType.REMOVE, ModelType.ATTRIBUTE),
+    REMOVE_OPERATION("Remove class operation", ActionType.REMOVE, ModelType.OPERATION),
+    REMOVE_CLASS_RELATION("Remove class relation", ActionType.REMOVE, ModelType.CLASS),
+    REMOVE_CLASS_ASSOCIATION("Remove class association", ActionType.REMOVE, ModelType.CLASS),
+    REMOVE_CLASS_GENERALIZATION("Remove class generalization", ActionType.REMOVE, ModelType.CLASS),
+    REMOVE_USE_CASE("Remove use case", ActionType.REMOVE, ModelType.USE_CASE),
+    REMOVE_USE_CASE_INCLUSION("Remove use case inclusion", ActionType.REMOVE, ModelType.USE_CASE),
+    REMOVE_USE_CASE_EXTENSION("Remove use case extension", ActionType.REMOVE, ModelType.USE_CASE);
 
-    public enum Type {
+    public enum ActionType {
         ADD,
         UPDATE,
         REMOVE
     }
 
-    public static LogActivity instance(Type type, Class<? extends IModelElement> modelType) {
+    private enum ModelType {
+        CLASS("Class"),
+        ATTRIBUTE("Attribute"),
+        OPERATION("Operation"),
+        USE_CASE("UseCase");
+
+        private String name;
+
+        ModelType(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    public static LogActivity getInstance(ActionType actionType, String modelTypeName) {
         for (LogActivity logActivity : LogActivity.values()) {
-            if (logActivity.type.equals(type) && logActivity.modelType.equals(modelType))
+            if (logActivity.type.equals(actionType) && logActivity.modelType.getName().equals(modelTypeName))
                 return logActivity;
         }
         throw new UnsupportedOperationException("LogActivity not found");
     }
 
     private String name;
-    private Type type;
-    private Class<? extends IModelElement> modelType;
+    private ActionType type;
+    private ModelType modelType;
 
-    LogActivity(String name, Type type, Class<? extends IModelElement> modelType) {
+    LogActivity(String name, ActionType type, ModelType modelType) {
         this.name = name;
         this.type = type;
         this.modelType = modelType;
@@ -63,11 +74,11 @@ public enum LogActivity {
         return name;
     }
 
-    public Type getType() {
+    public ActionType getType() {
         return type;
     }
 
-    public Class<? extends IModelElement> getModelType() {
+    public ModelType getModelType() {
         return modelType;
     }
 

@@ -4,6 +4,7 @@ import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ProjectManager;
 import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
+import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
 
 public class Application {
@@ -18,16 +19,16 @@ public class Application {
         return manager.getProductInfo();
     }
 
-    public static ProjectManager getProjectManager() {
-        return manager.getProjectManager();
-    }
-
     public static ViewManager getViewManager() {
         return manager.getViewManager();
     }
 
     public static IProject getProject() {
-        return getProjectManager().getProject();
+        return manager.getProjectManager().getProject();
+    }
+
+    public static IDiagramUIModel getDiagram() {
+        return manager.getDiagramManager().getActiveDiagram();
     }
 
     public static void reloadPlugin() {

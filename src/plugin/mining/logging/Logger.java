@@ -23,9 +23,11 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.out.XesXmlSerializer;
 
+import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;
+import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectProperties;
@@ -110,8 +112,10 @@ public class Logger {
 
     public static void createEvent(LogActivity activity, IModelElement modelElement, String propertyName,
             String propertyValue) {
+        System.out.println(
+                String.format("%s %s %s %s", activity.toString(), modelElement.getName(), propertyName, propertyValue));
         long timestamp = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-        IDiagramUIModel diagramUIModel = modelElement.getMasterView().getDiagramUIModel();
+        IDiagramUIModel diagramUIModel = Application.getDiagram();
         String eventId = xIdFactory.createId().toString();
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.EVENT_ID, eventId);
@@ -122,7 +126,7 @@ public class Logger {
         addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, modelElement.getId());
         addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, modelElement.getModelType());
         addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, modelElement.getName());
-        if (propertyName != null || propertyValue != null) {
+        if (propertyName != null && propertyValue != null) {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
             addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
         }

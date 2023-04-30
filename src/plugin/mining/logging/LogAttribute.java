@@ -1,40 +1,71 @@
 package plugin.mining.logging;
 
+import org.deckfour.xes.extension.XExtension;
+import org.deckfour.xes.model.XAttribute;
+
 enum LogAttribute {
-    PRODUCT_NAME("productName", Type.LITERAL),
-    PRODUCT_VERSION("productVersion", Type.LITERAL),
-    PRODUCT_BUILD("productBuild", Type.LITERAL),
-    CREATED_AT("createdAt", Type.TIMESTAMP),
-    CASE_ID("caseId", Type.LITERAL),
-    AUTHOR_NAME("authorName", Type.LITERAL),
-    PROJECT_NAME("projectName", Type.LITERAL),
-    EVENT_ID("eventId", Type.LITERAL),
-    ACTIVITY_NAME("activityName", Type.LITERAL),
-    DIAGRAM_ID("diagramId", Type.LITERAL),
-    DIAGRAM_TYPE("diagramType", Type.LITERAL),
-    DIAGRAM_NAME("diagramName", Type.LITERAL),
-    UML_ELEMENT_ID("umlElementId", Type.LITERAL),
-    UML_ELEMENT_TYPE("umlElementType", Type.LITERAL),
-    UML_ELEMENT_NAME("umlElementName", Type.LITERAL),
-    PROPERTY_NAME("propertyName", Type.LITERAL),
-    PROPERTY_VALUE("propertyValue", Type.LITERAL);
+    PRODUCT_NAME("ProductName", Type.LITERAL),
+    PRODUCT_VERSION("ProductVersion", Type.LITERAL),
+    PRODUCT_BUILD("ProductBuild", Type.LITERAL),
+    CREATED_AT("CreatedAt", Type.TIMESTAMP),
+    CASE_ID("CaseId", Type.LITERAL),
+    AUTHOR_NAME("AuthorName", Type.LITERAL),
+    PROJECT_NAME("ProjectName", Type.LITERAL),
+    EVENT_ID("EventId", Type.LITERAL),
+    ACTIVITY_NAME("ActivityName", Type.LITERAL),
+    DIAGRAM_ID("DiagramId", Type.LITERAL),
+    DIAGRAM_TYPE("DiagramType", Type.LITERAL),
+    DIAGRAM_NAME("DiagramName", Type.LITERAL),
+    UML_ELEMENT_ID("UMLElementId", Type.LITERAL),
+    UML_ELEMENT_TYPE("UMLElementType", Type.LITERAL),
+    UML_ELEMENT_NAME("UMLElementName", Type.LITERAL),
+    PROPERTY_NAME("PropertyName", Type.LITERAL),
+    PROPERTY_VALUE("PropertyValue", Type.LITERAL);
 
     enum Type {
-        LITERAL(String.class),
-        DISCRETE(Long.class),
-        CONTINUOUS(Double.class),
-        BOOLEAN(Boolean.class),
-        TIMESTAMP(Long.class);
+        LITERAL(String.class) {
+            @Override
+            public XAttribute createAttribute(String key, Object value, XExtension xExtension) {
+                return Logger.xFactory.createAttributeLiteral(key, (String) value, xExtension);
+            }
+        },
+        DISCRETE(Long.class) {
+            @Override
+            public XAttribute createAttribute(String key, Object value, XExtension xExtension) {
+                return Logger.xFactory.createAttributeDiscrete(key, (Long) value, xExtension);
+            }
+        },
+        CONTINUOUS(Double.class) {
+            @Override
+            public XAttribute createAttribute(String key, Object value, XExtension xExtension) {
+                return Logger.xFactory.createAttributeContinuous(key, (Double) value, xExtension);
+            }
+        },
+        BOOLEAN(Boolean.class) {
+            @Override
+            public XAttribute createAttribute(String key, Object value, XExtension xExtension) {
+                return Logger.xFactory.createAttributeBoolean(key, (Boolean) value, xExtension);
+            }
+        },
+        TIMESTAMP(Long.class) {
+            @Override
+            public XAttribute createAttribute(String key, Object value, XExtension xExtension) {
+                return Logger.xFactory.createAttributeTimestamp(key, (Long) value,
+                        xExtension != null ? xExtension : Logger.xTimeExtension);
+            }
+        };
 
-        private Class<?> valueType;
+        private Class<?> valueClass;
 
-        Type(Class<?> valueType) {
-            this.valueType = valueType;
+        Type(Class<?> valueClass) {
+            this.valueClass = valueClass;
         }
 
-        public Class<?> getValueType() {
-            return valueType;
+        public Class<?> getValueClass() {
+            return valueClass;
         }
+
+        public abstract XAttribute createAttribute(String key, Object value, XExtension xExtension);
     }
 
     private String name;

@@ -27,18 +27,19 @@ public class ProjectListener implements IProjectListener {
 
 	@Override
 	public void projectNewed(IProject project) {
+		projectName = project.getName();
+
 		Logger.createTrace(project);
 		project.addProjectDiagramListener(projectDiagramListener);
-		projectName = project.getName();
 		logger.info("New project \"%s\" created", projectName);
-
 	}
 
 	@Override
 	public void projectOpened(IProject project) {
+		projectName = project.getName();
+
 		Logger.createTrace(project);
 		project.addProjectDiagramListener(projectDiagramListener);
-		projectName = project.getName();
 		logger.info("Project \"%s\" opened", projectName);
 	}
 

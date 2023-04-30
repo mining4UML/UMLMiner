@@ -1,15 +1,11 @@
 package plugin.mining.listeners.property;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IHasChildrenBaseModelElement;
 
 import plugin.mining.logging.LogActivity;
-import plugin.mining.logging.Logger;
 import plugin.mining.logging.LogActivity.ActionType;
+import plugin.mining.logging.Logger;
 
 /**
  * 

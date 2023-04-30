@@ -1,7 +1,6 @@
 package plugin.mining.util;
 
 import com.vp.plugin.ApplicationManager;
-import com.vp.plugin.ProjectManager;
 import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;

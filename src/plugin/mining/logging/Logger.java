@@ -13,7 +13,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 
-import org.deckfour.xes.classification.XEventAttributeClassifier;
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.factory.XFactory;
@@ -60,20 +59,9 @@ public class Logger {
         createDirectory();
     }
 
-    private static void addClassifier(List<XEventClassifier> eventClassifiers, LogAttribute logAttribute) {
-        XEventClassifier xEventClassifier = new XEventAttributeClassifier(
-                String.format("%s %s", logAttribute.getName(), "Classifier"), logAttribute.getName());
-        eventClassifiers.add(xEventClassifier);
-    }
-
-    private static void addGlobalAttribute(List<XAttribute> attributes, LogAttribute logAttribute, Object value) {
-        XAttribute xAttribute = logAttribute.getType().createAttribute(logAttribute.getName(), value, null);
-        attributes.add(xAttribute);
-    }
-
     private static void addAttribute(XAttributeMap attributes, LogAttribute logAttribute, Object value) {
-        XAttribute xAttribute = logAttribute.getType().createAttribute(logAttribute.getName(), value, null);
-        attributes.put(logAttribute.getName(), xAttribute);
+        XAttribute xAttribute = logAttribute.createAttribute(value);
+        attributes.put(logAttribute.getKey(), xAttribute);
     }
 
     public static void createLog() {
@@ -88,33 +76,14 @@ public class Logger {
 
         xLog = xFactory.createLog(attributes);
 
-        List<XAttribute> globalTraceAttributes = xLog.getGlobalTraceAttributes();
-        addGlobalAttribute(globalTraceAttributes, LogAttribute.CASE_ID, "Case Id");
-        addGlobalAttribute(globalTraceAttributes, LogAttribute.AUTHOR_NAME, "Author Name");
-        addGlobalAttribute(globalTraceAttributes, LogAttribute.PROJECT_NAME, "Project Name");
-        addGlobalAttribute(globalTraceAttributes, LogAttribute.CREATED_AT, timestamp);
-
         List<XEventClassifier> eventClassifiers = xLog.getClassifiers();
-        addClassifier(eventClassifiers, LogAttribute.EVENT_ID);
-        addClassifier(eventClassifiers, LogAttribute.ACTIVITY_NAME);
-        addClassifier(eventClassifiers, LogAttribute.DIAGRAM_ID);
-        addClassifier(eventClassifiers, LogAttribute.DIAGRAM_TYPE);
-        addClassifier(eventClassifiers, LogAttribute.DIAGRAM_NAME);
-        addClassifier(eventClassifiers, LogAttribute.UML_ELEMENT_ID);
-        addClassifier(eventClassifiers, LogAttribute.UML_ELEMENT_TYPE);
-        addClassifier(eventClassifiers, LogAttribute.UML_ELEMENT_NAME);
-        addClassifier(eventClassifiers, LogAttribute.CREATED_AT);
+        eventClassifiers.addAll(LogAttribute.getEventClassifiers());
+
+        List<XAttribute> globalTraceAttributes = xLog.getGlobalTraceAttributes();
+        globalTraceAttributes.addAll(LogAttribute.getGlobalTraceAttributes());
 
         List<XAttribute> globalEventAttributes = xLog.getGlobalEventAttributes();
-        addGlobalAttribute(globalEventAttributes, LogAttribute.EVENT_ID, "Event Id");
-        addGlobalAttribute(globalEventAttributes, LogAttribute.ACTIVITY_NAME, "Activity Name");
-        addGlobalAttribute(globalEventAttributes, LogAttribute.DIAGRAM_ID, "Diagram Id");
-        addGlobalAttribute(globalEventAttributes, LogAttribute.DIAGRAM_TYPE, "Diagram Type");
-        addGlobalAttribute(globalEventAttributes, LogAttribute.DIAGRAM_NAME, "Diagram Name");
-        addGlobalAttribute(globalEventAttributes, LogAttribute.UML_ELEMENT_ID, "UML Element Id");
-        addGlobalAttribute(globalEventAttributes, LogAttribute.UML_ELEMENT_TYPE, "UML Element Type");
-        addGlobalAttribute(globalEventAttributes, LogAttribute.UML_ELEMENT_NAME, "UML Element Name");
-        addGlobalAttribute(globalEventAttributes, LogAttribute.CREATED_AT, timestamp);
+        globalEventAttributes.addAll(LogAttribute.getGlobalEventAttributes());
     }
 
     public static void createTrace(IProject project) {
@@ -152,12 +121,13 @@ public class Logger {
         addAttribute(attributes, LogAttribute.DIAGRAM_NAME, diagramUIModel.getName());
         addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, modelElement.getId());
         addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, modelElement.getModelType());
-        addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, modelElement.getName());
-        addAttribute(attributes, LogAttribute.CREATED_AT, timestamp);
+        if (modelElement.getName() != null)
+            addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, modelElement.getName());
         if (propertyName != null && propertyValue != null) {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
             addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
         }
+        addAttribute(attributes, LogAttribute.CREATED_AT, timestamp);
 
         xEvent = xFactory.createEvent(attributes);
         xTrace.add(xEvent);

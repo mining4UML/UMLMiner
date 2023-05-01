@@ -8,6 +8,7 @@ import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IModelElement;
+import com.vp.plugin.model.IRelationship;
 
 import plugin.mining.logging.LogActivity;
 import plugin.mining.logging.LogActivity.ActionType;
@@ -28,7 +29,8 @@ public class DiagramListener implements IDiagramListener {
 		modelElements.add(modelElement);
 
 		logger.info("%s element added to the diagram", modelElement.getModelType());
-		LogActivity logActivity = LogActivity.getInstance(ActionType.ADD, modelElement.getModelType());
+		LogActivity logActivity = modelElement instanceof IRelationship ? LogActivity.ADD_RELATIONSHIP
+				: LogActivity.getInstance(ActionType.ADD, modelElement.getModelType());
 		Logger.createEvent(logActivity, modelElement);
 
 		DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
@@ -47,7 +49,8 @@ public class DiagramListener implements IDiagramListener {
 			return;
 
 		logger.info("%s element removed from the diagram", modelElementRemoved.getModelType());
-		LogActivity logActivity = LogActivity.getInstance(ActionType.REMOVE, modelElementRemoved.getModelType());
+		LogActivity logActivity = modelElementRemoved instanceof IRelationship ? LogActivity.REMOVE_RELATIONSHIP
+				: LogActivity.getInstance(ActionType.REMOVE, modelElementRemoved.getModelType());
 		Logger.createEvent(logActivity, modelElementRemoved);
 		modelElements.remove(modelElementRemoved);
 	}

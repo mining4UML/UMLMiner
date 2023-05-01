@@ -17,8 +17,15 @@ import plugin.mining.logging.Logger;
 
 abstract class AbstractPropertyChangeListener<T extends IModelElement> implements PropertyChangeListener<T> {
 	private static final Logger logger = new Logger(AbstractPropertyChangeListener.class);
-	private static final Set<String> propertiesAllowed = new HashSet<>(
-			Arrays.asList("name", "initial value", "type", "scope", "visibility", "type modifier"));
+	private static final Set<String> excludedProperties = new HashSet<>(
+			Arrays.asList("lastModified", "pmLastModified", "reorderChild", "modelViewRemoved", "masterViewId",
+					"willDelete",
+					"deleted", "willParentChange", "parentChanged", "fromRelationshipAdded", "toRelationshipAdded",
+					"fromRelationshipRemoved", "toRelationshipRemoved",
+					"fromRelationshipEndAdded",
+					"referencedByAdded", "toRelationshipEndAdded", "toRelationshipEndRemoved", "referencedWillRemove",
+					"referencedByRemoved",
+					"fromRelationshipEndRemoved"));
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -28,10 +35,11 @@ abstract class AbstractPropertyChangeListener<T extends IModelElement> implement
 		Object oldValue = propertyChangeEvent.getOldValue();
 		Object newValue = propertyChangeEvent.getNewValue();
 
-		logger.info("%s property \"%s\" change to \"%s\"", ((IModelElement) source).getModelType(), propertyName,
-				newValue);
-		if (propertiesAllowed.contains(propertyName))
+		if (!excludedProperties.contains(propertyName)) {
+			logger.info("%s property \"%s\" change to \"%s\"", ((IModelElement) source).getModelType(), propertyName,
+					newValue);
 			propertyChange((T) source, propertyName, oldValue, newValue);
+		}
 	}
 
 }

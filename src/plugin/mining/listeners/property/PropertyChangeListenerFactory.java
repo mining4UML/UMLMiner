@@ -4,6 +4,7 @@ import com.vp.plugin.model.IAttribute;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
+import com.vp.plugin.model.IRelationship;
 import com.vp.plugin.model.IUseCase;
 
 /**
@@ -23,6 +24,8 @@ public interface PropertyChangeListenerFactory {
 			return new OperationPropertyChangeListener();
 		if (modelElement instanceof IUseCase)
 			return new UseCasePropertyChangeListener();
+		if (modelElement instanceof IRelationship)
+			return new RelationshipPropertyChangeListener();
 		throw new UnsupportedOperationException("modelElement is not supported");
 	}
 

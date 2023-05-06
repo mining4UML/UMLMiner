@@ -1,4 +1,4 @@
-package plugin.mining.logging;
+package com.plugin.mining.logging;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,10 +10,14 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.deckfour.xes.classification.XEventClassifier;
+import org.deckfour.xes.extension.XExtension;
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.factory.XFactory;
 import org.deckfour.xes.factory.XFactoryBufferedImpl;
@@ -25,25 +29,29 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.out.XesXmlSerializer;
 
+import com.plugin.mining.logging.extensions.XIdentityExtension;
+import com.plugin.mining.util.Application;
 import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;
+import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IModelElement;
+import com.vp.plugin.model.IOperation;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectProperties;
-
-import plugin.mining.util.Application;
+import com.vp.plugin.model.IRelationship;
 
 public class Logger {
     private static final String USER_NAME = System.getProperty("user.name");
     private static final Path logDirectory = Paths.get(System.getProperty("user.dir"), "logs", USER_NAME);
     public static final XFactory xFactory = new XFactoryBufferedImpl();
     public static final XIDFactory xIdFactory = XIDFactory.instance();
+    public static final XIdentityExtension xIdentityExtension = XIdentityExtension.instance();
+    public static final XConceptExtension xConceptExtension = XConceptExtension.instance();
     public static final XTimeExtension xTimeExtension = XTimeExtension.instance();
     private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
     private static XLog xLog;
     private static XTrace xTrace;
-    private static XEvent xEvent;
     private static final ViewManager viewManager = Application.getViewManager();
 
     private static void createDirectory() {
@@ -66,15 +74,24 @@ public class Logger {
 
     public static void createLog() {
         long timestamp = Instant.now().toEpochMilli();
+        String processId = xIdFactory.createId().toString();
         VPProductInfo vpProductInfo = Application.getProductInfo();
-
+        String productName = vpProductInfo.getName();
+        String processName = String.join("-", productName, processId);
+        String productVersion = vpProductInfo.getVersion();
+        String productBuild = vpProductInfo.getBuildNumber();
         XAttributeMap attributes = xFactory.createAttributeMap();
-        addAttribute(attributes, LogAttribute.PRODUCT_NAME, vpProductInfo.getName());
-        addAttribute(attributes, LogAttribute.PRODUCT_VERSION, vpProductInfo.getVersion());
-        addAttribute(attributes, LogAttribute.PRODUCT_BUILD, vpProductInfo.getBuildNumber());
-        addAttribute(attributes, LogAttribute.CREATED_AT, timestamp);
+        addAttribute(attributes, LogAttribute.PROCESS_ID, processId);
+        addAttribute(attributes, LogAttribute.PROCESS_NAME, processName);
+        addAttribute(attributes, LogAttribute.PROCESS_TIMESTAMP, timestamp);
+        addAttribute(attributes, LogAttribute.PRODUCT_NAME, productName);
+        addAttribute(attributes, LogAttribute.PRODUCT_VERSION, productVersion);
+        addAttribute(attributes, LogAttribute.PRODUCT_BUILD, productBuild);
 
         xLog = xFactory.createLog(attributes);
+
+        Set<XExtension> extensions = xLog.getExtensions();
+        extensions.addAll(Arrays.asList(xIdentityExtension, xConceptExtension, xTimeExtension));
 
         List<XEventClassifier> eventClassifiers = xLog.getClassifiers();
         eventClassifiers.addAll(LogAttribute.getEventClassifiers());
@@ -88,56 +105,80 @@ public class Logger {
 
     public static void createTrace(IProject project) {
         long timestamp = Instant.now().toEpochMilli();
+        String caseId = xIdFactory.createId().toString();
         IProjectProperties projectProperties = project.getProjectProperties();
         String authorName = projectProperties.getAuthor();
-        String caseId = xIdFactory.createId().toString();
+        String caseName = String.join("-", authorName, caseId);
         String projectName = projectProperties.getProjectName();
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.CASE_ID, caseId);
+        addAttribute(attributes, LogAttribute.CASE_NAME, caseName);
+        addAttribute(attributes, LogAttribute.CASE_TIMESTAMP, timestamp);
         addAttribute(attributes, LogAttribute.AUTHOR_NAME, authorName);
         addAttribute(attributes, LogAttribute.PROJECT_NAME, projectName);
-        addAttribute(attributes, LogAttribute.CREATED_AT, timestamp);
 
         xTrace = xFactory.createTrace(attributes);
         xLog.add(xTrace);
+    }
+
+    public static void createEvent(LogActivity logActivity, IModelElement modelElement, String propertyName,
+            String propertyValue) {
+        System.out.println(
+                String.format("%s %s %s %s", logActivity.toString(), modelElement.getName(), propertyName,
+                        propertyValue));
+        long timestamp = Instant.now().toEpochMilli();
+        String activityId = xIdFactory.createId().toString();
+        IDiagramUIModel diagramUIModel = Application.getDiagram();
+        String diagramId = diagramUIModel.getId();
+        String diagramType = diagramUIModel.getType();
+        String diagramName = diagramUIModel.getName();
+        String modelElementId = modelElement.getId();
+        String modelElementType = (modelElement instanceof IOperation && ((IOperation) modelElement).isConstructor())
+                ? "Constructor"
+                : modelElement.getModelType();
+        String modelElementName = modelElement.getName();
+        String activityName = propertyName != null
+                ? String.join(" - ", logActivity.getName(), modelElementType, propertyName)
+                : String.join(" - ", logActivity.getName(), modelElementType);
+        String activityInstance = String.join(":", logActivity.getName(), activityId);
+        XAttributeMap attributes = xFactory.createAttributeMap();
+        addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
+        addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
+        addAttribute(attributes, LogAttribute.ACTIVITY_INSTANCE, activityInstance);
+        addAttribute(attributes, LogAttribute.ACTIVITY_TIMESTAMP, timestamp);
+        addAttribute(attributes, LogAttribute.DIAGRAM_ID, diagramId);
+        addAttribute(attributes, LogAttribute.DIAGRAM_TYPE, diagramType);
+        addAttribute(attributes, LogAttribute.DIAGRAM_NAME, diagramName);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, modelElementId);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, modelElementType);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME,
+                modelElementName != null ? modelElementName : "unknown");
+        if (propertyName != null && propertyValue != null) {
+            addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
+            addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
+        }
+        if (modelElement instanceof IRelationship) {
+            IRelationship relationship = (IRelationship) modelElement;
+            String relationshipFromEnd = relationship instanceof IAssociation
+                    ? ((IAssociation) relationship).getFromEnd().getId()
+                    : relationship.getFrom().getId();
+            String relationshipToEnd = relationship instanceof IAssociation
+                    ? ((IAssociation) relationship).getToEnd().getId()
+                    : relationship.getTo().getId();
+            addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
+            addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
+        }
+
+        XEvent xEvent = xFactory.createEvent(attributes);
+        xTrace.add(xEvent);
     }
 
     public static void createEvent(LogActivity activity, IModelElement modelElement) {
         createEvent(activity, modelElement, null, null);
     }
 
-    public static void createEvent(LogActivity activity, IModelElement modelElement, String propertyName,
-            String propertyValue) {
-        System.out.println(
-                String.format("%s %s %s %s", activity.toString(), modelElement.getName(), propertyName, propertyValue));
-        long timestamp = Instant.now().toEpochMilli();
-        IDiagramUIModel diagramUIModel = Application.getDiagram();
-        String eventId = xIdFactory.createId().toString();
-        XAttributeMap attributes = xFactory.createAttributeMap();
-        addAttribute(attributes, LogAttribute.EVENT_ID, eventId);
-        addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activity.getName());
-        addAttribute(attributes, LogAttribute.DIAGRAM_ID, diagramUIModel.getId());
-        addAttribute(attributes, LogAttribute.DIAGRAM_TYPE, diagramUIModel.getType());
-        addAttribute(attributes, LogAttribute.DIAGRAM_NAME, diagramUIModel.getName());
-        addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, modelElement.getId());
-        addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, modelElement.getModelType());
-        if (modelElement.getName() != null)
-            addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, modelElement.getName());
-        if (propertyName != null && propertyValue != null) {
-            addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
-            addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
-        }
-        addAttribute(attributes, LogAttribute.CREATED_AT, timestamp);
-
-        xEvent = xFactory.createEvent(attributes);
-        xTrace.add(xEvent);
-    }
-
-    public static XAttributeMap getLastEventAttributes() {
-        return xEvent.getAttributes();
-    }
-
     public static void saveLog() {
+        System.out.println(Arrays.toString(xLog.getExtensions().toArray()));
         try {
             String logName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss"))
                     + ".xes";

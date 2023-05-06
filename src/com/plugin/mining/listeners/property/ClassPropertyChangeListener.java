@@ -1,11 +1,10 @@
-package plugin.mining.listeners.property;
+package com.plugin.mining.listeners.property;
 
+import com.plugin.mining.logging.LogActivity;
+import com.plugin.mining.logging.Logger;
+import com.plugin.mining.logging.LogActivity.ActionType;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IHasChildrenBaseModelElement;
-
-import plugin.mining.logging.LogActivity;
-import plugin.mining.logging.LogActivity.ActionType;
-import plugin.mining.logging.Logger;
 
 /**
  * 
@@ -15,6 +14,7 @@ import plugin.mining.logging.Logger;
 
 class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass> {
 
+	@Override
 	public void propertyChange(IClass classElement, String propertyName, Object oldValue, Object newValue) {
 		if (propertyName.equals("childAdded")) {
 			IHasChildrenBaseModelElement childElement = (IHasChildrenBaseModelElement) newValue;
@@ -27,6 +27,10 @@ class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass>
 			LogActivity logActivity = LogActivity.getInstance(ActionType.REMOVE, childElement.getModelType());
 
 			Logger.createEvent(logActivity, childElement);
+		} else {
+			String propertyValue = extractStringValue(newValue);
+
+			Logger.createEvent(LogActivity.UPDATE_CLASS, classElement, propertyName, propertyValue);
 		}
 	}
 

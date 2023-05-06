@@ -1,10 +1,10 @@
-package plugin.mining.listeners.property;
+package com.plugin.mining.listeners.property;
 
+import com.plugin.mining.logging.LogActivity;
+import com.plugin.mining.logging.Logger;
 import com.vp.plugin.model.IDataType;
+import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
-
-import plugin.mining.logging.LogActivity;
-import plugin.mining.logging.Logger;
 
 /**
  * 
@@ -15,8 +15,7 @@ import plugin.mining.logging.Logger;
 class OperationPropertyChangeListener extends AbstractPropertyChangeListener<IOperation> {
 
 	public void propertyChange(IOperation operation, String propertyName, Object oldValue, Object newValue) {
-		String propertyValue = newValue instanceof IDataType ? ((IDataType) newValue).getName()
-				: newValue instanceof Boolean ? ((Boolean) newValue).toString() : (String) newValue;
+		String propertyValue = extractStringValue(newValue);
 
 		Logger.createEvent(LogActivity.UPDATE_OPERATION, operation, propertyName, propertyValue);
 	}

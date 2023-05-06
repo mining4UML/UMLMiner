@@ -1,9 +1,8 @@
-package plugin.mining.listeners;
+package com.plugin.mining.listeners;
 
+import com.plugin.mining.logging.Logger;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectListener;
-
-import plugin.mining.logging.Logger;
 
 public class ProjectListener implements IProjectListener {
 	private static final Logger logger = new Logger(ProjectListener.class);

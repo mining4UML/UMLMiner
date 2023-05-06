@@ -1,18 +1,17 @@
-package plugin.mining.listeners;
+package com.plugin.mining.listeners;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.plugin.mining.logging.LogActivity;
+import com.plugin.mining.logging.Logger;
+import com.plugin.mining.logging.LogActivity.ActionType;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IRelationship;
-
-import plugin.mining.logging.LogActivity;
-import plugin.mining.logging.LogActivity.ActionType;
-import plugin.mining.logging.Logger;
 
 public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);

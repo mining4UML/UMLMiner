@@ -1,10 +1,9 @@
-package plugin.mining.listeners;
+package com.plugin.mining.listeners;
 
+import com.plugin.mining.logging.Logger;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectDiagramListener;
-
-import plugin.mining.logging.Logger;
 
 public class ProjectDiagramListener implements IProjectDiagramListener {
 	private final Logger logger = new Logger(ProjectDiagramListener.class);

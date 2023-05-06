@@ -1,4 +1,4 @@
-package plugin.mining.util;
+package com.plugin.mining.util;
 
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.VPProductInfo;

@@ -3,7 +3,7 @@
 	name="%plugin.name"
 	description="%plugin.description"
 	provider="%plugin.provider"
-	class="plugin.mining.plugin.MiningPlugin">
+	class="com.plugin.mining.plugin.MiningPlugin">
 
 	<runtime>
 		<library path="lib" relativePath="true" />
@@ -19,7 +19,7 @@
 				icon="icons/reloadPlugin.png"
 				style="normal"
 				ribbonPath="Help/InstallPlugin">
-				<actionController class="plugin.mining.actions.ReloadPluginActionController" />
+				<actionController class="com.plugin.mining.actions.ReloadPluginActionController" />
 			</action>
 		</actionSet>
 	</actionSets>

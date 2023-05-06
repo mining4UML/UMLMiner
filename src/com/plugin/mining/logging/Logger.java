@@ -31,10 +31,13 @@ import org.deckfour.xes.out.XesXmlSerializer;
 
 import com.plugin.mining.logging.extensions.XIdentityExtension;
 import com.plugin.mining.util.Application;
+import com.plugin.mining.util.StringPlaceholders;
+import com.plugin.mining.util.StringPlaceholders.Placeholder;
 import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IAssociation;
+import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 import com.vp.plugin.model.IProject;
@@ -137,10 +140,17 @@ public class Logger {
                 ? "Constructor"
                 : modelElement.getModelType();
         String modelElementName = modelElement.getName();
+        Placeholder typePlaceholder = new Placeholder("type",
+                modelElement instanceof IClass ? (((IClass) modelElement).stereotypesCount() > 0
+                        ? ((IClass) modelElement).toStereotypesArray()[0]
+                        : "") : modelElementType + " ");
+        Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
         String activityName = propertyName != null
-                ? String.join(" - ", logActivity.getName(), modelElementType, propertyName)
-                : String.join(" - ", logActivity.getName(), modelElementType);
-        String activityInstance = String.join(":", logActivity.getName(), activityId);
+                ? StringPlaceholders.setPlaceholders(logActivity.getName(),
+                        typePlaceholder,
+                        propertyNamePlaceholder)
+                : StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder);
+        String activityInstance = activityName + activityId;
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
         addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
@@ -178,7 +188,6 @@ public class Logger {
     }
 
     public static void saveLog() {
-        System.out.println(Arrays.toString(xLog.getExtensions().toArray()));
         try {
             String logName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss"))
                     + ".xes";

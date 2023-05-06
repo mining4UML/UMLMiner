@@ -14,9 +14,13 @@ import com.vp.plugin.model.IUseCase;
  *
  */
 
-public interface PropertyChangeListenerFactory {
+public class PropertyChangeListenerFactory {
 
-	static java.beans.PropertyChangeListener getInstance(IModelElement modelElement) {
+	private PropertyChangeListenerFactory() {
+		// Empty
+	}
+
+	public static java.beans.PropertyChangeListener getInstance(IModelElement modelElement) {
 		if (modelElement instanceof IClass)
 			return new ClassPropertyChangeListener();
 		if (modelElement instanceof IAttribute)

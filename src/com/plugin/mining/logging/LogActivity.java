@@ -1,29 +1,40 @@
 package com.plugin.mining.logging;
 
 public enum LogActivity {
-    ADD_CLASS("Add Class", ActionType.ADD, ModelType.CLASS),
-    ADD_ATTRIBUTE("Add Attribute", ActionType.ADD, ModelType.ATTRIBUTE),
-    ADD_OPERATION("Add Operation", ActionType.ADD, ModelType.OPERATION),
-    ADD_RECEPTION("Add Reception", ActionType.ADD, ModelType.RECEPTION),
-    ADD_RELATIONSHIP("Add Relationship", ActionType.ADD, ModelType.RELATIONSHIP),
-    ADD_USE_CASE("Add Use Case", ActionType.ADD, ModelType.USE_CASE),
-    UPDATE_CLASS("Update Class", ActionType.UPDATE, ModelType.CLASS),
-    UPDATE_ATTRIBUTE("Update Attribute", ActionType.UPDATE, ModelType.ATTRIBUTE),
-    UPDATE_OPERATION("Update Operation", ActionType.UPDATE, ModelType.OPERATION),
-    UPDATE_RECEPTION("Update Reception", ActionType.UPDATE, ModelType.RECEPTION),
-    UPDATE_RELATIONSHIP("Update Relationship", ActionType.UPDATE, ModelType.RELATIONSHIP),
-    UPDATE_USE_CASE("Update Use Case", ActionType.UPDATE, ModelType.USE_CASE),
-    REMOVE_CLASS("Remove Class", ActionType.REMOVE, ModelType.CLASS),
-    REMOVE_ATTRIBUTE("Remove Attribute", ActionType.REMOVE, ModelType.ATTRIBUTE),
-    REMOVE_OPERATION("Remove Operation", ActionType.REMOVE, ModelType.OPERATION),
-    REMOVE_RECEPTION("Remove Reception", ActionType.REMOVE, ModelType.RECEPTION),
-    REMOVE_RELATIONSHIP("Remove Relationship", ActionType.REMOVE, ModelType.RELATIONSHIP),
-    REMOVE_USE_CASE("Remove Case", ActionType.REMOVE, ModelType.USE_CASE);
+    ADD_CLASS(ActionType.ADD.getName() + ModelType.CLASS.getName(), ActionType.ADD, ModelType.CLASS),
+    ADD_ATTRIBUTE(ActionType.ADD, ModelType.ATTRIBUTE),
+    ADD_OPERATION(ActionType.ADD, ModelType.OPERATION),
+    ADD_RECEPTION(ActionType.ADD, ModelType.RECEPTION),
+    ADD_RELATIONSHIP(ActionType.ADD, ModelType.RELATIONSHIP),
+    ADD_USE_CASE(ActionType.ADD, ModelType.USE_CASE),
+    UPDATE_CLASS(ActionType.UPDATE.getName() + ModelType.CLASS.getName(), ActionType.UPDATE, ModelType.CLASS),
+    UPDATE_ATTRIBUTE(ActionType.UPDATE, ModelType.ATTRIBUTE),
+    UPDATE_OPERATION(ActionType.UPDATE, ModelType.OPERATION),
+    UPDATE_RECEPTION(ActionType.UPDATE, ModelType.RECEPTION),
+    UPDATE_RELATIONSHIP(ActionType.UPDATE, ModelType.RELATIONSHIP),
+    UPDATE_USE_CASE(ActionType.UPDATE, ModelType.USE_CASE),
+    REMOVE_CLASS(ActionType.REMOVE.getName() + ModelType.CLASS.getName(), ActionType.REMOVE, ModelType.CLASS),
+    REMOVE_ATTRIBUTE(ActionType.REMOVE, ModelType.ATTRIBUTE),
+    REMOVE_OPERATION(ActionType.REMOVE, ModelType.OPERATION),
+    REMOVE_RECEPTION(ActionType.REMOVE, ModelType.RECEPTION),
+    REMOVE_RELATIONSHIP(ActionType.REMOVE, ModelType.RELATIONSHIP),
+    REMOVE_USE_CASE(ActionType.REMOVE, ModelType.USE_CASE);
 
     public enum ActionType {
-        ADD,
-        UPDATE,
-        REMOVE
+        ADD("Add {{type}}"),
+        UPDATE("Update {{propertyName}} property for {{type}}"),
+        REMOVE("Remove {{type}}");
+
+        String name;
+
+        ActionType(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
     }
 
     public enum ModelType {
@@ -61,6 +72,10 @@ public enum LogActivity {
         this.name = name;
         this.actionType = actionType;
         this.modelType = modelType;
+    }
+
+    LogActivity(ActionType actionType, ModelType modelType) {
+        this(actionType.getName(), actionType, modelType);
     }
 
     public String getName() {

@@ -5,8 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.plugin.mining.logging.LogActivity;
-import com.plugin.mining.logging.Logger;
 import com.plugin.mining.logging.LogActivity.ActionType;
+import com.plugin.mining.logging.Logger;
+import com.plugin.mining.util.Application;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
 import com.vp.plugin.diagram.IDiagramUIModel;
@@ -30,7 +31,7 @@ public class DiagramListener implements IDiagramListener {
 		logger.info("%s element added to the diagram", modelElement.getModelType());
 		LogActivity logActivity = modelElement instanceof IRelationship ? LogActivity.ADD_RELATIONSHIP
 				: LogActivity.getInstance(ActionType.ADD, modelElement.getModelType());
-		Logger.createEvent(logActivity, modelElement);
+		Application.runDelayed(() -> Logger.createEvent(logActivity, modelElement), 100);
 
 		DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
 		diagramElement.addDiagramElementListener(diagramElementListener);

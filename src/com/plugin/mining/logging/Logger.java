@@ -139,18 +139,15 @@ public class Logger {
         String modelElementType = (modelElement instanceof IOperation && ((IOperation) modelElement).isConstructor())
                 ? "Constructor"
                 : modelElement.getModelType();
-        String modelElementName = modelElement.getName();
+        String modelElementName = modelElement.getName() != null ? modelElement.getName() : "unknown";
         Placeholder typePlaceholder = new Placeholder("type",
                 modelElement instanceof IClass ? (((IClass) modelElement).stereotypesCount() > 0
                         ? ((IClass) modelElement).toStereotypesArray()[0]
-                        : "") : modelElementType + " ");
+                        : "") : modelElementType);
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
-        String activityName = propertyName != null
-                ? StringPlaceholders.setPlaceholders(logActivity.getName(),
-                        typePlaceholder,
-                        propertyNamePlaceholder)
-                : StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder);
-        String activityInstance = activityName + activityId;
+        String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
+                propertyNamePlaceholder);
+        String activityInstance = String.join(":", activityName, activityId);
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
         addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
@@ -161,8 +158,7 @@ public class Logger {
         addAttribute(attributes, LogAttribute.DIAGRAM_NAME, diagramName);
         addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, modelElementId);
         addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, modelElementType);
-        addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME,
-                modelElementName != null ? modelElementName : "unknown");
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, modelElementName);
         if (propertyName != null && propertyValue != null) {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
             addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
@@ -170,10 +166,10 @@ public class Logger {
         if (modelElement instanceof IRelationship) {
             IRelationship relationship = (IRelationship) modelElement;
             String relationshipFromEnd = relationship instanceof IAssociation
-                    ? ((IAssociation) relationship).getFromEnd().getId()
+                    ? ((IAssociation) relationship).getFromEnd().getModelElement().getId()
                     : relationship.getFrom().getId();
             String relationshipToEnd = relationship instanceof IAssociation
-                    ? ((IAssociation) relationship).getToEnd().getId()
+                    ? ((IAssociation) relationship).getToEnd().getModelElement().getId()
                     : relationship.getTo().getId();
             addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
             addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);

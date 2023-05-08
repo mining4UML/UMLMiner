@@ -27,8 +27,9 @@ public class StringPlaceholders {
     public static String setPlaceholders(String string, Placeholder... placeholders) {
         String stringWithPlaceholders = string;
         for (Placeholder placeholder : placeholders) {
-            stringWithPlaceholders = stringWithPlaceholders.replace(String.format("{{%s}}", placeholder.getName()),
-                    placeholder.getValue());
+            if (placeholder.getValue() != null)
+                stringWithPlaceholders = stringWithPlaceholders.replace(String.format("{{%s}}", placeholder.getName()),
+                        placeholder.getValue());
         }
         return stringWithPlaceholders;
     }

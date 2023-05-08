@@ -1,5 +1,9 @@
 package com.plugin.mining.util;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
@@ -9,6 +13,7 @@ import com.vp.plugin.model.IProject;
 public class Application {
     public static final String PLUGIN_ID = "mining.plugin";
     private static final ApplicationManager manager = ApplicationManager.instance();
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     private Application() {
         // Empty
@@ -32,5 +37,9 @@ public class Application {
 
     public static void reloadPlugin() {
         manager.reloadPluginClasses(PLUGIN_ID);
+    }
+
+    public static void runDelayed(Runnable runnable, long delay) {
+        executor.schedule(runnable, delay, TimeUnit.MILLISECONDS);
     }
 }

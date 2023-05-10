@@ -43,10 +43,11 @@ enum LogAttribute {
     UML_ELEMENT_ID("UMLElementId", Type.LITERAL, "UML Element Id", true),
     UML_ELEMENT_TYPE("UMLElementType", Type.LITERAL, "UML Element Type", true),
     UML_ELEMENT_NAME("UMLElementName", Type.LITERAL, "UML Element Name", true),
-    RELATIONSHIP_FROM_END("RelationshipFromEnd", Type.LITERAL, "Relationship From End"),
-    RELATIONSHIP_TO_END("RelationshipToEnd", Type.LITERAL, "Relationship To End"),
     PROPERTY_NAME("PropertyName", Type.LITERAL, "Property Name"),
-    PROPERTY_VALUE("PropertyValue", Type.LITERAL, "Property Value");
+    PROPERTY_VALUE("PropertyValue", Type.LITERAL, "Property Value"),
+    PARAMETERS("Parameters", Type.LITERAL, "Parameters"),
+    RELATIONSHIP_FROM_END("RelationshipFromEnd", Type.LITERAL, "Relationship From End"),
+    RELATIONSHIP_TO_END("RelationshipToEnd", Type.LITERAL, "Relationship To End");
 
     enum Type {
         LITERAL(String.class) {

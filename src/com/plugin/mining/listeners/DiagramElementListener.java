@@ -6,12 +6,12 @@ import com.vp.plugin.diagram.IConnectorUIModel;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramElementListener;
 import com.vp.plugin.diagram.IShapeUIModel;
-import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IAttribute;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IEndRelationship;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
+import com.vp.plugin.model.IParameter;
 import com.vp.plugin.model.IRelationshipEnd;
 
 public class DiagramElementListener implements IDiagramElementListener {
@@ -31,10 +31,13 @@ public class DiagramElementListener implements IDiagramElementListener {
                 attribute.addPropertyChangeListener(
                         PropertyChangeListenerFactory
                                 .getInstance(attribute));
-            for (IOperation operation : classElement.toOperationArray())
+            for (IOperation operation : classElement.toOperationArray()) {
                 operation.addPropertyChangeListener(
                         PropertyChangeListenerFactory
                                 .getInstance(operation));
+                for (IParameter parameter : operation.toParameterArray())
+                    parameter.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(parameter));
+            }
         }
 
         if (modelElement instanceof IEndRelationship) {

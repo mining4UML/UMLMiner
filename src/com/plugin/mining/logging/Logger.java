@@ -140,9 +140,9 @@ public class Logger {
     }
 
     private static String extractModelStereotype(IModelElement modelElement) {
-        return modelElement instanceof IClass && ((IClass) modelElement).stereotypesCount() > 0
-                ? ((IClass) modelElement).toStereotypesArray()[0]
-                : "";
+        return modelElement instanceof IClass ? (((IClass) modelElement).stereotypesCount() > 0
+                ? ((IClass) modelElement).toStereotypesArray()[0] + " "
+                : "") : null;
     }
 
     public static void createEvent(LogActivity logActivity, IModelElement modelElement, String propertyName,
@@ -160,11 +160,11 @@ public class Logger {
         String modelElementType = extractModelType(modelElement);
         String modelElementName = extractModelName(modelElement);
         String stereotype = extractModelStereotype(modelElement);
-        Placeholder typePlaceholder = new Placeholder("type", stereotype.isEmpty() ? modelElementType : stereotype);
+        Placeholder typePlaceholder = new Placeholder("type", stereotype != null ? stereotype : modelElementType);
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
         String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
                 propertyNamePlaceholder);
-        String activityInstance = activityName + activityId;
+        String activityInstance = String.join(" - ", activityName, activityId);
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
         addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
@@ -179,6 +179,12 @@ public class Logger {
         if (propertyName != null && propertyValue != null) {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
             addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
+        }
+        if (modelElement instanceof IOperation) {
+            addAttribute(attributes, LogAttribute.PARAMETERS,
+                    Arrays.toString(
+                            Arrays.stream(((IOperation) modelElement).toParameterArray()).map(IModelElement::getId)
+                                    .toArray(String[]::new)));
         }
         if (modelElement instanceof IRelationship) {
             IRelationship relationship = (IRelationship) modelElement;

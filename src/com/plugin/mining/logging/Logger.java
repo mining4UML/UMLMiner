@@ -159,8 +159,8 @@ public class Logger {
         String modelElementId = modelElement.getId();
         String modelElementType = extractModelType(modelElement);
         String modelElementName = extractModelName(modelElement);
-        String type = extractModelStereotype(modelElement);
-        Placeholder typePlaceholder = new Placeholder("type", type.isEmpty() ? modelElementType + " " : type);
+        String stereotype = extractModelStereotype(modelElement);
+        Placeholder typePlaceholder = new Placeholder("type", stereotype.isEmpty() ? modelElementType : stereotype);
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
         String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
                 propertyNamePlaceholder);

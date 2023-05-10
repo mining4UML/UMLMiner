@@ -31,10 +31,12 @@ public class DiagramListener implements IDiagramListener {
 		logger.info("%s element added to the diagram", modelElement.getModelType());
 		LogActivity logActivity = modelElement instanceof IRelationship ? LogActivity.ADD_RELATIONSHIP
 				: LogActivity.getInstance(ActionType.ADD, modelElement.getModelType());
-		Application.runDelayed(() -> Logger.createEvent(logActivity, modelElement), 100);
+		Application.runDelayed(() -> {
+			Logger.createEvent(logActivity, modelElement);
+			DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
+			diagramElement.addDiagramElementListener(diagramElementListener);
+		}, 100);
 
-		DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
-		diagramElement.addDiagramElementListener(diagramElementListener);
 	}
 
 	@Override

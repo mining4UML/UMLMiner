@@ -37,6 +37,7 @@ import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IAssociation;
+import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
@@ -124,6 +125,26 @@ public class Logger {
         xLog.add(xTrace);
     }
 
+    private static String extractModelType(IModelElement modelElement) {
+        return (modelElement instanceof IOperation && ((IOperation) modelElement).isConstructor())
+                ? "Constructor"
+                : modelElement instanceof IAssociation
+                        ? String.format("Association[from=%s,to=%s]",
+                                ((IAssociationEnd) ((IAssociation) modelElement).getFromEnd()).getAggregationKind(),
+                                ((IAssociationEnd) ((IAssociation) modelElement).getToEnd()).getAggregationKind())
+                        : modelElement.getModelType();
+    }
+
+    private static String extractModelName(IModelElement modelElement) {
+        return modelElement.getName() != null ? modelElement.getName() : "unknown";
+    }
+
+    private static String extractModelStereotype(IModelElement modelElement) {
+        return modelElement instanceof IClass && ((IClass) modelElement).stereotypesCount() > 0
+                ? ((IClass) modelElement).toStereotypesArray()[0]
+                : "";
+    }
+
     public static void createEvent(LogActivity logActivity, IModelElement modelElement, String propertyName,
             String propertyValue) {
         System.out.println(
@@ -136,18 +157,14 @@ public class Logger {
         String diagramType = diagramUIModel.getType();
         String diagramName = diagramUIModel.getName();
         String modelElementId = modelElement.getId();
-        String modelElementType = (modelElement instanceof IOperation && ((IOperation) modelElement).isConstructor())
-                ? "Constructor"
-                : modelElement.getModelType();
-        String modelElementName = modelElement.getName() != null ? modelElement.getName() : "unknown";
-        Placeholder typePlaceholder = new Placeholder("type",
-                modelElement instanceof IClass ? (((IClass) modelElement).stereotypesCount() > 0
-                        ? ((IClass) modelElement).toStereotypesArray()[0]
-                        : "") : modelElementType);
+        String modelElementType = extractModelType(modelElement);
+        String modelElementName = extractModelName(modelElement);
+        String type = extractModelStereotype(modelElement);
+        Placeholder typePlaceholder = new Placeholder("type", type.isEmpty() ? modelElementType + " " : type);
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
         String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
                 propertyNamePlaceholder);
-        String activityInstance = String.join(":", activityName, activityId);
+        String activityInstance = activityName + activityId;
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
         addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);

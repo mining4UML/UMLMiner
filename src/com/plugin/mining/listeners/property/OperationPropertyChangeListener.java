@@ -24,7 +24,7 @@ class OperationPropertyChangeListener extends AbstractPropertyChangeListener<IOp
 
 			Logger.createEvent(LogActivity.REMOVE_PARAMETER, operation);
 		} else {
-			String propertyValue = extractStringValue(newValue);
+			String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 
 			Logger.createEvent(LogActivity.UPDATE_OPERATION, operation, propertyName, propertyValue);
 		}

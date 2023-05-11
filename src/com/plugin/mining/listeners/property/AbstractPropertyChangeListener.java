@@ -27,19 +27,6 @@ abstract class AbstractPropertyChangeListener<T extends IModelElement> implement
 					"referencedByRemoved",
 					"fromRelationshipEndRemoved"));
 
-	protected static String extractStringValue(Object value) {
-		if (value instanceof IModelElement)
-			return ((IModelElement) value).getId();
-		if (value instanceof IModelElement[])
-			return Arrays.toString(Arrays.stream(((IModelElement[]) value)).map(IModelElement::getName)
-					.toArray(String[]::new));
-		if (value instanceof Number)
-			return ((Number) value).toString();
-		if (value instanceof Boolean)
-			return ((Boolean) value).toString();
-		return (String) value;
-	}
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public void propertyChange(PropertyChangeEvent propertyChangeEvent) {

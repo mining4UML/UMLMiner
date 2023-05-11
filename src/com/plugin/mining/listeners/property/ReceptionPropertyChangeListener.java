@@ -7,7 +7,7 @@ import com.vp.plugin.model.IReception;
 public class ReceptionPropertyChangeListener extends AbstractPropertyChangeListener<IReception> {
     @Override
     public void propertyChange(IReception reception, String propertyName, Object oldValue, Object newValue) {
-        String propertyValue = extractStringValue(newValue);
+        String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 
         Logger.createEvent(LogActivity.UPDATE_RECEPTION, reception, propertyName, propertyValue);
     }

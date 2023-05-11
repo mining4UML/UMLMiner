@@ -1,6 +1,7 @@
 package com.plugin.mining.logging;
 
 public enum LogActivity {
+    ADD_DIAGRAM(ActionType.ADD, ModelType.DIAGRAM),
     ADD_CLASS("Add {{type}}Class", ActionType.ADD, ModelType.CLASS),
     ADD_ATTRIBUTE(ActionType.ADD, ModelType.ATTRIBUTE),
     ADD_OPERATION(ActionType.ADD, ModelType.OPERATION),
@@ -9,6 +10,7 @@ public enum LogActivity {
     ADD_RELATIONSHIP(ActionType.ADD, ModelType.RELATIONSHIP),
     ADD_PACKAGE(ActionType.ADD, ModelType.PACKAGE),
     ADD_USE_CASE(ActionType.ADD, ModelType.USE_CASE),
+    UPDATE_DIAGRAM(ActionType.UPDATE, ModelType.DIAGRAM),
     UPDATE_CLASS("Update {{propertyName}} property for {{type}}Class", ActionType.UPDATE, ModelType.CLASS),
     UPDATE_ATTRIBUTE(ActionType.UPDATE, ModelType.ATTRIBUTE),
     UPDATE_OPERATION(ActionType.UPDATE, ModelType.OPERATION),
@@ -17,6 +19,7 @@ public enum LogActivity {
     UPDATE_RELATIONSHIP(ActionType.UPDATE, ModelType.RELATIONSHIP),
     UPDATE_PACKAGE(ActionType.UPDATE, ModelType.PACKAGE),
     UPDATE_USE_CASE(ActionType.UPDATE, ModelType.USE_CASE),
+    REMOVE_DIAGRAM(ActionType.REMOVE, ModelType.DIAGRAM),
     REMOVE_CLASS("Remove {{type}}Class", ActionType.REMOVE, ModelType.CLASS),
     REMOVE_ATTRIBUTE(ActionType.REMOVE, ModelType.ATTRIBUTE),
     REMOVE_OPERATION(ActionType.REMOVE, ModelType.OPERATION),
@@ -44,6 +47,7 @@ public enum LogActivity {
     }
 
     public enum ModelType {
+        DIAGRAM("Diagram"),
         CLASS("Class"),
         ATTRIBUTE("Attribute"),
         OPERATION("Operation"),

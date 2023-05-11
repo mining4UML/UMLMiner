@@ -28,7 +28,7 @@ class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass>
 
 			Logger.createEvent(logActivity, childElement);
 		} else {
-			String propertyValue = extractStringValue(newValue);
+			String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 
 			Logger.createEvent(LogActivity.UPDATE_CLASS, classElement, propertyName, propertyValue);
 		}

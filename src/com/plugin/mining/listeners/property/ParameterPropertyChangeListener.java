@@ -14,7 +14,7 @@ import com.vp.plugin.model.IParameter;
 class ParameterPropertyChangeListener extends AbstractPropertyChangeListener<IParameter> {
 
 	public void propertyChange(IParameter parameter, String propertyName, Object oldValue, Object newValue) {
-		String propertyValue = extractStringValue(newValue);
+		String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 		IOperation operation = parameter.getOperation();
 
 		Logger.createEvent(LogActivity.UPDATE_PARAMETER, operation, propertyName, propertyValue);

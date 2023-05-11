@@ -160,7 +160,6 @@ public class Logger {
         }
 
         return modelElement.getModelType();
-
     }
 
     private static String extractModelName(IModelElement modelElement) {
@@ -175,6 +174,39 @@ public class Logger {
                     : "";
         }
         return null;
+    }
+
+    public static void createEvent(LogActivity logActivity, IDiagramUIModel diagramUIModel, String propertyName,
+            String propertyValue) {
+        long timestamp = Instant.now().toEpochMilli();
+        String activityId = xIdFactory.createId().toString();
+        String diagramId = diagramUIModel.getId();
+        String diagramType = diagramUIModel.getType();
+        String diagramName = diagramUIModel.getName();
+        Placeholder typePlaceholder = new Placeholder("type", diagramType);
+        Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
+        String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
+                propertyNamePlaceholder);
+        String activityInstance = String.join(" - ", activityName, activityId);
+        XAttributeMap attributes = xFactory.createAttributeMap();
+        addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
+        addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
+        addAttribute(attributes, LogAttribute.ACTIVITY_INSTANCE, activityInstance);
+        addAttribute(attributes, LogAttribute.ACTIVITY_TIMESTAMP, timestamp);
+        addAttribute(attributes, LogAttribute.DIAGRAM_ID, diagramId);
+        addAttribute(attributes, LogAttribute.DIAGRAM_TYPE, diagramType);
+        addAttribute(attributes, LogAttribute.DIAGRAM_NAME, diagramName);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, diagramId);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, diagramType);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, diagramName);
+        if (propertyName != null && propertyValue != null) {
+            addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
+            addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
+        }
+    }
+
+    public static void createEvent(LogActivity logActivity, IDiagramUIModel diagramUIModel) {
+        createEvent(logActivity, diagramUIModel, null, null);
     }
 
     public static void createEvent(LogActivity logActivity, IModelElement modelElement, String propertyName,

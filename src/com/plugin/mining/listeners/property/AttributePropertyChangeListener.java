@@ -14,7 +14,7 @@ class AttributePropertyChangeListener extends AbstractPropertyChangeListener<IAt
 
     @Override
     public void propertyChange(IAttribute attribute, String propertyName, Object oldValue, Object newValue) {
-        String propertyValue = extractStringValue(newValue);
+        String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 
         Logger.createEvent(LogActivity.UPDATE_ATTRIBUTE, attribute, propertyName, propertyValue);
     }

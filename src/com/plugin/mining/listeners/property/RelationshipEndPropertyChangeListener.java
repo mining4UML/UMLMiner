@@ -13,18 +13,18 @@ import com.vp.plugin.model.IRelationshipEnd;
 
 class RelationshipEndPropertyChangeListener extends AbstractPropertyChangeListener<IRelationshipEnd> {
 
-    @Override
-    public void propertyChange(IRelationshipEnd relationshipEnd, String propertyName, Object oldValue,
-            Object newValue) {
-        String propertyValue = extractStringValue(newValue);
-        IEndRelationship relationship = relationshipEnd.getEndRelationship();
-        String relationshipEndDirection = relationship.getFromEnd().equals(relationshipEnd)
-                ? "from"
-                : "to";
+        @Override
+        public void propertyChange(IRelationshipEnd relationshipEnd, String propertyName, Object oldValue,
+                        Object newValue) {
+                String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
+                IEndRelationship relationship = relationshipEnd.getEndRelationship();
+                String relationshipEndDirection = relationship.getFromEnd().equals(relationshipEnd)
+                                ? "from"
+                                : "to";
 
-        Logger.createEvent(LogActivity.UPDATE_RELATIONSHIP,
-                relationship,
-                String.join(".", relationshipEndDirection, propertyName), propertyValue);
-    }
+                Logger.createEvent(LogActivity.UPDATE_RELATIONSHIP,
+                                relationship,
+                                String.join(".", relationshipEndDirection, propertyName), propertyValue);
+        }
 
 }

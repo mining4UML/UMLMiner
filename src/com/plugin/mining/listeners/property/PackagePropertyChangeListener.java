@@ -14,7 +14,7 @@ class PackagePropertyChangeListener extends AbstractPropertyChangeListener<IPack
 
     @Override
     public void propertyChange(IPackage packageElement, String propertyName, Object oldValue, Object newValue) {
-        String propertyValue = extractStringValue(newValue);
+        String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 
         Logger.createEvent(LogActivity.UPDATE_PACKAGE, packageElement, propertyName, propertyValue);
     }

@@ -1,5 +1,6 @@
 package com.plugin.mining.listeners;
 
+import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.Logger;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
@@ -17,6 +18,7 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 	public void diagramAdded(IProject project, IDiagramUIModel diagramUIModel) {
 		logger.info(String.format("%s \"%s\" added", diagramUIModel.getType(),
 				diagramUIModel.getName()));
+		Logger.createEvent(LogActivity.ADD_DIAGRAM, diagramUIModel);
 		diagramUIModel.addDiagramListener(diagramListener);
 	}
 
@@ -24,6 +26,7 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 	public void diagramRemoved(IProject project, IDiagramUIModel diagramUIModel) {
 		logger.info(String.format("%s \"%s\" removed", diagramUIModel.getType(),
 				diagramUIModel.getName()));
+		Logger.createEvent(LogActivity.REMOVE_DIAGRAM, diagramUIModel);
 	}
 
 }

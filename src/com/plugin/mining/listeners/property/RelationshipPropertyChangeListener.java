@@ -14,7 +14,7 @@ class RelationshipPropertyChangeListener extends AbstractPropertyChangeListener<
 
     @Override
     public void propertyChange(IRelationship relationship, String propertyName, Object oldValue, Object newValue) {
-        String propertyValue = extractStringValue(newValue);
+        String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 
         Logger.createEvent(LogActivity.UPDATE_RELATIONSHIP, relationship, propertyName, propertyValue);
     }

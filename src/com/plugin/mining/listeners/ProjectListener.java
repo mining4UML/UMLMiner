@@ -13,8 +13,8 @@ public class ProjectListener implements IProjectListener {
 		projectName = project.getName();
 
 		if (project.getProjectFile() == null) {
-			Logger.createTrace(project);
 			logger.info("Temp project \"%s\" opened", projectName);
+			Logger.createTrace(project);
 			project.addProjectDiagramListener(projectDiagramListener);
 		}
 	}
@@ -28,18 +28,18 @@ public class ProjectListener implements IProjectListener {
 	public void projectNewed(IProject project) {
 		projectName = project.getName();
 
+		logger.info("New project \"%s\" created", projectName);
 		Logger.createTrace(project);
 		project.addProjectDiagramListener(projectDiagramListener);
-		logger.info("New project \"%s\" created", projectName);
 	}
 
 	@Override
 	public void projectOpened(IProject project) {
 		projectName = project.getName();
 
+		logger.info("Project \"%s\" opened", projectName);
 		Logger.createTrace(project);
 		project.addProjectDiagramListener(projectDiagramListener);
-		logger.info("Project \"%s\" opened", projectName);
 	}
 
 	@Override

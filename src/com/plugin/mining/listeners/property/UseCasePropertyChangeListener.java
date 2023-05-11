@@ -14,7 +14,7 @@ class UseCasePropertyChangeListener extends AbstractPropertyChangeListener<IUseC
 
     @Override
     public void propertyChange(IUseCase useCase, String propertyName, Object oldValue, Object newValue) {
-        String propertyValue = extractStringValue(newValue);
+        String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 
         Logger.createEvent(LogActivity.UPDATE_USE_CASE, useCase, propertyName, propertyValue);
     }

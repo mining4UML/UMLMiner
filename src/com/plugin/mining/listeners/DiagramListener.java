@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.plugin.mining.listeners.property.PropertyChangeListenerFactory;
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.LogActivity.ActionType;
 import com.plugin.mining.logging.Logger;
@@ -83,11 +84,10 @@ public class DiagramListener implements IDiagramListener {
 	@Override
 	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String propertyName,
 			Object oldValue, Object newValue) {
-
-		if (propertyName.equals("customizedSortDiagramElementIds"))
-			logger.info("%s \"%s\" %s property changed from \"%s\" to \"%s\"", diagramUIModel.getType(),
-					diagramUIModel.getName(), propertyName, Arrays.toString((String[]) oldValue),
-					Arrays.toString((String[]) newValue));
+		String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
+		logger.info("%s \"%s\" %s property changed to \"%s\"", diagramUIModel.getType(), diagramUIModel.getName(),
+				propertyName, propertyValue);
+		Logger.createEvent(LogActivity.UPDATE_DIAGRAM, diagramUIModel, propertyName, propertyValue);
 	}
 
 }

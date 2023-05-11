@@ -28,12 +28,16 @@ abstract class AbstractPropertyChangeListener<T extends IModelElement> implement
 					"fromRelationshipEndRemoved"));
 
 	protected static String extractStringValue(Object value) {
-		return value instanceof IModelElement ? ((IModelElement) value).getName()
-				: value instanceof IModelElement[]
-						? Arrays.toString(Arrays.stream(((IModelElement[]) value)).map(IModelElement::getName)
-								.toArray(String[]::new))
-						: value instanceof Number ? ((Number) value).toString()
-								: value instanceof Boolean ? ((Boolean) value).toString() : (String) value;
+		if (value instanceof IModelElement)
+			return ((IModelElement) value).getId();
+		if (value instanceof IModelElement[])
+			return Arrays.toString(Arrays.stream(((IModelElement[]) value)).map(IModelElement::getName)
+					.toArray(String[]::new));
+		if (value instanceof Number)
+			return ((Number) value).toString();
+		if (value instanceof Boolean)
+			return ((Boolean) value).toString();
+		return (String) value;
 	}
 
 	@Override

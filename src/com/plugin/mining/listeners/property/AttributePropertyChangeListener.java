@@ -3,9 +3,6 @@ package com.plugin.mining.listeners.property;
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.Logger;
 import com.vp.plugin.model.IAttribute;
-import com.vp.plugin.model.IDataType;
-import com.vp.plugin.model.IModel;
-import com.vp.plugin.model.IModelElement;
 
 /**
  * 

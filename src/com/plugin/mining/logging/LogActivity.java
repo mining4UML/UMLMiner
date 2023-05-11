@@ -7,6 +7,7 @@ public enum LogActivity {
     ADD_PARAMETER("Add Parameter to {{type}}", ActionType.ADD, ModelType.PARAMETER),
     ADD_RECEPTION(ActionType.ADD, ModelType.RECEPTION),
     ADD_RELATIONSHIP(ActionType.ADD, ModelType.RELATIONSHIP),
+    ADD_PACKAGE(ActionType.ADD, ModelType.PACKAGE),
     ADD_USE_CASE(ActionType.ADD, ModelType.USE_CASE),
     UPDATE_CLASS("Update {{propertyName}} property for {{type}}Class", ActionType.UPDATE, ModelType.CLASS),
     UPDATE_ATTRIBUTE(ActionType.UPDATE, ModelType.ATTRIBUTE),
@@ -14,6 +15,7 @@ public enum LogActivity {
     UPDATE_PARAMETER("Update {{propertyName}} property for {{type}} Parameter", ActionType.UPDATE, ModelType.PARAMETER),
     UPDATE_RECEPTION(ActionType.UPDATE, ModelType.RECEPTION),
     UPDATE_RELATIONSHIP(ActionType.UPDATE, ModelType.RELATIONSHIP),
+    UPDATE_PACKAGE(ActionType.UPDATE, ModelType.PACKAGE),
     UPDATE_USE_CASE(ActionType.UPDATE, ModelType.USE_CASE),
     REMOVE_CLASS("Remove {{type}}Class", ActionType.REMOVE, ModelType.CLASS),
     REMOVE_ATTRIBUTE(ActionType.REMOVE, ModelType.ATTRIBUTE),
@@ -21,6 +23,7 @@ public enum LogActivity {
     REMOVE_PARAMETER("Remove Parameter from {{type}}", ActionType.REMOVE, ModelType.PARAMETER),
     REMOVE_RECEPTION(ActionType.REMOVE, ModelType.RECEPTION),
     REMOVE_RELATIONSHIP(ActionType.REMOVE, ModelType.RELATIONSHIP),
+    REMOVE_PACKAGE(ActionType.REMOVE, ModelType.PACKAGE),
     REMOVE_USE_CASE(ActionType.REMOVE, ModelType.USE_CASE);
 
     public enum ActionType {
@@ -46,8 +49,9 @@ public enum LogActivity {
         OPERATION("Operation"),
         PARAMETER("Parameter"),
         RECEPTION("Reception"),
-        USE_CASE("UseCase"),
-        RELATIONSHIP("Relationship");
+        RELATIONSHIP("Relationship"),
+        PACKAGE("Package"),
+        USE_CASE("UseCase");
 
         private String name;
 

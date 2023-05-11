@@ -4,6 +4,7 @@ import com.vp.plugin.model.IAttribute;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
+import com.vp.plugin.model.IPackage;
 import com.vp.plugin.model.IParameter;
 import com.vp.plugin.model.IReception;
 import com.vp.plugin.model.IRelationship;
@@ -35,6 +36,8 @@ public class PropertyChangeListenerFactory {
 			return new OperationPropertyChangeListener();
 		if (modelElement instanceof IUseCase)
 			return new UseCasePropertyChangeListener();
+		if (modelElement instanceof IPackage)
+			return new PackagePropertyChangeListener();
 		if (modelElement instanceof IRelationship)
 			return new RelationshipPropertyChangeListener();
 		if (modelElement instanceof IRelationshipEnd)

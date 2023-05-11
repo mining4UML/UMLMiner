@@ -125,14 +125,42 @@ public class Logger {
         xLog.add(xTrace);
     }
 
+    private static String extractAggregationKind(IAssociationEnd associationEnd) {
+        String aggregationKind = associationEnd.getAggregationKind();
+        if (aggregationKind.equals("shared"))
+            return "Aggregation";
+        if (aggregationKind.equals("composite"))
+            return "Composition";
+        return "None";
+    }
+
     private static String extractModelType(IModelElement modelElement) {
-        return (modelElement instanceof IOperation && ((IOperation) modelElement).isConstructor())
-                ? "Constructor"
-                : modelElement instanceof IAssociation
-                        ? String.format("Association[from=%s,to=%s]",
-                                ((IAssociationEnd) ((IAssociation) modelElement).getFromEnd()).getAggregationKind(),
-                                ((IAssociationEnd) ((IAssociation) modelElement).getToEnd()).getAggregationKind())
-                        : modelElement.getModelType();
+        if (modelElement instanceof IOperation && ((IOperation) modelElement).isConstructor())
+            return "Constructor";
+
+        if (modelElement instanceof IAssociation) {
+            IAssociation association = (IAssociation) modelElement;
+            IAssociationEnd fromAssociationEnd = (IAssociationEnd) association.getFromEnd();
+            IAssociationEnd toAssociationEnd = (IAssociationEnd) association.getToEnd();
+            String fromAggregationKind = extractAggregationKind(fromAssociationEnd);
+            String toAggregationKind = extractAggregationKind(toAssociationEnd);
+            boolean fromIsNone = fromAggregationKind.equals("None");
+            boolean toIsNone = toAggregationKind.equals("None");
+
+            if (fromIsNone && toIsNone)
+                return "Association";
+
+            if (fromIsNone)
+                return toAggregationKind;
+
+            if (toIsNone)
+                return fromAggregationKind;
+
+            return String.format("Association[from=%s,to=%s]", fromAggregationKind, toAggregationKind);
+        }
+
+        return modelElement.getModelType();
+
     }
 
     private static String extractModelName(IModelElement modelElement) {
@@ -140,9 +168,13 @@ public class Logger {
     }
 
     private static String extractModelStereotype(IModelElement modelElement) {
-        return modelElement instanceof IClass ? (((IClass) modelElement).stereotypesCount() > 0
-                ? ((IClass) modelElement).toStereotypesArray()[0] + " "
-                : "") : null;
+        if (modelElement instanceof IClass) {
+            IClass classElement = (IClass) modelElement;
+            return classElement.stereotypesCount() > 0
+                    ? classElement.toStereotypesArray()[0] + " "
+                    : "";
+        }
+        return null;
     }
 
     public static void createEvent(LogActivity logActivity, IModelElement modelElement, String propertyName,

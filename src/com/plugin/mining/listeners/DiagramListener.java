@@ -17,7 +17,6 @@ import com.vp.plugin.model.IRelationship;
 
 public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);
-	private String diagramUIModelPreviousName;
 	private final Set<IModelElement> modelElements = new HashSet<>();
 
 	public DiagramListener() {
@@ -73,17 +72,15 @@ public class DiagramListener implements IDiagramListener {
 
 	@Override
 	public void diagramUIModelRenamed(IDiagramUIModel diagramUIModel) {
-		if (diagramUIModelPreviousName != null)
-			logger.info("%s \"%s\" renamed to \"%s\"", diagramUIModel.getType(),
-					diagramUIModelPreviousName,
-					diagramUIModel.getName());
-
-		diagramUIModelPreviousName = diagramUIModel.getName();
+		// Empty
 	}
 
 	@Override
 	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String propertyName,
 			Object oldValue, Object newValue) {
+		if (!(propertyName.equals("name")))
+			return;
+
 		String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 		logger.info("%s \"%s\" %s property changed to \"%s\"", diagramUIModel.getType(), diagramUIModel.getName(),
 				propertyName, propertyValue);

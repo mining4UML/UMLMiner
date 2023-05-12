@@ -35,6 +35,8 @@ public class PropertyChangeListenerFactory {
 			return ((Number) value).toString();
 		if (value instanceof Boolean)
 			return ((Boolean) value).toString();
+		if (value instanceof Object[])
+			return Arrays.toString((Object[]) value);
 		return (String) value;
 	}
 
@@ -48,7 +50,7 @@ public class PropertyChangeListenerFactory {
 		if (modelElement instanceof IParameter)
 			return new ParameterPropertyChangeListener();
 		if (modelElement instanceof IReception)
-			return new OperationPropertyChangeListener();
+			return new ReceptionPropertyChangeListener();
 		if (modelElement instanceof IUseCase)
 			return new UseCasePropertyChangeListener();
 		if (modelElement instanceof IPackage)

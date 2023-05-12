@@ -178,6 +178,9 @@ public class Logger {
 
     public static void createEvent(LogActivity logActivity, IDiagramUIModel diagramUIModel, String propertyName,
             String propertyValue) {
+        System.out.println(
+                String.format("%s %s %s %s", logActivity.toString(), diagramUIModel.getName(), propertyName,
+                        propertyValue));
         long timestamp = Instant.now().toEpochMilli();
         String activityId = xIdFactory.createId().toString();
         String diagramId = diagramUIModel.getId();
@@ -203,6 +206,9 @@ public class Logger {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
             addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
         }
+
+        XEvent xEvent = xFactory.createEvent(attributes);
+        xTrace.add(xEvent);
     }
 
     public static void createEvent(LogActivity logActivity, IDiagramUIModel diagramUIModel) {

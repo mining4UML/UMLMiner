@@ -1,7 +1,9 @@
 package com.plugin.mining.listeners.property;
 
 import com.plugin.mining.logging.LogActivity;
+import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.Logger;
+import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IPackage;
 
 /**
@@ -14,9 +16,19 @@ class PackagePropertyChangeListener extends AbstractPropertyChangeListener<IPack
 
     @Override
     public void propertyChange(IPackage packageElement, String propertyName, Object oldValue, Object newValue) {
-        String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
 
-        Logger.createEvent(LogActivity.UPDATE_PACKAGE, packageElement, propertyName, propertyValue);
+        if (propertyName.equals("childAdded")) {
+            String propertyValue = LogExtractor.extractModelType((IModelElement) newValue);
+            Logger.createEvent(LogActivity.ADD_PACKAGE_CHILD, packageElement, propertyName, propertyValue);
+
+        } else if (propertyName.equals("childRemoved")) {
+            String propertyValue = LogExtractor.extractModelType((IModelElement) oldValue);
+            Logger.createEvent(LogActivity.REMOVE_PACKAGE_CHILD, packageElement, propertyName, propertyValue);
+
+        } else {
+            String propertyValue = LogExtractor.extractStringValue(newValue);
+            Logger.createEvent(LogActivity.UPDATE_PACKAGE, packageElement, propertyName, propertyValue);
+        }
     }
 
 }

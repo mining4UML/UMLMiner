@@ -22,6 +22,7 @@ import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.factory.XFactory;
 import org.deckfour.xes.factory.XFactoryBufferedImpl;
 import org.deckfour.xes.id.XIDFactory;
+import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
@@ -41,11 +42,14 @@ import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
+import com.vp.plugin.model.IPackage;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectProperties;
 import com.vp.plugin.model.IRelationship;
 
 public class Logger {
+    private static final String EXTENSION = ".xes";
+    private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd_HH.mm.ss";
     private static final String USER_NAME = System.getProperty("user.name");
     private static final Path logDirectory = Paths.get(System.getProperty("user.dir"), "logs", USER_NAME);
     public static final XFactory xFactory = new XFactoryBufferedImpl();
@@ -53,6 +57,7 @@ public class Logger {
     public static final XIdentityExtension xIdentityExtension = XIdentityExtension.instance();
     public static final XConceptExtension xConceptExtension = XConceptExtension.instance();
     public static final XTimeExtension xTimeExtension = XTimeExtension.instance();
+    private static final XesXmlParser xesXmlParser = new XesXmlParser();
     private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
     private static XLog xLog;
     private static XTrace xTrace;
@@ -74,6 +79,32 @@ public class Logger {
     private static void addAttribute(XAttributeMap attributes, LogAttribute logAttribute, Object value) {
         XAttribute xAttribute = logAttribute.createAttribute(value);
         attributes.put(logAttribute.getKey(), xAttribute);
+    }
+
+    private static void addExtraAttributes(XAttributeMap attributes, IModelElement modelElement) {
+        if (modelElement instanceof IOperation) {
+            addAttribute(attributes, LogAttribute.PARAMETERS,
+                    Arrays.toString(
+                            Arrays.stream(((IOperation) modelElement).toParameterArray()).map(IModelElement::getId)
+                                    .toArray(String[]::new)));
+        }
+        if (modelElement instanceof IRelationship) {
+            IRelationship relationship = (IRelationship) modelElement;
+            String relationshipFromEnd = relationship instanceof IAssociation
+                    ? ((IAssociation) relationship).getFromEnd().getModelElement().getId()
+                    : relationship.getFrom().getId();
+            String relationshipToEnd = relationship instanceof IAssociation
+                    ? ((IAssociation) relationship).getToEnd().getModelElement().getId()
+                    : relationship.getTo().getId();
+            addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
+            addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
+        }
+        if (modelElement instanceof IPackage) {
+            addAttribute(attributes, LogAttribute.UML_ELEMENT_CHILDREN,
+                    Arrays.toString(
+                            Arrays.stream(((IPackage) modelElement).toChildArray()).map(IModelElement::getId)
+                                    .toArray(String[]::new)));
+        }
     }
 
     public static void createLog() {
@@ -120,60 +151,51 @@ public class Logger {
         addAttribute(attributes, LogAttribute.CASE_TIMESTAMP, timestamp);
         addAttribute(attributes, LogAttribute.AUTHOR_NAME, authorName);
         addAttribute(attributes, LogAttribute.PROJECT_NAME, projectName);
+        System.out.println(project.getId());
 
         xTrace = xFactory.createTrace(attributes);
         xLog.add(xTrace);
     }
 
-    private static String extractAggregationKind(IAssociationEnd associationEnd) {
-        String aggregationKind = associationEnd.getAggregationKind();
-        if (aggregationKind.equals("shared"))
-            return "Aggregation";
-        if (aggregationKind.equals("composite"))
-            return "Composition";
-        return "None";
-    }
-
-    private static String extractModelType(IModelElement modelElement) {
-        if (modelElement instanceof IOperation && ((IOperation) modelElement).isConstructor())
-            return "Constructor";
-
-        if (modelElement instanceof IAssociation) {
-            IAssociation association = (IAssociation) modelElement;
-            IAssociationEnd fromAssociationEnd = (IAssociationEnd) association.getFromEnd();
-            IAssociationEnd toAssociationEnd = (IAssociationEnd) association.getToEnd();
-            String fromAggregationKind = extractAggregationKind(fromAssociationEnd);
-            String toAggregationKind = extractAggregationKind(toAssociationEnd);
-            boolean fromIsNone = fromAggregationKind.equals("None");
-            boolean toIsNone = toAggregationKind.equals("None");
-
-            if (fromIsNone && toIsNone)
-                return "Association";
-
-            if (fromIsNone)
-                return toAggregationKind;
-
-            if (toIsNone)
-                return fromAggregationKind;
-
-            return String.format("Association[from=%s,to=%s]", fromAggregationKind, toAggregationKind);
+    public static void createEvent(LogActivity logActivity, IProject project, String propertyName,
+            String propertyValue) {
+        System.out.println(
+                String.format("%s %s %s %s", logActivity.toString(), project.getName(), propertyName,
+                        propertyValue));
+        long timestamp = Instant.now().toEpochMilli();
+        IDiagramUIModel diagram = Application.getDiagram();
+        String activityId = xIdFactory.createId().toString();
+        String diagramId = LogExtractor.getOrDefault(diagram.getId());
+        String diagramType = LogExtractor.getOrDefault(diagram.getType());
+        String diagramName = LogExtractor.getOrDefault(diagram.getName());
+        Placeholder typePlaceholder = new Placeholder("type", diagramType);
+        Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
+        String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
+                propertyNamePlaceholder);
+        String activityInstance = String.join(" - ", activityName, activityId);
+        XAttributeMap attributes = xFactory.createAttributeMap();
+        addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
+        addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
+        addAttribute(attributes, LogAttribute.ACTIVITY_INSTANCE, activityInstance);
+        addAttribute(attributes, LogAttribute.ACTIVITY_TIMESTAMP, timestamp);
+        addAttribute(attributes, LogAttribute.DIAGRAM_ID, diagramId);
+        addAttribute(attributes, LogAttribute.DIAGRAM_TYPE, diagramType);
+        addAttribute(attributes, LogAttribute.DIAGRAM_NAME, diagramName);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, project.getId());
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, logActivity.getModelType());
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, project.getName());
+        if (propertyName != null && propertyValue != null && !propertyName.equals("childAdded")
+                && !propertyName.equals("childRemoved")) {
+            addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
+            addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
         }
 
-        return modelElement.getModelType();
+        XEvent xEvent = xFactory.createEvent(attributes);
+        xTrace.add(xEvent);
     }
 
-    private static String extractModelName(IModelElement modelElement) {
-        return modelElement.getName() != null ? modelElement.getName() : "unknown";
-    }
-
-    private static String extractModelStereotype(IModelElement modelElement) {
-        if (modelElement instanceof IClass) {
-            IClass classElement = (IClass) modelElement;
-            return classElement.stereotypesCount() > 0
-                    ? classElement.toStereotypesArray()[0] + " "
-                    : "";
-        }
-        return null;
+    public static void createEvent(LogActivity logActivity, IProject project) {
+        createEvent(logActivity, project, null, null);
     }
 
     public static void createEvent(LogActivity logActivity, IDiagramUIModel diagramUIModel, String propertyName,
@@ -202,7 +224,8 @@ public class Logger {
         addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, diagramId);
         addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, diagramType);
         addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, diagramName);
-        if (propertyName != null && propertyValue != null) {
+        if (propertyName != null && propertyValue != null && !propertyName.equals("childAdded")
+                && !propertyName.equals("childRemoved")) {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
             addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
         }
@@ -227,13 +250,13 @@ public class Logger {
         String diagramType = diagramUIModel.getType();
         String diagramName = diagramUIModel.getName();
         String modelElementId = modelElement.getId();
-        String modelElementType = extractModelType(modelElement);
-        String modelElementName = extractModelName(modelElement);
-        String stereotype = extractModelStereotype(modelElement);
-        Placeholder typePlaceholder = new Placeholder("type", stereotype != null ? stereotype : modelElementType);
+        String modelElementType = LogExtractor.extractModelType(modelElement);
+        String modelElementName = LogExtractor.extractModelName(modelElement);
+        Placeholder typePlaceholder = new Placeholder("type", modelElementType);
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
+        Placeholder childTypePlaceholder = new Placeholder("childType", propertyValue);
         String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
-                propertyNamePlaceholder);
+                propertyNamePlaceholder, childTypePlaceholder);
         String activityInstance = String.join(" - ", activityName, activityId);
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
@@ -246,27 +269,13 @@ public class Logger {
         addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, modelElementId);
         addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, modelElementType);
         addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, modelElementName);
-        if (propertyName != null && propertyValue != null) {
+        if (propertyName != null && propertyValue != null && !propertyName.equals("childAdded")
+                && !propertyName.equals("childRemoved")) {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
             addAttribute(attributes, LogAttribute.PROPERTY_VALUE, propertyValue);
         }
-        if (modelElement instanceof IOperation) {
-            addAttribute(attributes, LogAttribute.PARAMETERS,
-                    Arrays.toString(
-                            Arrays.stream(((IOperation) modelElement).toParameterArray()).map(IModelElement::getId)
-                                    .toArray(String[]::new)));
-        }
-        if (modelElement instanceof IRelationship) {
-            IRelationship relationship = (IRelationship) modelElement;
-            String relationshipFromEnd = relationship instanceof IAssociation
-                    ? ((IAssociation) relationship).getFromEnd().getModelElement().getId()
-                    : relationship.getFrom().getId();
-            String relationshipToEnd = relationship instanceof IAssociation
-                    ? ((IAssociation) relationship).getToEnd().getModelElement().getId()
-                    : relationship.getTo().getId();
-            addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
-            addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
-        }
+
+        addExtraAttributes(attributes, modelElement);
 
         XEvent xEvent = xFactory.createEvent(attributes);
         xTrace.add(xEvent);
@@ -276,13 +285,36 @@ public class Logger {
         createEvent(activity, modelElement, null, null);
     }
 
+    private static String getLogName() {
+        return Application.getProject().getId() + EXTENSION;
+    }
+
+    public static void loadLog() {
+        try {
+            String logName = getLogName();
+            System.out.println("Parse log " + logName);
+            Path logPath = logDirectory.resolve(logName);
+
+            if (Files.isReadable(logPath))
+                xLog = xesXmlParser.parse(logPath.toFile()).get(0);
+            else
+                createLog();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void saveLog() {
         try {
-            String logName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss"))
-                    + ".xes";
+            String logName = getLogName();
+            System.out.println("Save log " + logName);
             Path logPath = logDirectory.resolve(logName);
-            File logFile = Files.createFile(logPath).toFile();
-            OutputStream logOutputStream = new FileOutputStream(logFile);
+
+            OutputStream logOutputStream = new FileOutputStream(
+                    Files.isWritable(logPath) ? logPath.toFile() : Files.createFile(logPath).toFile());
+
             xLog.removeIf(Collection::isEmpty);
             xesXmlSerializer.serialize(xLog, logOutputStream);
         } catch (IOException e) {

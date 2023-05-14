@@ -14,6 +14,7 @@ public class Application {
     public static final String PLUGIN_ID = "mining.plugin";
     private static final ApplicationManager manager = ApplicationManager.instance();
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private static final long DEFAULT_DELAY = 100;
 
     private Application() {
         // Empty
@@ -41,5 +42,9 @@ public class Application {
 
     public static void runDelayed(Runnable runnable, long delay) {
         executor.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+    }
+
+    public static void runDelayed(Runnable runnable) {
+        executor.schedule(runnable, DEFAULT_DELAY, TimeUnit.MILLISECONDS);
     }
 }

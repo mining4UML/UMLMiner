@@ -45,6 +45,8 @@ enum LogAttribute {
     UML_ELEMENT_NAME("UMLElementName", Type.LITERAL, "UML Element Name", true),
     PROPERTY_NAME("PropertyName", Type.LITERAL, "Property Name"),
     PROPERTY_VALUE("PropertyValue", Type.LITERAL, "Property Value"),
+    /* Extra event attributes */
+    UML_ELEMENT_CHILDREN("UMLElementChildren", Type.LITERAL, "UML Element Children"),
     PARAMETERS("Parameters", Type.LITERAL, "Parameters"),
     RELATIONSHIP_FROM_END("RelationshipFromEnd", Type.LITERAL, "Relationship From End"),
     RELATIONSHIP_TO_END("RelationshipToEnd", Type.LITERAL, "Relationship To End");

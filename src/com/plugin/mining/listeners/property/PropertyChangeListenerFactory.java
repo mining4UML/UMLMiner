@@ -25,21 +25,6 @@ public class PropertyChangeListenerFactory {
 		// Empty
 	}
 
-	public static String extractStringValue(Object value) {
-		if (value instanceof IModelElement)
-			return ((IModelElement) value).getId();
-		if (value instanceof IModelElement[])
-			return Arrays.toString(Arrays.stream(((IModelElement[]) value)).map(IModelElement::getName)
-					.toArray(String[]::new));
-		if (value instanceof Number)
-			return ((Number) value).toString();
-		if (value instanceof Boolean)
-			return ((Boolean) value).toString();
-		if (value instanceof Object[])
-			return Arrays.toString((Object[]) value);
-		return (String) value;
-	}
-
 	public static java.beans.PropertyChangeListener getInstance(IModelElement modelElement) {
 		if (modelElement instanceof IClass)
 			return new ClassPropertyChangeListener();

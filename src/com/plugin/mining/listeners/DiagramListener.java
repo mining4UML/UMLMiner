@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.plugin.mining.listeners.property.PropertyChangeListenerFactory;
 import com.plugin.mining.logging.LogActivity;
+import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.LogActivity.ActionType;
 import com.plugin.mining.logging.Logger;
 import com.plugin.mining.util.Application;
@@ -19,8 +20,14 @@ public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);
 	private final Set<IModelElement> modelElements = new HashSet<>();
 
-	public DiagramListener() {
-		// Empty
+	public DiagramListener(IDiagramUIModel diagramUIModel) {
+		IDiagramElement[] diagramElements = diagramUIModel.toDiagramElementArray();
+		for (IDiagramElement diagramElement : diagramElements) {
+			IModelElement modelElement = diagramElement.getModelElement();
+			modelElements.add(modelElement);
+			DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
+			diagramElement.addDiagramElementListener(diagramElementListener);
+		}
 	}
 
 	@Override
@@ -33,9 +40,8 @@ public class DiagramListener implements IDiagramListener {
 				: LogActivity.getInstance(ActionType.ADD, modelElement.getModelType());
 		Application.runDelayed(() -> {
 			Logger.createEvent(logActivity, modelElement);
-			DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
-			diagramElement.addDiagramElementListener(diagramElementListener);
-		}, 100);
+			diagramElement.addDiagramElementListener(new DiagramElementListener(modelElement));
+		});
 
 	}
 
@@ -60,14 +66,6 @@ public class DiagramListener implements IDiagramListener {
 	@Override
 	public void diagramUIModelLoaded(IDiagramUIModel diagramUIModel) {
 		logger.info("%s \"%s\" loaded", diagramUIModel.getType(), diagramUIModel.getName());
-
-		IDiagramElement[] diagramElements = diagramUIModel.toDiagramElementArray();
-		for (IDiagramElement diagramElement : diagramElements) {
-			IModelElement modelElement = diagramElement.getModelElement();
-			modelElements.add(modelElement);
-			DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
-			diagramElement.addDiagramElementListener(diagramElementListener);
-		}
 	}
 
 	@Override
@@ -81,7 +79,7 @@ public class DiagramListener implements IDiagramListener {
 		if (!(propertyName.equals("name")))
 			return;
 
-		String propertyValue = PropertyChangeListenerFactory.extractStringValue(newValue);
+		String propertyValue = LogExtractor.extractStringValue(newValue);
 		logger.info("%s \"%s\" %s property changed to \"%s\"", diagramUIModel.getType(), diagramUIModel.getName(),
 				propertyName, propertyValue);
 		Logger.createEvent(LogActivity.UPDATE_DIAGRAM, diagramUIModel, propertyName, propertyValue);

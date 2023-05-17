@@ -17,9 +17,10 @@ import com.vp.plugin.model.IModelElement;
 abstract class AbstractPropertyChangeListener<T extends IModelElement> implements PropertyChangeListener<T> {
 	private static final Logger logger = new Logger(AbstractPropertyChangeListener.class);
 	private static final Set<String> excludedProperties = new HashSet<>(
-			Arrays.asList("lastModified", "pmLastModified", "reorderChild", "modelViewRemoved", "masterViewId",
+			Arrays.asList("lastModified", "pmLastModified", "reorderChild", "modelViewAdded", "modelViewRemoved",
+					"masterViewId",
 					"willDelete",
-					"deleted", "willParentChange", "parentChanged", "fromRelationshipAdded",
+					"deleted", "undeleted", "willParentChange", "parentChanged", "fromRelationshipAdded",
 					"toRelationshipAdded",
 					"fromRelationshipRemoved", "toRelationshipRemoved",
 					"fromRelationshipEndAdded",

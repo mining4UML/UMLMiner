@@ -19,9 +19,12 @@ public class DiagramElementListener implements IDiagramElementListener {
     private IModelElement modelElement;
     private String modelElementPreviousName;
 
-    public DiagramElementListener(IModelElement modelElement) {
-        this.modelElement = modelElement;
+    public DiagramElementListener(IDiagramElement diagramElement) {
+        this.modelElement = diagramElement.getModelElement();
         modelElementPreviousName = modelElement.getName();
+
+        if (!diagramElement.isMasterView())
+            return;
 
         modelElement.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(modelElement));
 

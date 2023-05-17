@@ -1,6 +1,5 @@
 package com.plugin.mining.logging;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -24,12 +22,14 @@ import org.deckfour.xes.factory.XFactoryBufferedImpl;
 import org.deckfour.xes.id.XIDFactory;
 import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.model.XAttribute;
+import org.deckfour.xes.model.XAttributeLiteral;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.out.XesXmlSerializer;
 
+import com.plugin.mining.logging.LogActivity.ModelType;
 import com.plugin.mining.logging.extensions.XIdentityExtension;
 import com.plugin.mining.util.Application;
 import com.plugin.mining.util.StringPlaceholders;
@@ -38,8 +38,6 @@ import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IAssociation;
-import com.vp.plugin.model.IAssociationEnd;
-import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 import com.vp.plugin.model.IPackage;
@@ -90,14 +88,27 @@ public class Logger {
         }
         if (modelElement instanceof IRelationship) {
             IRelationship relationship = (IRelationship) modelElement;
-            String relationshipFromEnd = relationship instanceof IAssociation
-                    ? ((IAssociation) relationship).getFromEnd().getModelElement().getId()
-                    : relationship.getFrom().getId();
-            String relationshipToEnd = relationship instanceof IAssociation
-                    ? ((IAssociation) relationship).getToEnd().getModelElement().getId()
-                    : relationship.getTo().getId();
-            addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
-            addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
+
+            if (relationship instanceof IAssociation) {
+                IAssociation association = (IAssociation) relationship;
+                String relationshipFromEnd = association.getFromEnd().getModelElement() != null
+                        ? association.getFromEnd().getModelElement().getId()
+                        : LogExtractor.DEFAULT_VALUE;
+                String relationshipToEnd = association.getToEnd().getModelElement() != null
+                        ? association.getToEnd().getModelElement().getId()
+                        : LogExtractor.DEFAULT_VALUE;
+
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
+            } else {
+                String relationshipFromEnd = relationship.getFrom() != null ? relationship.getFrom().getId()
+                        : LogExtractor.DEFAULT_VALUE;
+                String relationshipToEnd = relationship.getTo() != null ? relationship.getTo().getId()
+                        : LogExtractor.DEFAULT_VALUE;
+
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
+            }
         }
         if (modelElement instanceof IPackage) {
             addAttribute(attributes, LogAttribute.UML_ELEMENT_CHILDREN,
@@ -151,7 +162,6 @@ public class Logger {
         addAttribute(attributes, LogAttribute.CASE_TIMESTAMP, timestamp);
         addAttribute(attributes, LogAttribute.AUTHOR_NAME, authorName);
         addAttribute(attributes, LogAttribute.PROJECT_NAME, projectName);
-        System.out.println(project.getId());
 
         xTrace = xFactory.createTrace(attributes);
         xLog.add(xTrace);
@@ -165,9 +175,9 @@ public class Logger {
         long timestamp = Instant.now().toEpochMilli();
         IDiagramUIModel diagram = Application.getDiagram();
         String activityId = xIdFactory.createId().toString();
-        String diagramId = LogExtractor.getOrDefault(diagram.getId());
-        String diagramType = LogExtractor.getOrDefault(diagram.getType());
-        String diagramName = LogExtractor.getOrDefault(diagram.getName());
+        String diagramId = diagram != null ? diagram.getId() : LogExtractor.DEFAULT_VALUE;
+        String diagramType = diagram != null ? diagram.getType() : LogExtractor.DEFAULT_VALUE;
+        String diagramName = diagram != null ? diagram.getName() : LogExtractor.DEFAULT_VALUE;
         Placeholder typePlaceholder = new Placeholder("type", diagramType);
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
         String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
@@ -238,10 +248,11 @@ public class Logger {
         createEvent(logActivity, diagramUIModel, null, null);
     }
 
-    public static void createEvent(LogActivity logActivity, IModelElement modelElement, String propertyName,
-            String propertyValue) {
+    public static void createEvent(LogActivity logActivity, IModelElement modelElement, ModelType sourceType,
+            String propertyName, String propertyValue) {
         System.out.println(
-                String.format("%s %s %s %s", logActivity.toString(), modelElement.getName(), propertyName,
+                String.format("%s %s %s %s %s", logActivity.toString(), modelElement.getName(), sourceType.getName(),
+                        propertyName,
                         propertyValue));
         long timestamp = Instant.now().toEpochMilli();
         String activityId = xIdFactory.createId().toString();
@@ -253,10 +264,11 @@ public class Logger {
         String modelElementType = LogExtractor.extractModelType(modelElement);
         String modelElementName = LogExtractor.extractModelName(modelElement);
         Placeholder typePlaceholder = new Placeholder("type", modelElementType);
+        Placeholder sourceTypePlaceholder = new Placeholder("sourceType", sourceType.getName());
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
         Placeholder childTypePlaceholder = new Placeholder("childType", propertyValue);
         String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
-                propertyNamePlaceholder, childTypePlaceholder);
+                sourceTypePlaceholder, propertyNamePlaceholder, childTypePlaceholder);
         String activityInstance = String.join(" - ", activityName, activityId);
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
@@ -281,8 +293,17 @@ public class Logger {
         xTrace.add(xEvent);
     }
 
-    public static void createEvent(LogActivity activity, IModelElement modelElement) {
-        createEvent(activity, modelElement, null, null);
+    public static void createEvent(LogActivity logActivity, IModelElement modelElement, String propertyName,
+            String propertyValue) {
+        createEvent(logActivity, modelElement, ModelType.DIAGRAM, propertyName, propertyValue);
+    }
+
+    public static void createEvent(LogActivity logActivity, IModelElement modelElement, ModelType sourceType) {
+        createEvent(logActivity, modelElement, sourceType, null, null);
+    }
+
+    public static void createEvent(LogActivity logActivity, IModelElement modelElement) {
+        createEvent(logActivity, modelElement, ModelType.DIAGRAM);
     }
 
     private static String getLogName() {
@@ -320,6 +341,18 @@ public class Logger {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean hasDiagram(IDiagramUIModel diagramUIModel) {
+        for (XTrace xTrace : xLog) {
+            for (XEvent xEvent : xTrace) {
+                XAttributeLiteral diagramIdAttribute = (XAttributeLiteral) xEvent.getAttributes()
+                        .get(LogAttribute.DIAGRAM_ID.getKey());
+                if (diagramIdAttribute != null && diagramUIModel.getId().equals(diagramIdAttribute.getValue()))
+                    return true;
+            }
+        }
+        return false;
     }
 
     private final Class<?> classId;

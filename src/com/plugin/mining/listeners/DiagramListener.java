@@ -1,66 +1,69 @@
 package com.plugin.mining.listeners;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import com.plugin.mining.listeners.property.PropertyChangeListenerFactory;
 import com.plugin.mining.logging.LogActivity;
-import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.LogActivity.ActionType;
+import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.Logger;
 import com.plugin.mining.util.Application;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IModelElement;
-import com.vp.plugin.model.IRelationship;
 
 public class DiagramListener implements IDiagramListener {
 	private static final Logger logger = new Logger(DiagramListener.class);
-	private final Set<IModelElement> modelElements = new HashSet<>();
+	private final Map<String, IModelElement> modelElements = new HashMap<>();
+	private IDiagramUIModel diagramUIModel;
 
 	public DiagramListener(IDiagramUIModel diagramUIModel) {
+		this.diagramUIModel = diagramUIModel;
 		IDiagramElement[] diagramElements = diagramUIModel.toDiagramElementArray();
 		for (IDiagramElement diagramElement : diagramElements) {
+			String diagramElementId = diagramElement.getId();
 			IModelElement modelElement = diagramElement.getModelElement();
-			modelElements.add(modelElement);
-			DiagramElementListener diagramElementListener = new DiagramElementListener(modelElement);
-			diagramElement.addDiagramElementListener(diagramElementListener);
+			modelElements.put(diagramElementId, modelElement);
+			diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
 		}
+	}
+
+	public IDiagramUIModel getDiagramUIModel() {
+		return diagramUIModel;
 	}
 
 	@Override
 	public void diagramElementAdded(IDiagramUIModel diagramUIModel, IDiagramElement diagramElement) {
+		String diagramElementId = diagramElement.getId();
 		IModelElement modelElement = diagramElement.getModelElement();
-		modelElements.add(modelElement);
+
+		if (modelElements.put(diagramElementId, modelElement) != null)
+			return;
 
 		logger.info("%s element added to the diagram", modelElement.getModelType());
-		LogActivity logActivity = modelElement instanceof IRelationship ? LogActivity.ADD_RELATIONSHIP
-				: LogActivity.getInstance(ActionType.ADD, modelElement.getModelType());
+		LogActivity logActivity = LogExtractor.extractLogActivity(ActionType.ADD, modelElement);
 		Application.runDelayed(() -> {
 			Logger.createEvent(logActivity, modelElement);
-			diagramElement.addDiagramElementListener(new DiagramElementListener(modelElement));
+			diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
 		});
 
 	}
 
 	@Override
 	public void diagramElementRemoved(IDiagramUIModel diagramUIModel, IDiagramElement diagramElement) {
-		IDiagramElement[] diagramElements = diagramUIModel.toDiagramElementArray();
-		IModelElement modelElementRemoved = modelElements.stream()
-				.filter(modelElement -> Arrays.stream(diagramElements)
-						.noneMatch(t -> t.getModelElement().equals(modelElement)))
-				.findFirst().orElse(null);
+		String diagramElementId = diagramElement.getId();
+		IModelElement modelElementRemoved = modelElements.get(diagramElementId);
 
 		if (modelElementRemoved == null)
 			return;
 
 		logger.info("%s element removed from the diagram", modelElementRemoved.getModelType());
-		LogActivity logActivity = modelElementRemoved instanceof IRelationship ? LogActivity.REMOVE_RELATIONSHIP
-				: LogActivity.getInstance(ActionType.REMOVE, modelElementRemoved.getModelType());
+		LogActivity logActivity = LogExtractor.extractLogActivity(ActionType.REMOVE, modelElementRemoved);
 		Logger.createEvent(logActivity, modelElementRemoved);
-		modelElements.remove(modelElementRemoved);
+		modelElements.remove(diagramElementId);
 	}
 
 	@Override

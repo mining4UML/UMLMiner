@@ -2,18 +2,21 @@ package com.plugin.mining.logging;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
 
+import com.plugin.mining.logging.LogActivity.ActionType;
+import com.plugin.mining.logging.LogActivity.ModelType;
+import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IHasChildrenBaseModelElement;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
+import com.vp.plugin.model.IRelationship;
 
 public class LogExtractor {
 
-    private static final String DEFAULT_VALUE = "unknown";
+    public static final String DEFAULT_VALUE = "unknown";
     private static final HashMap<IHasChildrenBaseModelElement, IModelElement> modelElementsParent = new HashMap<>();
 
     private LogExtractor() {
@@ -28,8 +31,8 @@ public class LogExtractor {
         return modelElementsParent.get(childElement);
     }
 
-    public static Object getOrDefault(Object value) {
-        return value != null ? value : DEFAULT_VALUE;
+    public static <T> T getOrDefault(T value, T fallbackValue) {
+        return value != null ? value : fallbackValue;
     }
 
     public static String getOrDefault(String value) {
@@ -108,6 +111,19 @@ public class LogExtractor {
     }
 
     public static String extractModelName(IModelElement modelElement) {
-        return modelElement.getName() != null ? modelElement.getName() : DEFAULT_VALUE;
+        return getOrDefault(modelElement.getName(), DEFAULT_VALUE);
+    }
+
+    public static LogActivity extractLogActivity(ActionType actionType, IModelElement modelElement) {
+        IDiagramElement[] diagramElements = modelElement.getDiagramElements();
+        System.out.println(Arrays.toString(diagramElements));
+        if ((actionType == ActionType.ADD && diagramElements.length > 1)
+                || (actionType == ActionType.REMOVE && diagramElements.length > 0))
+            return LogActivity.getInstance(actionType, ModelType.VIEW.getName());
+
+        if (modelElement instanceof IRelationship)
+            return LogActivity.getInstance(actionType, ModelType.RELATIONSHIP.getName());
+
+        return LogActivity.getInstance(actionType, modelElement.getModelType());
     }
 }

@@ -1,7 +1,9 @@
 package com.plugin.mining.logging;
 
 public enum LogActivity {
+    ADD_PROJECT("Project opened", ActionType.ADD, ModelType.PROJECT),
     ADD_DIAGRAM(ActionType.ADD, ModelType.DIAGRAM),
+    ADD_VIEW("View added to {{type}}", ActionType.ADD, ModelType.VIEW),
     ADD_CLASS(ActionType.ADD, ModelType.CLASS),
     ADD_ATTRIBUTE(ActionType.ADD, ModelType.ATTRIBUTE),
     ADD_OPERATION(ActionType.ADD, ModelType.OPERATION),
@@ -22,7 +24,9 @@ public enum LogActivity {
     UPDATE_RELATIONSHIP(ActionType.UPDATE, ModelType.RELATIONSHIP),
     UPDATE_PACKAGE(ActionType.UPDATE, ModelType.PACKAGE),
     UPDATE_USE_CASE(ActionType.UPDATE, ModelType.USE_CASE),
+    REMOVE_PROJECT(ActionType.REMOVE, ModelType.PROJECT),
     REMOVE_DIAGRAM(ActionType.REMOVE, ModelType.DIAGRAM),
+    REMOVE_VIEW("View removed from {{type}}", ActionType.REMOVE, ModelType.VIEW),
     REMOVE_CLASS(ActionType.REMOVE, ModelType.CLASS),
     REMOVE_ATTRIBUTE(ActionType.REMOVE, ModelType.ATTRIBUTE),
     REMOVE_OPERATION(ActionType.REMOVE, ModelType.OPERATION),
@@ -36,7 +40,7 @@ public enum LogActivity {
     public enum ActionType {
         ADD("{{type}} added"),
         UPDATE("{{propertyName}} property updated for {{type}}"),
-        REMOVE("{{type}} removed");
+        REMOVE("{{type}} removed from {{sourceType}}");
 
         private String name;
 
@@ -53,6 +57,7 @@ public enum LogActivity {
     public enum ModelType {
         PROJECT("Project"),
         DIAGRAM("Diagram"),
+        VIEW("View"),
         CLASS("Class"),
         ATTRIBUTE("Attribute"),
         OPERATION("Operation"),
@@ -75,7 +80,7 @@ public enum LogActivity {
 
     public static LogActivity getInstance(ActionType actionType, String modelTypeName) {
         for (LogActivity logActivity : LogActivity.values()) {
-            if (logActivity.actionType.equals(actionType) && logActivity.modelType.getName().equals(modelTypeName))
+            if (logActivity.actionType.equals(actionType) && logActivity.modelType.name.equals(modelTypeName))
                 return logActivity;
         }
         throw new UnsupportedOperationException("LogActivity not found");
@@ -105,10 +110,6 @@ public enum LogActivity {
 
     public ModelType getModelType() {
         return modelType;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
 }

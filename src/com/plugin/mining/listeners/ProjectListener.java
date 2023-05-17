@@ -7,6 +7,7 @@ import com.vp.plugin.model.IProjectListener;
 
 public class ProjectListener implements IProjectListener {
 	private static final Logger logger = new Logger(ProjectListener.class);
+	private static final ProjectModelListener projectModelListener = new ProjectModelListener();
 	private static final ProjectDiagramListener projectDiagramListener = new ProjectDiagramListener();
 
 	public ProjectListener(IProject project) {
@@ -15,6 +16,7 @@ public class ProjectListener implements IProjectListener {
 			logger.info("Temp project \"%s\" opened", project.getName());
 			Logger.loadLog();
 			Logger.createTrace(project);
+			project.addProjectModelListener(projectModelListener);
 			project.addProjectDiagramListener(projectDiagramListener);
 		}
 	}
@@ -29,6 +31,7 @@ public class ProjectListener implements IProjectListener {
 		logger.info("New project \"%s\" created", project.getName());
 		Logger.loadLog();
 		Logger.createTrace(project);
+		project.addProjectModelListener(projectModelListener);
 		project.addProjectDiagramListener(projectDiagramListener);
 	}
 
@@ -37,6 +40,8 @@ public class ProjectListener implements IProjectListener {
 		logger.info("Project \"%s\" opened", project.getName());
 		Logger.loadLog();
 		Logger.createTrace(project);
+		Logger.createEvent(LogActivity.ADD_PROJECT, project);
+		project.addProjectModelListener(projectModelListener);
 		project.addProjectDiagramListener(projectDiagramListener);
 	}
 

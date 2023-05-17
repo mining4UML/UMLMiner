@@ -20,7 +20,8 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 				diagramUIModel.getName()));
 
 		Application.runDelayed(() -> {
-			Logger.createEvent(LogActivity.ADD_DIAGRAM, diagramUIModel);
+			if (!Logger.hasDiagram(diagramUIModel))
+				Logger.createEvent(LogActivity.ADD_DIAGRAM, diagramUIModel);
 			diagramUIModel.addDiagramListener(new DiagramListener(diagramUIModel));
 		});
 	}
@@ -29,6 +30,7 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 	public void diagramRemoved(IProject project, IDiagramUIModel diagramUIModel) {
 		logger.info(String.format("%s \"%s\" removed", diagramUIModel.getType(),
 				diagramUIModel.getName()));
+
 		Logger.createEvent(LogActivity.REMOVE_DIAGRAM, diagramUIModel);
 	}
 

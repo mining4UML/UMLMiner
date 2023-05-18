@@ -17,13 +17,33 @@
 				ribbonPath="Help"
 			/>
 			<action
+				id="Discovery"
+				actionType="generalAction"
+				label="%actions.Discovery.label"
+				tooltip="%actions.Discovery.label"
+				icon="icons/lightbulb.png"
+				style="normal"
+				ribbonPath="Toolbar/#">
+				<actionController class="com.plugin.mining.actions.DiscoveryController" />
+			</action>
+			<action
+				id="ConformanceChecking"
+				actionType="generalAction"
+				label="%actions.ConformanceChecking.label"
+				tooltip="%actions.ConformanceChecking.label"
+				icon="icons/test.png"
+				style="normal"
+				ribbonPath="Toolbar/Discovery">
+				<actionController class="com.plugin.mining.actions.ConformanceCheckingController" />
+			</action>
+			<action
 				id="ExportLogs"
 				actionType="generalAction"
 				label="%actions.ExportLogs.label"
 				tooltip="%actions.ExportLogs.label"
-				icon="icons/exportLogs.png"
+				icon="icons/book.png"
 				style="normal"
-				ribbonPath="Toolbar/#">
+				ribbonPath="Toolbar/ConformanceChecking">
 				<actionController class="com.plugin.mining.actions.ExportLogsController" />
 			</action>
 			<separator
@@ -34,7 +54,7 @@
 				actionType="generalAction"
 				label="%actions.ReloadPlugin.label"
 				tooltip="%actions.ReloadPlugin.label"
-				icon="icons/reloadPlugin.png"
+				icon="icons/reload.png"
 				style="normal"
 				ribbonPath="Toolbar/Separator1">
 				<actionController class="com.plugin.mining.actions.ReloadPluginActionController" />

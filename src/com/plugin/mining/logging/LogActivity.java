@@ -38,7 +38,7 @@ public enum LogActivity {
     REMOVE_USE_CASE(ActionType.REMOVE, ModelType.USE_CASE);
 
     public enum ActionType {
-        ADD("{{type}} added"),
+        ADD("{{type}} added to {{sourceType}}"),
         UPDATE("{{propertyName}} property updated for {{type}}"),
         REMOVE("{{type}} removed from {{sourceType}}");
 

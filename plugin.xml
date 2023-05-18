@@ -10,15 +10,28 @@
 	</runtime>
 
 	<actionSets>
-		<actionSet id="%plugin.actions.id">
+		<actionSet id="%actions.id">
 			<action
-				id="%plugin.actions.ReloadPlugin.id"
+				id="%actions.ExportLogs.id"
 				actionType="generalAction"
-				label="%plugin.actions.ReloadPlugin.label"
-				tooltip="%plugin.actions.ReloadPlugin.label"
+				label="%actions.ExportLogs.label"
+				tooltip="%actions.ExportLogs.label"
+				icon="icons/exportLogs.png"
+				style="normal"
+				ribbonPath="Help">
+				<actionController class="com.plugin.mining.actions.ExportLogsController" />
+			</action>
+			<separator
+				id="%actions.separator.id"
+				ribbonPath="%actions.toolbar.id/%actions.ExportLogs.id" />
+			<action
+				id="%actions.ReloadPlugin.id"
+				actionType="generalAction"
+				label="%actions.ReloadPlugin.label"
+				tooltip="%actions.ReloadPlugin.label"
 				icon="icons/reloadPlugin.png"
 				style="normal"
-				ribbonPath="Help/InstallPlugin">
+				ribbonPath="%actions.toolbar.id/%actions.separator.id">
 				<actionController class="com.plugin.mining.actions.ReloadPluginActionController" />
 			</action>
 		</actionSet>

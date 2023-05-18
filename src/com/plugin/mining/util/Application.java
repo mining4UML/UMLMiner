@@ -11,7 +11,7 @@ import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
 
 public class Application {
-    public static final String PLUGIN_ID = "mining.plugin";
+    public static final String PLUGIN_ID = "UMLMiner";
     private static final ApplicationManager manager = ApplicationManager.instance();
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static final long DEFAULT_DELAY = 100;

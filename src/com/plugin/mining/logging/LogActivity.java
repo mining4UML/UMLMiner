@@ -2,7 +2,7 @@ package com.plugin.mining.logging;
 
 public enum LogActivity {
     ADD_PROJECT("Project opened", ActionType.ADD, ModelType.PROJECT),
-    ADD_DIAGRAM(ActionType.ADD, ModelType.DIAGRAM),
+    ADD_DIAGRAM("{{type}} added", ActionType.ADD, ModelType.DIAGRAM),
     ADD_VIEW("View added to {{type}}", ActionType.ADD, ModelType.VIEW),
     ADD_CLASS(ActionType.ADD, ModelType.CLASS),
     ADD_ATTRIBUTE(ActionType.ADD, ModelType.ATTRIBUTE),
@@ -25,7 +25,7 @@ public enum LogActivity {
     UPDATE_PACKAGE(ActionType.UPDATE, ModelType.PACKAGE),
     UPDATE_USE_CASE(ActionType.UPDATE, ModelType.USE_CASE),
     REMOVE_PROJECT(ActionType.REMOVE, ModelType.PROJECT),
-    REMOVE_DIAGRAM(ActionType.REMOVE, ModelType.DIAGRAM),
+    REMOVE_DIAGRAM("{{type}} removed", ActionType.REMOVE, ModelType.DIAGRAM),
     REMOVE_VIEW("View removed from {{type}}", ActionType.REMOVE, ModelType.VIEW),
     REMOVE_CLASS(ActionType.REMOVE, ModelType.CLASS),
     REMOVE_ATTRIBUTE(ActionType.REMOVE, ModelType.ATTRIBUTE),

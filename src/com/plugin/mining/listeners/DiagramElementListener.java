@@ -1,6 +1,7 @@
 package com.plugin.mining.listeners;
 
 import com.plugin.mining.listeners.property.PropertyChangeListenerFactory;
+import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.Logger;
 import com.vp.plugin.diagram.IConnectorUIModel;
 import com.vp.plugin.diagram.IDiagramElement;
@@ -23,18 +24,21 @@ public class DiagramElementListener implements IDiagramElementListener {
         this.modelElement = diagramElement.getModelElement();
         modelElementPreviousName = modelElement.getName();
 
-        if (!diagramElement.isMasterView())
+        if (PropertyChangeListenerFactory.getPropertyChangeListener(modelElement) != null)
             return;
 
         modelElement.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(modelElement));
 
         if (modelElement instanceof IClass) {
             IClass classElement = (IClass) modelElement;
-            for (IAttribute attribute : classElement.toAttributeArray())
+            for (IAttribute attribute : classElement.toAttributeArray()) {
+                LogExtractor.addDiagramUIModel(attribute, diagramElement.getDiagramUIModel());
                 attribute.addPropertyChangeListener(
                         PropertyChangeListenerFactory
                                 .getInstance(attribute));
+            }
             for (IOperation operation : classElement.toOperationArray()) {
+                LogExtractor.addDiagramUIModel(operation, diagramElement.getDiagramUIModel());
                 operation.addPropertyChangeListener(
                         PropertyChangeListenerFactory
                                 .getInstance(operation));

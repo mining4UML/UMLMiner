@@ -1,12 +1,14 @@
 package com.plugin.mining.listeners;
 
+import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
+import com.plugin.mining.listeners.property.PropertyChangeListenerFactory;
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.LogActivity.ActionType;
+import com.plugin.mining.logging.LogActivity.ModelType;
 import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.Logger;
 import com.plugin.mining.util.Application;
@@ -27,6 +29,7 @@ public class DiagramListener implements IDiagramListener {
 			String diagramElementId = diagramElement.getId();
 			IModelElement modelElement = diagramElement.getModelElement();
 			modelElements.put(diagramElementId, modelElement);
+			LogExtractor.addDiagramUIModel(modelElement, diagramUIModel);
 			diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
 		}
 	}
@@ -40,8 +43,8 @@ public class DiagramListener implements IDiagramListener {
 		String diagramElementId = diagramElement.getId();
 		IModelElement modelElement = diagramElement.getModelElement();
 
-		if (modelElements.put(diagramElementId, modelElement) != null)
-			return;
+		modelElements.put(diagramElementId, modelElement);
+		LogExtractor.addDiagramUIModel(modelElement, diagramUIModel);
 
 		logger.info("%s element added to the diagram", modelElement.getModelType());
 		LogActivity logActivity = LogExtractor.extractLogActivity(ActionType.ADD, modelElement);
@@ -62,6 +65,11 @@ public class DiagramListener implements IDiagramListener {
 
 		logger.info("%s element removed from the diagram", modelElementRemoved.getModelType());
 		LogActivity logActivity = LogExtractor.extractLogActivity(ActionType.REMOVE, modelElementRemoved);
+		if (logActivity.getModelType() != ModelType.VIEW) {
+			PropertyChangeListener propertyChangeListener = PropertyChangeListenerFactory
+					.getPropertyChangeListener(modelElementRemoved);
+			modelElementRemoved.removePropertyChangeListener(propertyChangeListener);
+		}
 		Logger.createEvent(logActivity, modelElementRemoved);
 		modelElements.remove(diagramElementId);
 	}

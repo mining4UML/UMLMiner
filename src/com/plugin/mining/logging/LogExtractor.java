@@ -2,10 +2,12 @@ package com.plugin.mining.logging;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.plugin.mining.logging.LogActivity.ActionType;
 import com.plugin.mining.logging.LogActivity.ModelType;
 import com.vp.plugin.diagram.IDiagramElement;
+import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IClass;
@@ -17,18 +19,11 @@ import com.vp.plugin.model.IRelationship;
 public class LogExtractor {
 
     public static final String DEFAULT_VALUE = "unknown";
-    private static final HashMap<IHasChildrenBaseModelElement, IModelElement> modelElementsParent = new HashMap<>();
+    private static final Map<String, IDiagramUIModel> diagramUIModels = new HashMap<>();
+    private static final Map<String, IModelElement> modelElementParents = new HashMap<>();
 
     private LogExtractor() {
         // Empty
-    }
-
-    public static void addModelElementParent(IHasChildrenBaseModelElement childElement, IModelElement modelElement) {
-        modelElementsParent.put(childElement, modelElement);
-    }
-
-    public static IModelElement getModelElementParent(IHasChildrenBaseModelElement childElement) {
-        return modelElementsParent.get(childElement);
     }
 
     public static <T> T getOrDefault(T value, T fallbackValue) {
@@ -37,6 +32,22 @@ public class LogExtractor {
 
     public static String getOrDefault(String value) {
         return value != null ? value : DEFAULT_VALUE;
+    }
+
+    public static void addModelElementParent(IHasChildrenBaseModelElement childElement, IModelElement modelElement) {
+        modelElementParents.put(childElement.getId(), modelElement);
+    }
+
+    public static IModelElement getModelElementParent(IHasChildrenBaseModelElement childElement) {
+        return modelElementParents.get(childElement.getId());
+    }
+
+    public static void addDiagramUIModel(IModelElement modelElement, IDiagramUIModel diagramUIModel) {
+        diagramUIModels.put(modelElement.getId(), diagramUIModel);
+    }
+
+    public static IDiagramUIModel getDiagramUIModel(IModelElement modelElement) {
+        return diagramUIModels.get(modelElement.getId());
     }
 
     public static String extractStringValue(Object value) {
@@ -110,13 +121,19 @@ public class LogExtractor {
         return modelElement.getModelType();
     }
 
+    public static String extractSourceType(ModelType sourceModelType, IDiagramUIModel diagramUIModel) {
+        if (sourceModelType == ModelType.DIAGRAM)
+            return diagramUIModel.getType();
+
+        return sourceModelType.getName();
+    }
+
     public static String extractModelName(IModelElement modelElement) {
         return getOrDefault(modelElement.getName(), DEFAULT_VALUE);
     }
 
     public static LogActivity extractLogActivity(ActionType actionType, IModelElement modelElement) {
         IDiagramElement[] diagramElements = modelElement.getDiagramElements();
-        System.out.println(Arrays.toString(diagramElements));
         if ((actionType == ActionType.ADD && diagramElements.length > 1)
                 || (actionType == ActionType.REMOVE && diagramElements.length > 0))
             return LogActivity.getInstance(actionType, ModelType.VIEW.getName());

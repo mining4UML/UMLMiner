@@ -248,23 +248,25 @@ public class Logger {
         createEvent(logActivity, diagramUIModel, null, null);
     }
 
-    public static void createEvent(LogActivity logActivity, IModelElement modelElement, ModelType sourceType,
+    public static void createEvent(LogActivity logActivity, IModelElement modelElement, ModelType sourceModelType,
             String propertyName, String propertyValue) {
         System.out.println(
-                String.format("%s %s %s %s %s", logActivity.toString(), modelElement.getName(), sourceType.getName(),
+                String.format("%s %s %s %s %s", logActivity.toString(), modelElement.getName(),
+                        sourceModelType.getName(),
                         propertyName,
                         propertyValue));
         long timestamp = Instant.now().toEpochMilli();
         String activityId = xIdFactory.createId().toString();
-        IDiagramUIModel diagramUIModel = Application.getDiagram();
+        IDiagramUIModel diagramUIModel = LogExtractor.getDiagramUIModel(modelElement);
         String diagramId = diagramUIModel.getId();
         String diagramType = diagramUIModel.getType();
         String diagramName = diagramUIModel.getName();
         String modelElementId = modelElement.getId();
         String modelElementType = LogExtractor.extractModelType(modelElement);
         String modelElementName = LogExtractor.extractModelName(modelElement);
+        String sourceType = LogExtractor.extractSourceType(sourceModelType, diagramUIModel);
         Placeholder typePlaceholder = new Placeholder("type", modelElementType);
-        Placeholder sourceTypePlaceholder = new Placeholder("sourceType", sourceType.getName());
+        Placeholder sourceTypePlaceholder = new Placeholder("sourceType", sourceType);
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
         Placeholder childTypePlaceholder = new Placeholder("childType", propertyValue);
         String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
@@ -298,8 +300,8 @@ public class Logger {
         createEvent(logActivity, modelElement, ModelType.DIAGRAM, propertyName, propertyValue);
     }
 
-    public static void createEvent(LogActivity logActivity, IModelElement modelElement, ModelType sourceType) {
-        createEvent(logActivity, modelElement, sourceType, null, null);
+    public static void createEvent(LogActivity logActivity, IModelElement modelElement, ModelType sourceModelType) {
+        createEvent(logActivity, modelElement, sourceModelType, null, null);
     }
 
     public static void createEvent(LogActivity logActivity, IModelElement modelElement) {

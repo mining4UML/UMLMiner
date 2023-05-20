@@ -24,7 +24,7 @@
 				icon="icons/lightbulb.png"
 				style="normal"
 				ribbonPath="Toolbar/#">
-				<actionController class="com.plugin.mining.actions.DiscoveryController" />
+				<actionController class="com.plugin.mining.actions.DiscoveryActionController" />
 			</action>
 			<action
 				id="ConformanceChecking"
@@ -34,7 +34,8 @@
 				icon="icons/test.png"
 				style="normal"
 				ribbonPath="Toolbar/Discovery">
-				<actionController class="com.plugin.mining.actions.ConformanceCheckingController" />
+				<actionController
+					class="com.plugin.mining.actions.ConformanceCheckingActionController" />
 			</action>
 			<action
 				id="ExportLogs"
@@ -44,7 +45,7 @@
 				icon="icons/book.png"
 				style="normal"
 				ribbonPath="Toolbar/ConformanceChecking">
-				<actionController class="com.plugin.mining.actions.ExportLogsController" />
+				<actionController class="com.plugin.mining.actions.ExportLogsActionController" />
 			</action>
 			<separator
 				id="Separator1"

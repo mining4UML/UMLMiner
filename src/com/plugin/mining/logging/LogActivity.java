@@ -28,7 +28,7 @@ public enum LogActivity {
     UPDATE_RELATIONSHIP(ActionType.UPDATE, ModelType.RELATIONSHIP),
     UPDATE_PACKAGE(ActionType.UPDATE, ModelType.PACKAGE),
     UPDATE_USE_CASE(ActionType.UPDATE, ModelType.USE_CASE),
-    REMOVE_PROJECT(ActionType.REMOVE, ModelType.PROJECT),
+    REMOVE_PROJECT("Project removed", ActionType.REMOVE, ModelType.PROJECT),
     REMOVE_DIAGRAM("{{type}} removed", ActionType.REMOVE, ModelType.DIAGRAM),
     REMOVE_MODEL(ActionType.REMOVE, ModelType.MODEL),
     REMOVE_VIEW("View removed from {{type}}", ActionType.REMOVE, ModelType.VIEW),

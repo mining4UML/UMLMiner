@@ -16,8 +16,8 @@ public class ProjectListener implements IProjectListener {
 			logger.info("Temp project \"%s\" opened", project.getName());
 			Logger.loadLog();
 			Logger.createTrace(project);
-			project.addProjectModelListener(projectModelListener);
 			project.addProjectDiagramListener(projectDiagramListener);
+			project.addProjectModelListener(projectModelListener);
 		}
 	}
 
@@ -31,8 +31,8 @@ public class ProjectListener implements IProjectListener {
 		logger.info("New project \"%s\" created", project.getName());
 		Logger.loadLog();
 		Logger.createTrace(project);
-		project.addProjectModelListener(projectModelListener);
 		project.addProjectDiagramListener(projectDiagramListener);
+		project.addProjectModelListener(projectModelListener);
 	}
 
 	@Override
@@ -41,8 +41,8 @@ public class ProjectListener implements IProjectListener {
 		Logger.loadLog();
 		Logger.createTrace(project);
 		Logger.createEvent(LogActivity.ADD_PROJECT, project);
-		project.addProjectModelListener(projectModelListener);
 		project.addProjectDiagramListener(projectDiagramListener);
+		project.addProjectModelListener(projectModelListener);
 	}
 
 	@Override

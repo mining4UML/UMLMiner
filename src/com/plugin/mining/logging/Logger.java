@@ -178,7 +178,10 @@ public class Logger {
         String diagramId = diagram != null ? diagram.getId() : LogExtractor.DEFAULT_VALUE;
         String diagramType = diagram != null ? diagram.getType() : LogExtractor.DEFAULT_VALUE;
         String diagramName = diagram != null ? diagram.getName() : LogExtractor.DEFAULT_VALUE;
-        Placeholder typePlaceholder = new Placeholder("type", diagramType);
+        String projectId = project.getId();
+        String projectType = logActivity.getModelType().getName();
+        String projectName = project.getName();
+        Placeholder typePlaceholder = new Placeholder("type", projectType);
         Placeholder propertyNamePlaceholder = new Placeholder("propertyName", propertyName);
         String activityName = StringPlaceholders.setPlaceholders(logActivity.getName(), typePlaceholder,
                 propertyNamePlaceholder);
@@ -191,9 +194,9 @@ public class Logger {
         addAttribute(attributes, LogAttribute.DIAGRAM_ID, diagramId);
         addAttribute(attributes, LogAttribute.DIAGRAM_TYPE, diagramType);
         addAttribute(attributes, LogAttribute.DIAGRAM_NAME, diagramName);
-        addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, project.getId());
-        addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, logActivity.getModelType());
-        addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, project.getName());
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, projectId);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, projectType);
+        addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, projectName);
         if (propertyName != null && propertyValue != null && !propertyName.equals("childAdded")
                 && !propertyName.equals("childRemoved")) {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);
@@ -258,9 +261,9 @@ public class Logger {
         long timestamp = Instant.now().toEpochMilli();
         String activityId = xIdFactory.createId().toString();
         IDiagramUIModel diagramUIModel = LogExtractor.getDiagramUIModel(modelElement);
-        String diagramId = diagramUIModel.getId();
-        String diagramType = diagramUIModel.getType();
-        String diagramName = diagramUIModel.getName();
+        String diagramId = diagramUIModel != null ? diagramUIModel.getId() : LogExtractor.DEFAULT_VALUE;
+        String diagramType = diagramUIModel != null ? diagramUIModel.getType() : LogExtractor.DEFAULT_VALUE;
+        String diagramName = diagramUIModel != null ? diagramUIModel.getName() : LogExtractor.DEFAULT_VALUE;
         String modelElementId = modelElement.getId();
         String modelElementType = LogExtractor.extractModelType(modelElement);
         String modelElementName = LogExtractor.extractModelName(modelElement);

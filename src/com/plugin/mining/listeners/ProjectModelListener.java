@@ -18,7 +18,7 @@ public class ProjectModelListener implements IProjectModelListener {
 	@Override
 	public void modelAdded(IProject project, IModelElement modelElement) {
 		logger.info("%s model element added", modelElement.getModelType());
-		LogActivity logActivity = LogActivity.getInstance(ActionType.ADD, modelElement.getModelType());
+		LogActivity logActivity = LogActivity.getInstance(ActionType.ADD, modelElement);
 
 		Logger.createEvent(logActivity, modelElement, ModelType.PROJECT);
 	}
@@ -26,7 +26,7 @@ public class ProjectModelListener implements IProjectModelListener {
 	@Override
 	public void modelRemoved(IProject project, IModelElement modelElement) {
 		logger.info("%s model element removed", modelElement.getModelType());
-		LogActivity logActivity = LogActivity.getInstance(ActionType.REMOVE, modelElement.getModelType());
+		LogActivity logActivity = LogActivity.getInstance(ActionType.REMOVE, modelElement);
 
 		Logger.createEvent(logActivity, modelElement, ModelType.PROJECT);
 	}

@@ -136,11 +136,11 @@ public class LogExtractor {
         IDiagramElement[] diagramElements = modelElement.getDiagramElements();
         if ((actionType == ActionType.ADD && diagramElements.length > 1)
                 || (actionType == ActionType.REMOVE && diagramElements.length > 0))
-            return LogActivity.getInstance(actionType, ModelType.VIEW.getName());
+            return LogActivity.getInstance(actionType, ModelType.VIEW);
 
         if (modelElement instanceof IRelationship)
-            return LogActivity.getInstance(actionType, ModelType.RELATIONSHIP.getName());
+            return LogActivity.getInstance(actionType, ModelType.RELATIONSHIP);
 
-        return LogActivity.getInstance(actionType, modelElement.getModelType());
+        return LogActivity.getInstance(actionType, modelElement);
     }
 }

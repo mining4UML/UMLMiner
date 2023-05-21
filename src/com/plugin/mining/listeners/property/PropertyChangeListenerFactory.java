@@ -52,9 +52,8 @@ public class PropertyChangeListenerFactory {
 			propertyChangeListener = new RelationshipPropertyChangeListener();
 		else if (modelElement instanceof IRelationshipEnd)
 			propertyChangeListener = new RelationshipEndPropertyChangeListener();
-
-		if (propertyChangeListener == null)
-			throw new UnsupportedOperationException("modelElement is not supported");
+		else
+			propertyChangeListener = new ModelElementPropertyChangeListener();
 
 		propertyChangeListeners.put(modelElement.getId(), propertyChangeListener);
 		return propertyChangeListener;

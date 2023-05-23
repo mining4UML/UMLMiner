@@ -1,15 +1,8 @@
 package com.plugin.mining.logging;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -20,14 +13,12 @@ import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.factory.XFactory;
 import org.deckfour.xes.factory.XFactoryBufferedImpl;
 import org.deckfour.xes.id.XIDFactory;
-import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeLiteral;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
-import org.deckfour.xes.out.XesXmlSerializer;
 
 import com.plugin.mining.logging.LogActivity.ModelType;
 import com.plugin.mining.logging.extensions.XIdentityExtension;
@@ -46,33 +37,15 @@ import com.vp.plugin.model.IProjectProperties;
 import com.vp.plugin.model.IRelationship;
 
 public class Logger {
-    private static final String EXTENSION = ".xes";
-    private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd_HH.mm.ss";
-    private static final String USER_NAME = System.getProperty("user.name");
-    private static final Path logDirectory = Paths.get(System.getProperty("user.dir"), "logs", USER_NAME);
+
     public static final XFactory xFactory = new XFactoryBufferedImpl();
     public static final XIDFactory xIdFactory = XIDFactory.instance();
     public static final XIdentityExtension xIdentityExtension = XIdentityExtension.instance();
     public static final XConceptExtension xConceptExtension = XConceptExtension.instance();
     public static final XTimeExtension xTimeExtension = XTimeExtension.instance();
-    private static final XesXmlParser xesXmlParser = new XesXmlParser();
-    private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
     private static XLog xLog;
     private static XTrace xTrace;
     private static final ViewManager viewManager = Application.getViewManager();
-
-    private static void createDirectory() {
-        try {
-            if (Files.notExists(logDirectory))
-                Files.createDirectory(logDirectory);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static {
-        createDirectory();
-    }
 
     private static void addAttribute(XAttributeMap attributes, LogAttribute logAttribute, Object value) {
         XAttribute xAttribute = logAttribute.createAttribute(value);
@@ -311,41 +284,16 @@ public class Logger {
         createEvent(logActivity, modelElement, ModelType.DIAGRAM);
     }
 
-    private static String getLogName() {
-        return Application.getProject().getId() + EXTENSION;
-    }
-
     public static void loadLog() {
-        try {
-            String logName = getLogName();
-            System.out.println("Parse log " + logName);
-            Path logPath = logDirectory.resolve(logName);
+        xLog = LogStream.parseLog();
 
-            if (Files.isReadable(logPath))
-                xLog = xesXmlParser.parse(logPath.toFile()).get(0);
-            else
-                createLog();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        if (xLog == null)
+            createLog();
 
     }
 
     public static void saveLog() {
-        try {
-            String logName = getLogName();
-            System.out.println("Save log " + logName);
-            Path logPath = logDirectory.resolve(logName);
-
-            OutputStream logOutputStream = new FileOutputStream(
-                    Files.isWritable(logPath) ? logPath.toFile() : Files.createFile(logPath).toFile());
-
-            xLog.removeIf(Collection::isEmpty);
-            xesXmlSerializer.serialize(xLog, logOutputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        LogStream.serializeLog(xLog);
     }
 
     public static boolean hasDiagram(IDiagramUIModel diagramUIModel) {

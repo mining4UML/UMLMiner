@@ -1,9 +1,9 @@
 package com.plugin.mining.listeners;
 
 import com.plugin.mining.logging.LogActivity;
-import com.plugin.mining.logging.Logger;
 import com.plugin.mining.logging.LogActivity.ActionType;
 import com.plugin.mining.logging.LogActivity.ModelType;
+import com.plugin.mining.logging.Logger;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectModelListener;
@@ -18,6 +18,7 @@ public class ProjectModelListener implements IProjectModelListener {
 	@Override
 	public void modelAdded(IProject project, IModelElement modelElement) {
 		logger.info("%s model element added", modelElement.getModelType());
+
 		LogActivity logActivity = LogActivity.getInstance(ActionType.ADD, modelElement);
 
 		Logger.createEvent(logActivity, modelElement, ModelType.PROJECT);

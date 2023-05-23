@@ -52,7 +52,7 @@ public class ProjectListener implements IProjectListener {
 
 	@Override
 	public void projectRenamed(IProject project) {
-		logger.info("Project \"%s\" is renamed to \"%s\"", project.getName());
+		logger.info("Project is renamed to \"%s\"", project.getName());
 		Logger.createEvent(LogActivity.UPDATE_PROJECT, project, "name", project.getName());
 	}
 

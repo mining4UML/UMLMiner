@@ -19,7 +19,6 @@ public class ExportLogsActionController implements VPActionController {
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setName(ACTION_NAME);
         fileChooser.setDialogTitle(ACTION_NAME);
-        fileChooser.setDialogType(0);
         fileChooser.setToolTipText(ACTION_NAME);
         return fileChooser;
     }
@@ -28,8 +27,9 @@ public class ExportLogsActionController implements VPActionController {
     public void performAction(VPAction vpAction) {
         JFileChooser fileChooser = createFileChooser();
 
-        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showSaveDialog(viewManager.getRootFrame()) == JFileChooser.APPROVE_OPTION) {
             LogStream.exportLogs(fileChooser.getSelectedFile().toPath());
+            viewManager.showMessageDialog(viewManager.getRootFrame(), "Logs successfully exported");
         }
 
     }

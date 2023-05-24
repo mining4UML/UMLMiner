@@ -37,7 +37,6 @@ import com.vp.plugin.model.IProjectProperties;
 import com.vp.plugin.model.IRelationship;
 
 public class Logger {
-
     public static final XFactory xFactory = new XFactoryBufferedImpl();
     public static final XIDFactory xIdFactory = XIDFactory.instance();
     public static final XIdentityExtension xIdentityExtension = XIdentityExtension.instance();

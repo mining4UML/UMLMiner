@@ -27,6 +27,7 @@ public class LogStream {
     private static final String USER_NAME = System.getProperty("user.name");
     private static final String USER_DIR = System.getProperty("user.dir");
     private static final Path logDirectory = Paths.get(USER_DIR, "logs", USER_NAME);
+    private static final Logger logger = new Logger(LogStream.class);
     private static final XesXmlParser xesXmlParser = new XesXmlParser();
     private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
 
@@ -87,6 +88,10 @@ public class LogStream {
         }
     }
 
+    public static int countLogs() {
+        return logDirectory.toFile().listFiles().length;
+    }
+
     public static void exportLogs(Path directoryPath) {
         String fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT)) + ZIP_EXTENSION;
         Path filePath = directoryPath.resolve(fileName);
@@ -103,6 +108,8 @@ public class LogStream {
                         zipOutputStream.write(bytes);
                 }
             }
+
+            logger.info("Logs exported in %s", directoryPath.toString());
 
         } catch (IOException e) {
             e.printStackTrace();

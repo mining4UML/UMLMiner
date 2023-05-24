@@ -6,7 +6,7 @@ import com.vp.plugin.action.VPAction;
 import com.vp.plugin.action.VPActionController;
 
 public class ReloadPluginActionController implements VPActionController {
-    private final Logger logger = new Logger(ReloadPluginActionController.class);
+    private static final Logger logger = new Logger(ReloadPluginActionController.class);
 
     @Override
     public void performAction(VPAction vpAction) {

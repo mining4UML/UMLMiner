@@ -1,6 +1,13 @@
 package com.plugin.mining.actions;
 
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.TextField;
+import java.util.Arrays;
+
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JTextField;
 
 import com.plugin.mining.logging.LogStream;
 import com.plugin.mining.util.Application;
@@ -12,12 +19,25 @@ public class ExportLogsActionController implements VPActionController {
     private static final String ACTION_NAME = "Export Logs";
     private static final ViewManager viewManager = Application.getViewManager();
 
+    public void disableTextFields(Container container) {
+        for (Component component : container.getComponents()) {
+            if (component instanceof JTextField) {
+                ((JTextField) component).setEditable(false);
+            } else if (component instanceof Container) {
+                disableTextFields((Container) component);
+            }
+        }
+    }
+
     private JFileChooser createFileChooser() {
         JFileChooser fileChooser = viewManager.createJFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setName(ACTION_NAME);
         fileChooser.setDialogTitle(ACTION_NAME);
         fileChooser.setToolTipText(ACTION_NAME);
+
+        disableTextFields(fileChooser);
+
         return fileChooser;
     }
 

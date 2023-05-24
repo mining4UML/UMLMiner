@@ -95,7 +95,8 @@ public class LogStream {
     public static void exportLogs(Path directoryPath) {
         String fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT)) + ZIP_EXTENSION;
         Path filePath = directoryPath.resolve(fileName);
-        try (OutputStream logsOutputStream = new FileOutputStream(filePath.toFile());
+
+        try (OutputStream logsOutputStream = new FileOutputStream(Files.createFile(filePath).toFile());
                 ZipOutputStream zipOutputStream = new ZipOutputStream(logsOutputStream)) {
 
             for (File logFile : logDirectory.toFile().listFiles()) {

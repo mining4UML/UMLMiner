@@ -2,12 +2,8 @@ package com.plugin.mining.actions;
 
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.TextField;
-import java.awt.TrayIcon.MessageType;
-import java.util.Arrays;
 import java.util.Locale;
 
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -22,7 +18,7 @@ public class ExportLogsActionController implements VPActionController {
     private static final String ACTION_NAME = "Export Logs";
     private static final ViewManager viewManager = Application.getViewManager();
 
-    public void disableTextFields(Container container) {
+    private void disableTextFields(Container container) {
         for (Component component : container.getComponents()) {
             if (component instanceof JTextField) {
                 ((JTextField) component).setEditable(false);

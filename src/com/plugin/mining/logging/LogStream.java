@@ -3,6 +3,7 @@ package com.plugin.mining.logging;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -10,7 +11,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -30,6 +34,10 @@ public class LogStream {
     private static final Logger logger = new Logger(LogStream.class);
     private static final XesXmlParser xesXmlParser = new XesXmlParser();
     private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
+    private static final Set<String> logExtensions = new HashSet<>(
+            Arrays.asList("xes", "csv", "jsoncel", "xmlocel"));
+    private static final String LOG_FILENAME_REGEX = String.format(".*\\.(%s)",
+            logExtensions.stream().reduce("", (t, u) -> String.join("|", t, u)));
 
     private LogStream() {
 
@@ -50,6 +58,10 @@ public class LogStream {
 
     private static String getLogName() {
         return Application.getProject().getId() + LOG_EXTENSION;
+    }
+
+    private static boolean isLogFile(File dir, String name) {
+        return name.matches(LOG_FILENAME_REGEX);
     }
 
     public static XLog parseLog() {
@@ -89,7 +101,7 @@ public class LogStream {
     }
 
     public static int countLogs() {
-        return logDirectory.toFile().listFiles().length;
+        return logDirectory.toFile().listFiles(LogStream::isLogFile).length;
     }
 
     public static void exportLogs(Path directoryPath) {
@@ -99,7 +111,7 @@ public class LogStream {
         try (OutputStream logsOutputStream = new FileOutputStream(Files.createFile(filePath).toFile());
                 ZipOutputStream zipOutputStream = new ZipOutputStream(logsOutputStream)) {
 
-            for (File logFile : logDirectory.toFile().listFiles()) {
+            for (File logFile : logDirectory.toFile().listFiles(LogStream::isLogFile)) {
                 ZipEntry zipEntry = new ZipEntry(logFile.getName());
                 zipOutputStream.putNextEntry(zipEntry);
 

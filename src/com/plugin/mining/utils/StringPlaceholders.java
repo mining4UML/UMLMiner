@@ -1,4 +1,4 @@
-package com.plugin.mining.util;
+package com.plugin.mining.utils;
 
 public class StringPlaceholders {
 

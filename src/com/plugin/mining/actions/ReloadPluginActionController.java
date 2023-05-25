@@ -1,12 +1,12 @@
 package com.plugin.mining.actions;
 
 import com.plugin.mining.logging.Logger;
-import com.plugin.mining.util.Application;
+import com.plugin.mining.utils.Application;
 import com.vp.plugin.action.VPAction;
 import com.vp.plugin.action.VPActionController;
 
 public class ReloadPluginActionController implements VPActionController {
-    private static final Logger logger = new Logger(ReloadPluginActionController.class);
+    public static final Logger logger = new Logger(ReloadPluginActionController.class);
 
     @Override
     public void performAction(VPAction vpAction) {

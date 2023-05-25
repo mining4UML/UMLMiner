@@ -2,7 +2,7 @@ package com.plugin.mining.plugin;
 
 import com.plugin.mining.listeners.ProjectListener;
 import com.plugin.mining.logging.Logger;
-import com.plugin.mining.util.Application;
+import com.plugin.mining.utils.Application;
 import com.vp.plugin.VPPlugin;
 import com.vp.plugin.VPPluginInfo;
 import com.vp.plugin.model.IProject;

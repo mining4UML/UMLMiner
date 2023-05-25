@@ -22,9 +22,9 @@ import org.deckfour.xes.model.XTrace;
 
 import com.plugin.mining.logging.LogActivity.ModelType;
 import com.plugin.mining.logging.extensions.XIdentityExtension;
-import com.plugin.mining.util.Application;
-import com.plugin.mining.util.StringPlaceholders;
-import com.plugin.mining.util.StringPlaceholders.Placeholder;
+import com.plugin.mining.utils.Application;
+import com.plugin.mining.utils.StringPlaceholders;
+import com.plugin.mining.utils.StringPlaceholders.Placeholder;
 import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;

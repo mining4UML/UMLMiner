@@ -2,9 +2,9 @@ package com.plugin.mining.listeners.property;
 
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.LogActivity.ActionType;
+import com.plugin.mining.utils.Application;
 import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.Logger;
-import com.plugin.mining.util.Application;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IHasChildrenBaseModelElement;
 

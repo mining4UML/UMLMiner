@@ -3,7 +3,7 @@ package com.plugin.mining.listeners.property;
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.Logger;
-import com.plugin.mining.util.Application;
+import com.plugin.mining.utils.Application;
 import com.vp.plugin.model.IOperation;
 import com.vp.plugin.model.IParameter;
 

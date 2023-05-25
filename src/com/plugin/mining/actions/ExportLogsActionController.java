@@ -9,13 +9,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import com.plugin.mining.logging.LogStream;
-import com.plugin.mining.util.Application;
+import com.plugin.mining.utils.Application;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.action.VPAction;
 import com.vp.plugin.action.VPActionController;
 
 public class ExportLogsActionController implements VPActionController {
-    private static final String ACTION_NAME = "Export Logs";
+    public static final String ACTION_NAME = "Export Logs";
     private static final ViewManager viewManager = Application.getViewManager();
 
     private void disableTextFields(Container container) {

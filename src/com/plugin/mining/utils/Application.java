@@ -1,5 +1,8 @@
-package com.plugin.mining.util;
+package com.plugin.mining.utils;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +37,16 @@ public class Application {
 
     public static IDiagramUIModel getDiagram() {
         return manager.getDiagramManager().getActiveDiagram();
+    }
+
+    public static Point getCenterPoint() {
+        Component rootComponent = manager.getViewManager().getRootFrame();
+        Point rootPoint = rootComponent.getLocation();
+        Dimension rootDimension = rootComponent.getSize();
+        int xCoordinate = (int) (rootPoint.getX() + rootDimension.getWidth() / 2);
+        int yCoordinate = (int) (rootPoint.getY() + rootDimension.getHeight() / 2);
+
+        return new Point(xCoordinate, yCoordinate);
     }
 
     public static void reloadPlugin() {

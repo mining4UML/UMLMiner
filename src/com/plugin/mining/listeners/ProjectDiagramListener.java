@@ -2,7 +2,7 @@ package com.plugin.mining.listeners;
 
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.Logger;
-import com.plugin.mining.util.Application;
+import com.plugin.mining.utils.Application;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectDiagramListener;

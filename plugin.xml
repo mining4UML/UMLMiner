@@ -17,14 +17,14 @@
 				ribbonPath="Help"
 			/>
 			<action
-				id="Discovery"
+				id="ProcessDiscovery"
 				actionType="generalAction"
-				label="%actions.Discovery.label"
-				tooltip="%actions.Discovery.label"
+				label="%actions.ProcessDiscovery.label"
+				tooltip="%actions.ProcessDiscovery.label"
 				icon="icons/lightbulb.png"
 				style="normal"
 				ribbonPath="Toolbar/#">
-				<actionController class="com.plugin.mining.actions.DiscoveryActionController" />
+				<actionController class="com.plugin.mining.actions.ProcessDiscoveryActionController" />
 			</action>
 			<action
 				id="ConformanceChecking"

@@ -22,7 +22,7 @@ import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.out.XesXmlSerializer;
 
-import com.plugin.mining.util.Application;
+import com.plugin.mining.utils.Application;
 
 public class LogStream {
     private static final String LOG_EXTENSION = ".xes";

@@ -1,11 +1,12 @@
 package com.plugin.mining.actions;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Point;
 
 import javax.swing.JPanel;
 
 import com.plugin.mining.utils.Application;
+import com.plugin.mining.utils.DialogFormatter;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.view.IDialog;
 import com.vp.plugin.view.IDialogHandler;
@@ -20,9 +21,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 
     @Override
     public Component getComponent() {
-        JPanel panel = new JPanel();
-        panel.setToolTipText(ConformanceCheckingActionController.ACTION_NAME);
-        return panel;
+        JPanel rootPanel = new JPanel(new BorderLayout(2, 0));
+        return rootPanel;
     }
 
     @Override
@@ -30,10 +30,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         dialog.setModal(true);
         dialog.setResizable(false);
         dialog.setTitle(ConformanceCheckingActionController.ACTION_NAME);
-
-        Point point = Application.getCenterPoint();
-        point.translate(-(dialog.getWidth() / 2), -(dialog.getHeight() / 2));
-        dialog.setLocation(point);
+        DialogFormatter.centerDialog(dialog);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.plugin.mining.logging;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -17,6 +16,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.model.XLog;
@@ -36,6 +38,9 @@ public class LogStream {
     private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
     private static final Set<String> logExtensions = new HashSet<>(
             Arrays.asList("xes", "csv", "jsoncel", "xmlocel"));
+    private static final FileFilter logFileFilter = new FileNameExtensionFilter(
+            "Log File " + Arrays.toString(logExtensions.toArray()),
+            logExtensions.toArray(String[]::new));
     private static final String LOG_FILENAME_REGEX = String.format(".*\\.(%s)",
             logExtensions.stream().reduce("", (t, u) -> String.join("|", t, u)));
 
@@ -54,6 +59,14 @@ public class LogStream {
 
     static {
         createDirectory();
+    }
+
+    public static Path getLogDirectory() {
+        return logDirectory;
+    }
+
+    public static FileFilter getLogFileFilter() {
+        return logFileFilter;
     }
 
     private static String getLogName() {

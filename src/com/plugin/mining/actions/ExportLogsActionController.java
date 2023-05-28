@@ -28,7 +28,7 @@ public class ExportLogsActionController implements VPActionController {
         }
     }
 
-    private JFileChooser createFileChooser() {
+    private JFileChooser getFileChooser() {
         JFileChooser fileChooser = viewManager.createJFileChooser();
         fileChooser.setLocale(Locale.ENGLISH);
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -52,7 +52,7 @@ public class ExportLogsActionController implements VPActionController {
             return;
         }
 
-        JFileChooser fileChooser = createFileChooser();
+        JFileChooser fileChooser = getFileChooser();
         if (fileChooser.showOpenDialog(viewManager.getRootFrame()) == JFileChooser.APPROVE_OPTION) {
             LogStream.exportLogs(fileChooser.getSelectedFile().toPath());
             viewManager.showMessageDialog(viewManager.getRootFrame(), "Logs successfully exported.", ACTION_NAME,

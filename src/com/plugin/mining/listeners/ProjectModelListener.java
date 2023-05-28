@@ -1,7 +1,5 @@
 package com.plugin.mining.listeners;
 
-import org.bouncycastle.its.asn1.IValue;
-
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.LogActivity.ActionType;
 import com.plugin.mining.logging.LogActivity.ModelType;

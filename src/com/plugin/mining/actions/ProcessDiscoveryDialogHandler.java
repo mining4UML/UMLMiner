@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
+import java.io.File;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -33,11 +34,17 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
     private static final String[] pruningTypeMinerfulItems = new String[] { "None", "Hierarchy", "Conflicts",
             "Redundancy", "Double redundancy" };
 
+    private File selectedLogFile;
     private JPanel rootPanel;
+    private JComboBox<String> discoveryMethodComboBox;
     private JCheckBox choiceCheckBox;
+    private JSlider constraintSupportSlider;
     private JComboBox<String> pruningTypeComboBox;
     private JToggleButton vacuousAsViolatedButton;
     private JToggleButton considerLifecycleButton;
+    private JToggleButton discoverTimeConditionsButton;
+    private JComboBox<String> discoverDataConditionsComboBox;
+    private JButton actionsDiscoveryButton;
 
     private Component getSelectFilePanel() {
         JPanel selectFilePanel = new JPanel();
@@ -56,7 +63,9 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
             fileChooser.setCurrentDirectory(LogStream.getLogDirectory().toFile());
 
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
-                selectFileTextField.setText(fileChooser.getSelectedFile().getName());
+                selectedLogFile = fileChooser.getSelectedFile();
+                selectFileTextField.setText(selectedLogFile.getName());
+                actionsDiscoveryButton.setEnabled(true);
             }
         });
         GUI.addAll(selectFileInputBox, true, selectFileTextField, selectFileButton);
@@ -70,7 +79,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
     private Component getDiscoveryMethodPanel() {
         JPanel discoveryMethodPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
         JLabel discoveryMethodLabel = new JLabel("Discovery Method");
-        JComboBox<String> discoveryMethodComboBox = new JComboBox<>(new String[] { "Declare Miner", "MINERful" });
+        discoveryMethodComboBox = new JComboBox<>(new String[] { "Declare Miner", "MINERful" });
         discoveryMethodComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 boolean isDeclareMiner = e.getItem().equals("Declare Miner");
@@ -115,12 +124,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         JLabel considerLifecycleLabel = new JLabel("Consider Lifecycle");
         JLabel discoverTimeConditionsLabel = new JLabel("Discover Time Conditions");
         JLabel discoverDataConditionsLabel = new JLabel("Discover Data Conditions");
-        JSlider constraintSupportSlider = new JSlider(0, 100);
+        constraintSupportSlider = new JSlider(0, 100);
         pruningTypeComboBox = new JComboBox<>(pruningTypeDeclareMinerItems);
         vacuousAsViolatedButton = new JToggleButton("Disabled");
         considerLifecycleButton = new JToggleButton("Disabled");
-        JToggleButton discoverTimeConditionsButton = new JToggleButton("Disabled");
-        JComboBox<String> discoverDataConditionsComboBox = new JComboBox<>(
+        discoverTimeConditionsButton = new JToggleButton("Disabled");
+        discoverDataConditionsComboBox = new JComboBox<>(
                 new String[] { "Activations", "Correlations", "None" });
         Box constraintSupportBox = new Box(BoxLayout.LINE_AXIS);
         Box pruningTypeBox = new Box(BoxLayout.LINE_AXIS);
@@ -175,7 +184,9 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
     private Component getActionsPanel() {
         JPanel actionsPanel = new JPanel();
-        actionsPanel.add(new JButton("Discovery"));
+        actionsDiscoveryButton = new JButton("Discovery");
+        actionsDiscoveryButton.setEnabled(false);
+        actionsPanel.add(actionsDiscoveryButton);
         return actionsPanel;
     }
 

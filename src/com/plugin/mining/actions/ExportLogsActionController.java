@@ -8,7 +8,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import com.plugin.mining.logging.LogStream;
+import com.plugin.mining.logging.LogStreamer;
 import com.plugin.mining.utils.Application;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.action.VPAction;
@@ -46,7 +46,7 @@ public class ExportLogsActionController implements VPActionController {
     @Override
     public void performAction(VPAction vpAction) {
 
-        if (LogStream.countLogs() == 0) {
+        if (LogStreamer.countLogs() == 0) {
             viewManager.showMessageDialog(viewManager.getRootFrame(), "No logs found.", ACTION_NAME,
                     JOptionPane.WARNING_MESSAGE);
             return;
@@ -54,7 +54,7 @@ public class ExportLogsActionController implements VPActionController {
 
         JFileChooser fileChooser = getFileChooser();
         if (fileChooser.showOpenDialog(viewManager.getRootFrame()) == JFileChooser.APPROVE_OPTION) {
-            LogStream.exportLogs(fileChooser.getSelectedFile().toPath());
+            LogStreamer.exportLogs(fileChooser.getSelectedFile().toPath());
             viewManager.showMessageDialog(viewManager.getRootFrame(), "Logs successfully exported.", ACTION_NAME,
                     JOptionPane.INFORMATION_MESSAGE);
         }

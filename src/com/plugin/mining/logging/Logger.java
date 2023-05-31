@@ -284,7 +284,7 @@ public class Logger {
     }
 
     public static void loadLog() {
-        xLog = LogStream.parseLog();
+        xLog = LogStreamer.parseLog();
 
         if (xLog == null)
             createLog();
@@ -292,7 +292,7 @@ public class Logger {
     }
 
     public static void saveLog() {
-        LogStream.serializeLog(xLog);
+        LogStreamer.serializeLog(xLog);
     }
 
     public static boolean hasDiagram(IDiagramUIModel diagramUIModel) {

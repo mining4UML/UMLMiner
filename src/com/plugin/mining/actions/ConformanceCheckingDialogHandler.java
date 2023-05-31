@@ -6,7 +6,7 @@ import java.awt.Component;
 import javax.swing.JPanel;
 
 import com.plugin.mining.utils.Application;
-import com.plugin.mining.utils.DialogFormatter;
+import com.plugin.mining.utils.GUI;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.view.IDialog;
 import com.vp.plugin.view.IDialogHandler;
@@ -30,7 +30,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         dialog.setModal(true);
         dialog.setResizable(false);
         dialog.setTitle(ConformanceCheckingActionController.ACTION_NAME);
-        DialogFormatter.centerDialog(dialog);
+        GUI.centerDialog(dialog);
     }
 
     @Override

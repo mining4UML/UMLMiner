@@ -4,11 +4,14 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Point;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
+
+import com.vp.plugin.view.IDialog;
 
 public class GUI {
     private static final int DEFAULT_PADDING = 4;
@@ -48,5 +51,11 @@ public class GUI {
 
     public static void addAll(Container container, Component... components) {
         addAll(container, false, components);
+    }
+
+    public static void centerDialog(IDialog dialog) {
+        Point point = Application.getCenterPoint();
+        point.translate(-dialog.getWidth() / 2, -dialog.getHeight() / 2);
+        dialog.setLocation(point);
     }
 }

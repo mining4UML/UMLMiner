@@ -20,6 +20,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/visual-paradigm-mining-plugin/docs/vp-plugin-javadoc.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/rum-0.6.10-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/original-rum-0.6.10-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

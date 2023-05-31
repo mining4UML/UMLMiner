@@ -19,16 +19,21 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
-import com.plugin.mining.logging.LogStream;
+import com.plugin.mining.logging.LogStreamer;
 import com.plugin.mining.utils.Application;
-import com.plugin.mining.utils.DialogFormatter;
 import com.plugin.mining.utils.GUI;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.view.IDialog;
 import com.vp.plugin.view.IDialogHandler;
 
+import minerful.miner.params.MinerFulCmdParameters;
+import minerful.postprocessing.params.PostProcessingCmdParameters.PostProcessingAnalysisType;
+import task.discovery.DiscoveryTaskDeclare;
+import task.discovery.DiscoveryTaskMinerful;
+
 public class ProcessDiscoveryDialogHandler implements IDialogHandler {
     private static final ViewManager viewManager = Application.getViewManager();
+    private static final String[] discoveryMethodItems = new String[] { "Declare Miner", "MINERful" };
     private static final String[] pruningTypeDeclareMinerItems = new String[] { "All reductions", "Hierarchy-based",
             "Transitive Closure", "None" };
     private static final String[] pruningTypeMinerfulItems = new String[] { "None", "Hierarchy", "Conflicts",
@@ -59,8 +64,10 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         selectFileButton.addActionListener(e -> {
             JFileChooser fileChooser = viewManager.createJFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fileChooser.setFileFilter(LogStream.getLogFileFilter());
-            fileChooser.setCurrentDirectory(LogStream.getLogDirectory().toFile());
+            fileChooser.setFileFilter(LogStreamer.getLogFileFilter());
+            fileChooser.setCurrentDirectory(LogStreamer.getLogDirectory().toFile());
+            fileChooser.setDialogTitle("Select log file");
+            fileChooser.setApproveButtonText("Select");
 
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
                 selectedLogFile = fileChooser.getSelectedFile();
@@ -187,6 +194,9 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         actionsDiscoveryButton = new JButton("Discovery");
         actionsDiscoveryButton.setEnabled(false);
         actionsPanel.add(actionsDiscoveryButton);
+        actionsDiscoveryButton.addActionListener(e -> {
+
+        });
         return actionsPanel;
     }
 
@@ -211,7 +221,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         dialog.setModal(true);
         dialog.setResizable(false);
         dialog.setTitle(ProcessDiscoveryActionController.ACTION_NAME);
-        DialogFormatter.centerDialog(dialog);
+        GUI.centerDialog(dialog);
     }
 
     @Override

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.Logger;
-import com.vp.plugin.model.IHasChildrenBaseModelElement;
+import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IModelElement;
 
 /**
@@ -39,12 +39,13 @@ abstract class AbstractPropertyChangeListener<T extends IModelElement> implement
 		Object newValue = propertyChangeEvent.getNewValue();
 
 		if (!excludedProperties.contains(propertyName)) {
-			logger.info("%s property \"%s\" change to \"%s\"", modelElement.getModelType(), propertyName,
-					newValue);
+			IDiagramUIModel diagramUIModel = LogExtractor.getDiagramUIModel(modelElement);
+			logger.info("%s property \"%s\" change from \"%s\" to \"%s\"", modelElement.getModelType(), propertyName,
+					LogExtractor.extractStringValue(oldValue), LogExtractor.extractStringValue(newValue));
 
 			if (propertyName.equals("childAdded")) {
 				IModelElement childElement = (IModelElement) newValue;
-				LogExtractor.addDiagramUIModel(childElement, LogExtractor.getDiagramUIModel(modelElement));
+				LogExtractor.addDiagramUIModel(childElement, diagramUIModel);
 				LogExtractor.addParentModelElement(childElement, modelElement);
 			}
 

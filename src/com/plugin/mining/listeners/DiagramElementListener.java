@@ -14,6 +14,7 @@ import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 import com.vp.plugin.model.IParameter;
 import com.vp.plugin.model.IRelationshipEnd;
+import com.vp.plugin.model.ITemplateParameter;
 
 public class DiagramElementListener implements IDiagramElementListener {
     private static final Logger logger = new Logger(DiagramElementListener.class);
@@ -44,6 +45,11 @@ public class DiagramElementListener implements IDiagramElementListener {
                                 .getInstance(operation));
                 for (IParameter parameter : operation.toParameterArray())
                     parameter.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(parameter));
+            }
+            for (ITemplateParameter templateParameter : classElement.toTemplateParameterArray()) {
+                LogExtractor.addDiagramUIModel(templateParameter, diagramElement.getDiagramUIModel());
+                templateParameter.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(
+                        templateParameter));
             }
         }
 

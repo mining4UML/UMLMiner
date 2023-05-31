@@ -22,10 +22,18 @@ import com.vp.plugin.model.IUseCase;
  */
 
 public class PropertyChangeListenerFactory {
-	private static final Map<String, PropertyChangeListener> propertyChangeListeners = new HashMap<>();
+	private static Map<String, PropertyChangeListener> propertyChangeListeners;
 
 	public static PropertyChangeListener getPropertyChangeListener(IModelElement modelElement) {
 		return propertyChangeListeners.get(modelElement.getId());
+	}
+
+	public static void initPropertyChangeListeners() {
+		propertyChangeListeners = new HashMap<>();
+	}
+
+	static {
+		initPropertyChangeListeners();
 	}
 
 	private PropertyChangeListenerFactory() {

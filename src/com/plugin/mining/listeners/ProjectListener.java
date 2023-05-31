@@ -1,5 +1,6 @@
 package com.plugin.mining.listeners;
 
+import com.plugin.mining.listeners.property.PropertyChangeListenerFactory;
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.Logger;
 import com.vp.plugin.model.IProject;
@@ -10,14 +11,18 @@ public class ProjectListener implements IProjectListener {
 	private static final ProjectModelListener projectModelListener = new ProjectModelListener();
 	private static final ProjectDiagramListener projectDiagramListener = new ProjectDiagramListener();
 
-	public ProjectListener(IProject project) {
+	public void init(IProject project) {
+		PropertyChangeListenerFactory.initPropertyChangeListeners();
+		Logger.loadLog();
+		Logger.createTrace(project);
+		project.addProjectDiagramListener(projectDiagramListener);
+		project.addProjectModelListener(projectModelListener);
+	}
 
+	public ProjectListener(IProject project) {
 		if (project.getProjectFile() == null) {
 			logger.info("Temp project \"%s\" opened", project.getName());
-			Logger.loadLog();
-			Logger.createTrace(project);
-			project.addProjectDiagramListener(projectDiagramListener);
-			project.addProjectModelListener(projectModelListener);
+			init(project);
 		}
 	}
 
@@ -29,20 +34,14 @@ public class ProjectListener implements IProjectListener {
 	@Override
 	public void projectNewed(IProject project) {
 		logger.info("New project \"%s\" created", project.getName());
-		Logger.loadLog();
-		Logger.createTrace(project);
-		project.addProjectDiagramListener(projectDiagramListener);
-		project.addProjectModelListener(projectModelListener);
+		init(project);
 	}
 
 	@Override
 	public void projectOpened(IProject project) {
 		logger.info("Project \"%s\" opened", project.getName());
-		Logger.loadLog();
-		Logger.createTrace(project);
+		init(project);
 		Logger.createEvent(LogActivity.ADD_PROJECT, project);
-		project.addProjectDiagramListener(projectDiagramListener);
-		project.addProjectModelListener(projectModelListener);
 	}
 
 	@Override

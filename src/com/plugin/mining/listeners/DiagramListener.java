@@ -30,6 +30,7 @@ public class DiagramListener implements IDiagramListener {
 			IModelElement modelElement = diagramElement.getModelElement();
 			modelElements.put(diagramElementId, modelElement);
 			LogExtractor.addDiagramUIModel(modelElement, diagramUIModel);
+			LogExtractor.addParentModelElementRecursive(modelElement);
 			diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
 		}
 	}

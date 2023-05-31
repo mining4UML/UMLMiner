@@ -22,7 +22,6 @@ class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass>
 			IHasChildrenBaseModelElement childElement = (IHasChildrenBaseModelElement) newValue;
 			LogActivity logActivity = LogActivity.getInstance(ActionType.ADD, childElement.getModelType());
 
-			LogExtractor.addModelElementParent(childElement, classElement);
 			Application.runDelayed(() -> {
 				Logger.createEvent(logActivity, childElement);
 				childElement.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(childElement));
@@ -32,7 +31,6 @@ class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass>
 			IHasChildrenBaseModelElement childElement = (IHasChildrenBaseModelElement) oldValue;
 			LogActivity logActivity = LogActivity.getInstance(ActionType.REMOVE, childElement.getModelType());
 
-			LogExtractor.addModelElementParent(childElement, classElement);
 			Logger.createEvent(logActivity, childElement);
 		} else {
 			String propertyValue = LogExtractor.extractStringValue(newValue);

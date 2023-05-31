@@ -11,7 +11,6 @@ import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IClass;
-import com.vp.plugin.model.IHasChildrenBaseModelElement;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 import com.vp.plugin.model.IRelationship;
@@ -20,7 +19,7 @@ public class LogExtractor {
 
     public static final String DEFAULT_VALUE = "unknown";
     private static final Map<String, IDiagramUIModel> diagramUIModels = new HashMap<>();
-    private static final Map<String, IModelElement> modelElementParents = new HashMap<>();
+    private static final Map<String, IModelElement> parentModelElements = new HashMap<>();
 
     private LogExtractor() {
         // Empty
@@ -34,12 +33,22 @@ public class LogExtractor {
         return value != null ? value : DEFAULT_VALUE;
     }
 
-    public static void addModelElementParent(IHasChildrenBaseModelElement childElement, IModelElement modelElement) {
-        modelElementParents.put(childElement.getId(), modelElement);
+    public static void addParentModelElement(IModelElement childElement, IModelElement modelElement) {
+        parentModelElements.put(childElement.getId(), modelElement);
     }
 
-    public static IModelElement getModelElementParent(IHasChildrenBaseModelElement childElement) {
-        return modelElementParents.get(childElement.getId());
+    public static void addParentModelElementRecursive(IModelElement modelElement) {
+        if (modelElement.childCount() == 0)
+            return;
+
+        for (IModelElement childElement : modelElement.toChildArray()) {
+            addParentModelElement(childElement, modelElement);
+            addParentModelElementRecursive(childElement);
+        }
+    }
+
+    public static IModelElement getParentModelElement(IModelElement childElement) {
+        return parentModelElements.get(childElement.getId());
     }
 
     public static void addDiagramUIModel(IModelElement modelElement, IDiagramUIModel diagramUIModel) {
@@ -92,8 +101,8 @@ public class LogExtractor {
 
         if (modelElement instanceof IOperation) {
             IOperation operation = (IOperation) modelElement;
-            IModelElement parentElement = getModelElementParent(operation);
-            if (operation.getName().equals(parentElement.getName()))
+            IModelElement parentModelElement = getParentModelElement(operation);
+            if (operation.getName().equals(parentModelElement.getName()))
                 return "Constructor";
         }
 

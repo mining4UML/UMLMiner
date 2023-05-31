@@ -42,9 +42,11 @@ abstract class AbstractPropertyChangeListener<T extends IModelElement> implement
 			logger.info("%s property \"%s\" change to \"%s\"", modelElement.getModelType(), propertyName,
 					newValue);
 
-			if (propertyName.equals("childAdded"))
-				LogExtractor.addDiagramUIModel(((IHasChildrenBaseModelElement) newValue),
-						LogExtractor.getDiagramUIModel(modelElement));
+			if (propertyName.equals("childAdded")) {
+				IModelElement childElement = (IModelElement) newValue;
+				LogExtractor.addDiagramUIModel(childElement, LogExtractor.getDiagramUIModel(modelElement));
+				LogExtractor.addParentModelElement(childElement, modelElement);
+			}
 
 			propertyChange(modelElement, propertyName, oldValue, newValue);
 		}

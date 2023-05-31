@@ -16,7 +16,7 @@ class ParameterPropertyChangeListener extends AbstractPropertyChangeListener<IPa
 
 	public void propertyChange(IParameter parameter, String propertyName, Object oldValue, Object newValue) {
 		String propertyValue = LogExtractor.extractStringValue(newValue);
-		IOperation operation = parameter.getOperation();
+		IOperation operation = (IOperation) parameter.getParent();
 
 		Logger.createEvent(LogActivity.UPDATE_PARAMETER, operation, propertyName, propertyValue);
 	}

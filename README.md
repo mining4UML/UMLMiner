@@ -7,7 +7,7 @@ UML Miner supports the Declare Analyzer and the Declare Replayer methods to conf
 UML Miner comes as a zip file. To install it in Visual Paradigm it only necessary to select  "Help > Install Plugin" from the application toolbar. 
 
 The development of UML Miner has been started by Ardimento Pasquale and was later continued by Pasquale Ardimento and Vito Alessandro Carella.
-Currently is still under development (01st Jube 2023).
+Currently is still under development (01st June 2023).
 
 The team members of UML Miner are:
 - Pasquale Ardimento -  Department of Computer Science, University of Bari ALdo Moro (responsible of project)

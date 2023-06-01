@@ -135,7 +135,7 @@ public class LogExtractor {
                 return String.join(" ", message.getActionType().getName(), message.getModelType());
         }
 
-        return modelElement.getModelType();
+        return getOrDefault(modelElement.getModelType());
     }
 
     public static String extractSourceType(ModelType sourceModelType, IDiagramUIModel diagramUIModel) {
@@ -146,7 +146,7 @@ public class LogExtractor {
     }
 
     public static String extractModelName(IModelElement modelElement) {
-        return getOrDefault(modelElement.getName(), DEFAULT_VALUE);
+        return getOrDefault(modelElement.getName());
     }
 
     public static LogActivity extractLogActivity(ActionType actionType, IModelElement modelElement) {

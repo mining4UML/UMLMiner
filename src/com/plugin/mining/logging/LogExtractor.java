@@ -11,6 +11,7 @@ import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IClass;
+import com.vp.plugin.model.IMessage;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 import com.vp.plugin.model.IRelationship;
@@ -125,6 +126,13 @@ public class LogExtractor {
                 return fromAggregationKind;
 
             return String.format("Association[from=%s,to=%s]", fromAggregationKind, toAggregationKind);
+        }
+
+        if (modelElement instanceof IMessage) {
+            IMessage message = (IMessage) modelElement;
+            IModelElement messageActionType = message.getActionType();
+            if (messageActionType != null)
+                return String.join(" ", message.getActionType().getName(), message.getModelType());
         }
 
         return modelElement.getModelType();

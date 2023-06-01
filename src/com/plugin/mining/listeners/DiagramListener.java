@@ -1,7 +1,6 @@
 package com.plugin.mining.listeners;
 
 import java.beans.PropertyChangeListener;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,9 +8,9 @@ import com.plugin.mining.listeners.property.PropertyChangeListenerFactory;
 import com.plugin.mining.logging.LogActivity;
 import com.plugin.mining.logging.LogActivity.ActionType;
 import com.plugin.mining.logging.LogActivity.ModelType;
-import com.plugin.mining.utils.Application;
 import com.plugin.mining.logging.LogExtractor;
 import com.plugin.mining.logging.Logger;
+import com.plugin.mining.utils.Application;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
 import com.vp.plugin.diagram.IDiagramUIModel;

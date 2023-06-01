@@ -32,35 +32,43 @@ public class DiagramElementListener implements IDiagramElementListener {
 
         if (modelElement instanceof IClass) {
             IClass classElement = (IClass) modelElement;
-            for (IAttribute attribute : classElement.toAttributeArray()) {
-                LogExtractor.addDiagramUIModel(attribute, diagramElement.getDiagramUIModel());
-                attribute.addPropertyChangeListener(
-                        PropertyChangeListenerFactory
-                                .getInstance(attribute));
-            }
-            for (IOperation operation : classElement.toOperationArray()) {
-                LogExtractor.addDiagramUIModel(operation, diagramElement.getDiagramUIModel());
-                operation.addPropertyChangeListener(
-                        PropertyChangeListenerFactory
-                                .getInstance(operation));
-                for (IParameter parameter : operation.toParameterArray())
-                    parameter.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(parameter));
-            }
-            for (ITemplateParameter templateParameter : classElement.toTemplateParameterArray()) {
-                LogExtractor.addDiagramUIModel(templateParameter, diagramElement.getDiagramUIModel());
-                templateParameter.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(
-                        templateParameter));
-            }
-        }
+            IAttribute[] attributes = classElement.toAttributeArray();
+            IOperation[] operations = classElement.toOperationArray();
+            ITemplateParameter[] templateParameters = classElement.toTemplateParameterArray();
+            if (attributes != null)
+                for (IAttribute attribute : attributes) {
+                    LogExtractor.addDiagramUIModel(attribute, diagramElement.getDiagramUIModel());
+                    attribute.addPropertyChangeListener(
+                            PropertyChangeListenerFactory
+                                    .getInstance(attribute));
+                }
+            if (operations != null)
+                for (IOperation operation : operations) {
+                    LogExtractor.addDiagramUIModel(operation, diagramElement.getDiagramUIModel());
+                    operation.addPropertyChangeListener(
+                            PropertyChangeListenerFactory
+                                    .getInstance(operation));
+                    for (IParameter parameter : operation.toParameterArray())
+                        parameter.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(parameter));
+                }
+            if (templateParameters != null)
+                for (ITemplateParameter templateParameter : classElement.toTemplateParameterArray()) {
+                    LogExtractor.addDiagramUIModel(templateParameter, diagramElement.getDiagramUIModel());
+                    templateParameter.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(
+                            templateParameter));
+                }
+        } else if (modelElement instanceof IEndRelationship) {
+            IEndRelationship endRelationship = (IEndRelationship) modelElement;
+            IRelationshipEnd relationshipFromEnd = endRelationship.getFromEnd();
+            IRelationshipEnd relationshipToEnd = endRelationship.getToEnd();
 
-        if (modelElement instanceof IEndRelationship) {
-            IEndRelationship association = (IEndRelationship) modelElement;
-            IRelationshipEnd relationshipFromEnd = association.getFromEnd();
-            IRelationshipEnd relationshipToEnd = association.getToEnd();
+            if (relationshipFromEnd != null)
+                relationshipFromEnd
+                        .addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(relationshipFromEnd));
 
-            relationshipFromEnd
-                    .addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(relationshipFromEnd));
-            relationshipToEnd.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(relationshipToEnd));
+            if (relationshipToEnd != null)
+                relationshipToEnd
+                        .addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(relationshipToEnd));
         }
     }
 

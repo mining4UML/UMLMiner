@@ -6,7 +6,7 @@ UML Miner is a Visual Paradigm plug-in that makes possible mining all the UML d
 - UML Miner allows to execute the [Declare Miner](https://www.sciencedirect.com/science/article/abs/pii/S0306437916306615?via%3Dihub) and [MINERful](https://dl.acm.org/doi/10.1145/2629447) techniques to process discovery.
 - UML Miner allows to execute the [Declare Analyzer](https://www.sciencedirect.com/science/article/abs/pii/S0957417416304390?via%3Dihub) and the [Declare Replayer](https://link.springer.com/chapter/10.1007%2F978-3-642-32885-5_6) methods to conformance checking. The conformance can be explored either by trace or by constraint.
 
-# How does UML Miner work?
+# How does it work?
 For each "Visual Paradigm" project, UML Miner creates a unique log. A log is made up of all the working sessions on that project.
 A working session of a project represents all the modeling events made across all the UML diagrams employed between an opening and the corresponding closure of the project.
 
@@ -27,5 +27,5 @@ The team members, listed in alphabetical order, are:
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg">
-  <img alt="UML MINER to make UML diagrams mining possibl" src="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg" height="auto" width="auto">
+  <img alt="UML MINER to make UML diagrams mining possibl" src="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg" height="75%" width="75%">
 </picture>

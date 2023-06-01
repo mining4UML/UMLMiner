@@ -21,7 +21,7 @@
 				actionType="generalAction"
 				label="%actions.ProcessDiscovery.label"
 				tooltip="%actions.ProcessDiscovery.label"
-				icon="icons/lightbulb.png"
+				icon="assets/icons/lightbulb.png"
 				style="normal"
 				ribbonPath="Toolbar/#">
 				<actionController class="com.plugin.mining.actions.ProcessDiscoveryActionController" />
@@ -31,7 +31,7 @@
 				actionType="generalAction"
 				label="%actions.ConformanceChecking.label"
 				tooltip="%actions.ConformanceChecking.label"
-				icon="icons/test.png"
+				icon="assets/icons/test.png"
 				style="normal"
 				ribbonPath="Toolbar/Discovery">
 				<actionController
@@ -42,7 +42,7 @@
 				actionType="generalAction"
 				label="%actions.ExportLogs.label"
 				tooltip="%actions.ExportLogs.label"
-				icon="icons/book.png"
+				icon="assets/icons/book.png"
 				style="normal"
 				ribbonPath="Toolbar/ConformanceChecking">
 				<actionController class="com.plugin.mining.actions.ExportLogsActionController" />
@@ -55,7 +55,7 @@
 				actionType="generalAction"
 				label="%actions.ReloadPlugin.label"
 				tooltip="%actions.ReloadPlugin.label"
-				icon="icons/reload.png"
+				icon="assets/icons/reload.png"
 				style="normal"
 				ribbonPath="Toolbar/Separator1">
 				<actionController class="com.plugin.mining.actions.ReloadPluginActionController" />

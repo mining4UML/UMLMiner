@@ -1,8 +1,8 @@
 # UML Miner - To make UML diagrams mining possible
 
 UML Miner is a Visual Paradigm plug-in that makes possible mining all the UML diagrams realized in real-time. It produces  a Log Event written in the XES format that can be readily explored and analyzed upon the generation. The XES standard defines a grammar for a tag-based language whose aim is to provide designers of information systems with a unified and extensible methodology for capturing systems behaviors by means of event logs and event streams is defined in the XES standard.
-- UML Miner supports the Declare Miner and MINERful techniques to process discovery.
-- UML Miner supports the Declare Analyzer and the Declare Replayer methods to conformance checking. The conformance can be explored either by trace or by constraint.
+- UML Miner supports the [Declare Miner](https://www.sciencedirect.com/science/article/abs/pii/S0306437916306615?via%3Dihub) and [MINERful](https://dl.acm.org/doi/10.1145/2629447) techniques to process discovery.
+- UML Miner supports the [Declare Analyzer](https://www.sciencedirect.com/science/article/abs/pii/S0957417416304390?via%3Dihub) and the [Declare Replayer](https://link.springer.com/chapter/10.1007%2F978-3-642-32885-5_6) methods to conformance checking. The conformance can be explored either by trace or by constraint.
 
 For each "Visual Paradigm" project, UML Miner creates a unique log. A log is made up of all the working sessions on that project.
 A working session, represented by a trace in the XES Log, captures all the modeling events made from the opening to the closure project across all the UML diagrams employed.

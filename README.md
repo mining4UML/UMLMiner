@@ -10,7 +10,7 @@ The development of UML Miner has been started by Ardimento Pasquale and was late
 Currently is still under development (01st Jube 2023).
 
 The team members of UML Miner are:
-Pasquale Ardimento -  Department of Computer Science, University of Bari ALdo Moro (responsible of project)
-Mario Luca Bernardi - Department of Engineering, Università degli Studi del Sannio, 82100 Benevento, Italy
-Vito Alessandro Carella - Department of Computer Science, University of Bari ALdo Moro
-Marta Cimitile - Department of Law and Economics, Unitelma Sapienza University, 00161 Rome, Italy
+- Pasquale Ardimento -  Department of Computer Science, University of Bari ALdo Moro (responsible of project)
+- Mario Luca Bernardi - Department of Engineering, Università degli Studi del Sannio, 82100 Benevento, Italy
+- Vito Alessandro Carella - Department of Computer Science, University of Bari ALdo Moro
+- Marta Cimitile - Department of Law and Economics, Unitelma Sapienza University, 00161 Rome, Italy

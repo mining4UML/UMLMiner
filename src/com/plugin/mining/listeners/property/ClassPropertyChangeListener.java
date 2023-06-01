@@ -18,7 +18,11 @@ import com.vp.plugin.model.IModelElement;
  */
 
 class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass> {
-	IModelElement[] oldTemplateParameters;
+	IModelElement[] templateParameters;
+
+	ClassPropertyChangeListener(IClass classElement) {
+		this.templateParameters = classElement.toTemplateParameterArray();
+	}
 
 	@Override
 	public void propertyChange(IClass classElement, String propertyName, Object oldValue, Object newValue) {
@@ -40,10 +44,10 @@ class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass>
 		} else if (propertyName.equals("templateParameters")) {
 			IModelElement[] newTemplateParameters = (IModelElement[]) newValue;
 
-			if (oldTemplateParameters == null || newTemplateParameters.length > oldTemplateParameters.length) {
-				IModelElement newTemplateParameter = oldTemplateParameters == null ? newTemplateParameters[0]
+			if (templateParameters == null || newTemplateParameters.length > templateParameters.length) {
+				IModelElement newTemplateParameter = templateParameters == null ? newTemplateParameters[0]
 						: Arrays.stream(newTemplateParameters)
-								.filter(t1 -> Arrays.stream(oldTemplateParameters).noneMatch(t2 -> t2.equals(t1)))
+								.filter(t1 -> Arrays.stream(templateParameters).noneMatch(t2 -> t2.equals(t1)))
 								.findFirst().orElse(null);
 				if (newTemplateParameter != null) {
 					LogExtractor.addDiagramUIModel(newTemplateParameter, LogExtractor.getDiagramUIModel(classElement));
@@ -52,13 +56,13 @@ class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass>
 							.addPropertyChangeListener(
 									PropertyChangeListenerFactory.getInstance(newTemplateParameter));
 				}
-			} else if (newTemplateParameters.length < oldTemplateParameters.length) {
-				IModelElement oldTemplateParameter = Arrays.stream(oldTemplateParameters)
+			} else if (newTemplateParameters.length < templateParameters.length) {
+				IModelElement oldTemplateParameter = Arrays.stream(templateParameters)
 						.filter(t1 -> Arrays.stream(newTemplateParameters).noneMatch(t2 -> t2.equals(t1)))
 						.findFirst().orElse(null);
 				Logger.createEvent(LogActivity.REMOVE_TEMPLATE_PARAMETER, oldTemplateParameter);
 			}
-			oldTemplateParameters = newTemplateParameters;
+			templateParameters = newTemplateParameters;
 		} else {
 			String propertyValue = LogExtractor.extractStringValue(newValue);
 

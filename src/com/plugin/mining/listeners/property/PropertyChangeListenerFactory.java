@@ -43,7 +43,7 @@ public class PropertyChangeListenerFactory {
 	public static PropertyChangeListener getInstance(IModelElement modelElement) {
 		PropertyChangeListener propertyChangeListener = null;
 		if (modelElement instanceof IClass)
-			propertyChangeListener = new ClassPropertyChangeListener();
+			propertyChangeListener = new ClassPropertyChangeListener((IClass) modelElement);
 		else if (modelElement instanceof IAttribute)
 			propertyChangeListener = new AttributePropertyChangeListener();
 		else if (modelElement instanceof IOperation)

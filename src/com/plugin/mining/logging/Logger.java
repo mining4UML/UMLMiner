@@ -29,6 +29,7 @@ import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IAssociation;
+import com.vp.plugin.model.IHasChildrenBaseModelElement;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
 import com.vp.plugin.model.IPackage;
@@ -52,6 +53,11 @@ public class Logger {
     }
 
     private static void addExtraAttributes(XAttributeMap attributes, IModelElement modelElement) {
+        if (modelElement instanceof IHasChildrenBaseModelElement) {
+            addAttribute(attributes, LogAttribute.UML_ELEMENT_CHILDREN, Arrays
+                    .toString(Arrays.stream(modelElement.toChildArray()).map(IModelElement::getId)
+                            .toArray(String[]::new)));
+        }
         if (modelElement instanceof IOperation) {
             addAttribute(attributes, LogAttribute.PARAMETERS,
                     Arrays.toString(
@@ -81,12 +87,6 @@ public class Logger {
                 addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
                 addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
             }
-        }
-        if (modelElement instanceof IPackage) {
-            addAttribute(attributes, LogAttribute.UML_ELEMENT_CHILDREN,
-                    Arrays.toString(
-                            Arrays.stream(((IPackage) modelElement).toChildArray()).map(IModelElement::getId)
-                                    .toArray(String[]::new)));
         }
     }
 
@@ -258,6 +258,7 @@ public class Logger {
         addAttribute(attributes, LogAttribute.UML_ELEMENT_ID, modelElementId);
         addAttribute(attributes, LogAttribute.UML_ELEMENT_TYPE, modelElementType);
         addAttribute(attributes, LogAttribute.UML_ELEMENT_NAME, modelElementName);
+
         if (propertyName != null && propertyValue != null && !propertyName.equals("childAdded")
                 && !propertyName.equals("childRemoved")) {
             addAttribute(attributes, LogAttribute.PROPERTY_NAME, propertyName);

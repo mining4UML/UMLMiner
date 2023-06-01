@@ -4,11 +4,14 @@ UML Miner is a Visual Paradigm plug-in that makes possible mining all the UML d
 - UML Miner supports the Declare Miner and MINERful techniques to process discovery.
 - UML Miner supports the Declare Analyzer and the Declare Replayer methods to conformance checking. The conformance can be explored either by trace or by constraint.
 
+## Installation
 UML Miner comes as a zip file. To install it in Visual Paradigm it only necessary to select  "Help > Install Plugin" from the application toolbar. 
 
+## Development
 The development of UML Miner has been started by Ardimento Pasquale and was later continued by Pasquale Ardimento and Vito Alessandro Carella.
 Currently is still under development (01st June 2023).
 
+## Team members
 The team members of UML Miner are:
 - Pasquale Ardimento -  Department of Computer Science, University of Bari Aldo Moro (responsible of project)
 - Mario Luca Bernardi - Department of Engineering, Università degli Studi del Sannio, 82100 Benevento, Italy

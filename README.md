@@ -18,5 +18,5 @@ The team members of UML Miner are:
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg">
-  <img alt="UML MINER to make UML diagrams mining possibl" src="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg">
+  <img alt="UML MINER to make UML diagrams mining possibl" src="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg" height="50%" width="50%">
 </picture>

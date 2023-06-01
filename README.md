@@ -5,7 +5,7 @@ UML Miner is a Visual Paradigm plug-in that makes possible mining all the UML d
 - UML Miner supports the [Declare Analyzer](https://www.sciencedirect.com/science/article/abs/pii/S0957417416304390?via%3Dihub) and the [Declare Replayer](https://link.springer.com/chapter/10.1007%2F978-3-642-32885-5_6) methods to conformance checking. The conformance can be explored either by trace or by constraint.
 
 For each "Visual Paradigm" project, UML Miner creates a unique log. A log is made up of all the working sessions on that project.
-A working session, represented by a trace in the XES Log, captures all the modeling events made from the opening to the closure project across all the UML diagrams employed.
+A working session for a Project represent the time between the project is open and the time this project is clodes. For a working session, traced in a trace of the XES Log, UML miner captures all the modeling events made across all the UML diagrams employed.
 
 ## Installation
 UML Miner comes as a zip file. To install it in Visual Paradigm it only necessary to select  "Help > Install Plugin" from the application toolbar. 

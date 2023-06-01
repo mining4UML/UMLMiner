@@ -9,7 +9,7 @@ UML Miner is a Visual Paradigm plug-in that makes possible mining all the UML d
 # How does it work?
 For each "Visual Paradigm" project, UML Miner creates a unique log. A log is made up of all the working sessions on that project.
 A working session of a project represents all the modeling events made across all the UML diagrams employed between an opening and the corresponding closure of the project.
-Events captured are all those related to:
+Modeling events captured are related to:
 - adding or removing diagrams in a project;
 - adding or removing model elements in a project;
 - adding or removing model elements in a Diagram;

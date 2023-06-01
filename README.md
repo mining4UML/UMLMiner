@@ -3,8 +3,8 @@
 UML Miner is a Visual Paradigm plug-in that makes possible mining all the UML diagrams realized in real-time. It produces  a Log Event written in the XES format that can be readily explored and analyzed upon the generation.
 
 - UML Miner allows to export all the Logs generated in the XES format. The XES standard defines a grammar for a tag-based language whose aim is to provide designers of information systems with a unified and extensible methodology for capturing systems behaviors by means of event logs and event streams is defined in the XES standard.
-- UML Miner allows to execute the [Declare Miner](https://www.sciencedirect.com/science/article/abs/pii/S0306437916306615?via%3Dihub) and [MINERful](https://dl.acm.org/doi/10.1145/2629447) techniques to process discovery.
-- UML Miner allows to execute the [Declare Analyzer](https://www.sciencedirect.com/science/article/abs/pii/S0957417416304390?via%3Dihub) and the [Declare Replayer](https://link.springer.com/chapter/10.1007%2F978-3-642-32885-5_6) methods to conformance checking. The conformance can be explored either by trace or by constraint.
+- UML Miner finds out the actual process which is happening inside modelling of a software project. To this aim it allows to execute the [Declare Miner](https://www.sciencedirect.com/science/article/abs/pii/S0306437916306615?via%3Dihub) and [MINERful](https://dl.acm.org/doi/10.1145/2629447) techniques to process discovery.
+- UML Miner allows to figure out if there are any deviations between the real-life process (happening every day) and the ideal process (from the model). To this aim, it allows to execute the [Declare Analyzer](https://www.sciencedirect.com/science/article/abs/pii/S0957417416304390?via%3Dihub) and the [Declare Replayer](https://link.springer.com/chapter/10.1007%2F978-3-642-32885-5_6) methods to conformance checking. The conformance can be explored either by trace or by constraint.
 
 # How does it work?
 For each "Visual Paradigm" project, UML Miner creates a unique log. A log is made up of all the working sessions on that project.

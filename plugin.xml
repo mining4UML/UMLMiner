@@ -68,7 +68,7 @@
 				actionType="generalAction"
 				label="%actions.About.label"
 				tooltip="%actions.About.label"
-				icon="assets/images/logoCircle.png"
+				icon="assets/icons/question.png"
 				style="normal"
 				ribbonPath="Toolbar/Separator2">
 				<actionController class="com.plugin.mining.actions.AboutActionController" />

@@ -32,7 +32,7 @@ The team members, listed in alphabetical order, are:
 - Marta Cimitile - Department of Law and Economics, Unitelma Sapienza University, 00161 Rome, Italy
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg">
-  <img alt="UML MINER to make UML diagrams mining possibl" src="https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg" height="75%" width="75%">
+  <source media="(prefers-color-scheme: dark)" srcset="[https://github.com/mining4UML/mining4UML/blob/main/logoUMLMiner.jpg](https://github.com/mining4UML/mining4UML/blob/main/assets/images/logoUMLMiner.jpg)">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/mining4UML/mining4UML/blob/main/assets/images/logoUMLMiner.jpg">
+  <img alt="UML MINER to make UML diagrams mining possible" src="https://github.com/mining4UML/mining4UML/blob/main/assets/images/logoUMLMiner.jpg" height="75%" width="75%">
 </picture>

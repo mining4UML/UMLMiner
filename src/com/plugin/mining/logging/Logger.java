@@ -159,7 +159,6 @@ public class Logger {
                 propertyNamePlaceholder);
         String activityInstance = String.join(" - ", activityName, activityId);
         XAttributeMap attributes = xFactory.createAttributeMap();
-        addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
         addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
         addAttribute(attributes, LogAttribute.ACTIVITY_INSTANCE, activityInstance);
         addAttribute(attributes, LogAttribute.ACTIVITY_TIMESTAMP, timestamp);
@@ -199,7 +198,6 @@ public class Logger {
                 propertyNamePlaceholder);
         String activityInstance = String.join(" - ", activityName, activityId);
         XAttributeMap attributes = xFactory.createAttributeMap();
-        addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
         addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
         addAttribute(attributes, LogAttribute.ACTIVITY_INSTANCE, activityInstance);
         addAttribute(attributes, LogAttribute.ACTIVITY_TIMESTAMP, timestamp);
@@ -248,7 +246,6 @@ public class Logger {
                 sourceTypePlaceholder, propertyNamePlaceholder, childTypePlaceholder);
         String activityInstance = String.join(" - ", activityName, activityId);
         XAttributeMap attributes = xFactory.createAttributeMap();
-        addAttribute(attributes, LogAttribute.ACTIVITY_ID, activityId);
         addAttribute(attributes, LogAttribute.ACTIVITY_NAME, activityName);
         addAttribute(attributes, LogAttribute.ACTIVITY_INSTANCE, activityInstance);
         addAttribute(attributes, LogAttribute.ACTIVITY_TIMESTAMP, timestamp);

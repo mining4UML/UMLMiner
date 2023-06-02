@@ -31,7 +31,7 @@ enum LogAttribute {
     AUTHOR_NAME("AuthorName", Type.LITERAL, "Author Name", false, true),
     PROJECT_NAME("ProjectName", Type.LITERAL, "Project Name", false, true),
     /* Event attributes */
-    ACTIVITY_ID(XIdentityExtension.KEY_ID, Type.LITERAL, "Activity Id", Logger.xIdentityExtension, true),
+    ACTIVITY_ID(XIdentityExtension.KEY_ID, Type.LITERAL, "Activity Id", Logger.xIdentityExtension),
     ACTIVITY_NAME(XConceptExtension.KEY_NAME, Type.LITERAL, "Activity Name", Logger.xConceptExtension, true),
     ACTIVITY_INSTANCE(XConceptExtension.KEY_INSTANCE, Type.LITERAL, "Activity Instance", Logger.xConceptExtension,
             true),

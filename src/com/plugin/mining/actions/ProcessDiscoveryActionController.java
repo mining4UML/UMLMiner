@@ -1,5 +1,6 @@
 package com.plugin.mining.actions;
 
+import com.plugin.mining.dialogs.ProcessDiscoveryDialogHandler;
 import com.plugin.mining.utils.Application;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.action.VPAction;

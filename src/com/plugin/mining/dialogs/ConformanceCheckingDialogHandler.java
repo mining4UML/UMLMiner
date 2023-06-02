@@ -1,10 +1,11 @@
-package com.plugin.mining.actions;
+package com.plugin.mining.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 
 import javax.swing.JPanel;
 
+import com.plugin.mining.actions.ConformanceCheckingActionController;
 import com.plugin.mining.utils.Application;
 import com.plugin.mining.utils.GUI;
 import com.vp.plugin.ViewManager;

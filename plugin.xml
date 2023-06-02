@@ -60,6 +60,19 @@
 				ribbonPath="Toolbar/Separator1">
 				<actionController class="com.plugin.mining.actions.ReloadPluginActionController" />
 			</action>
+			<separator
+				id="Separator2"
+				ribbonPath="Toolbar/ReloadPlugin" />
+			<action
+				id="About"
+				actionType="generalAction"
+				label="%actions.About.label"
+				tooltip="%actions.About.label"
+				icon="assets/images/logoCircle.png"
+				style="normal"
+				ribbonPath="Toolbar/Separator2">
+				<actionController class="com.plugin.mining.actions.AboutActionController" />
+			</action>
 		</actionSet>
 	</actionSets>
 

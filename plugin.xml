@@ -3,7 +3,7 @@
 	name="%plugin.name"
 	description="%plugin.description"
 	provider="%plugin.provider"
-	class="com.plugin.mining.plugin.MiningPlugin">
+	class="com.uniba.mining.plugin.MiningPlugin">
 
 	<runtime>
 		<library path="lib" relativePath="true" />
@@ -24,7 +24,7 @@
 				icon="assets/icons/lightbulb.png"
 				style="normal"
 				ribbonPath="Toolbar/#">
-				<actionController class="com.plugin.mining.actions.ProcessDiscoveryActionController" />
+				<actionController class="com.uniba.mining.actions.ProcessDiscoveryActionController" />
 			</action>
 			<action
 				id="ConformanceChecking"
@@ -35,7 +35,7 @@
 				style="normal"
 				ribbonPath="Toolbar/Discovery">
 				<actionController
-					class="com.plugin.mining.actions.ConformanceCheckingActionController" />
+					class="com.uniba.mining.actions.ConformanceCheckingActionController" />
 			</action>
 			<action
 				id="ExportLogs"
@@ -45,7 +45,7 @@
 				icon="assets/icons/book.png"
 				style="normal"
 				ribbonPath="Toolbar/ConformanceChecking">
-				<actionController class="com.plugin.mining.actions.ExportLogsActionController" />
+				<actionController class="com.uniba.mining.actions.ExportLogsActionController" />
 			</action>
 			<separator
 				id="Separator1"
@@ -58,7 +58,7 @@
 				icon="assets/icons/reload.png"
 				style="normal"
 				ribbonPath="Toolbar/Separator1">
-				<actionController class="com.plugin.mining.actions.ReloadPluginActionController" />
+				<actionController class="com.uniba.mining.actions.ReloadPluginActionController" />
 			</action>
 			<separator
 				id="Separator2"
@@ -71,7 +71,7 @@
 				icon="assets/icons/question.png"
 				style="normal"
 				ribbonPath="Toolbar/Separator2">
-				<actionController class="com.plugin.mining.actions.AboutActionController" />
+				<actionController class="com.uniba.mining.actions.AboutActionController" />
 			</action>
 		</actionSet>
 	</actionSets>

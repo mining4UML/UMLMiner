@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -26,9 +27,12 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import com.uniba.mining.plugin.Config;
+import com.vp.plugin.ViewManager;
 import com.vp.plugin.view.IDialog;
 
 public class GUI {
@@ -39,6 +43,7 @@ public class GUI {
             DEFAULT_PADDING, DEFAULT_PADDING);
     private static final Border defaultBorder = BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(Color.LIGHT_GRAY, DEFAULT_BORDER_SIZE, true), defaultPaddingBorder);
+    private static final ViewManager viewManager = Application.getViewManager();
 
     private GUI() {
     }
@@ -53,6 +58,16 @@ public class GUI {
 
     public static Border getDefaultTitledBorder(String title) {
         return BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder(title), defaultPaddingBorder);
+    }
+
+    public static Point getCenterPoint() {
+        Component rootComponent = viewManager.getRootFrame();
+        Point rootPoint = rootComponent.getLocation();
+        Dimension rootDimension = rootComponent.getSize();
+        int xCoordinate = (int) (rootPoint.getX() + rootDimension.getWidth() / 2);
+        int yCoordinate = (int) (rootPoint.getY() + rootDimension.getHeight() / 2);
+
+        return new Point(xCoordinate, yCoordinate);
     }
 
     public static void addAll(Container container, boolean withPadding, Component... components) {
@@ -73,7 +88,7 @@ public class GUI {
     }
 
     public static void prepareDialog(IDialog dialog, String title) {
-        Point point = Application.getCenterPoint();
+        Point point = getCenterPoint();
         dialog.pack();
         point.translate(-dialog.getWidth() / 2, -dialog.getHeight() / 2);
         dialog.setLocation(point);
@@ -153,5 +168,32 @@ public class GUI {
 
     public static JButton createLinkButton(String text, URI uri) {
         return createLinkButton(text, uri, null);
+    }
+
+    private static void disableTextFields(Container container) {
+        for (Component component : container.getComponents()) {
+            if (component instanceof JTextField) {
+                ((JTextField) component).setEditable(false);
+            } else if (component instanceof Container) {
+                disableTextFields((Container) component);
+            }
+        }
+    }
+
+    public static JFileChooser createExportFileChooser(String title) {
+        String actionName = "Export";
+        String fullTitle = String.join(" - ", title, actionName);
+        JFileChooser fileChooser = viewManager.createJFileChooser();
+        fileChooser.setLocale(Locale.ENGLISH);
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setName(fullTitle);
+        fileChooser.setDialogTitle(fullTitle);
+        fileChooser.setToolTipText(fullTitle);
+        fileChooser.setApproveButtonText(actionName);
+        fileChooser.setApproveButtonToolTipText(actionName);
+
+        disableTextFields(fileChooser);
+
+        return fileChooser;
     }
 }

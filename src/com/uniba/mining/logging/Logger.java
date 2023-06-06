@@ -33,7 +33,6 @@ import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IHasChildrenBaseModelElement;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IOperation;
-import com.vp.plugin.model.IPackage;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectProperties;
 import com.vp.plugin.model.IRelationship;
@@ -127,7 +126,7 @@ public class Logger {
         String caseId = xIdFactory.createId().toString();
         IProjectProperties projectProperties = project.getProjectProperties();
         String authorName = projectProperties.getAuthor();
-        String caseName = String.join("-", authorName, caseId);
+        String caseName = String.join(" - ", authorName, caseId);
         String projectName = projectProperties.getProjectName();
         XAttributeMap attributes = xFactory.createAttributeMap();
         addAttribute(attributes, LogAttribute.CASE_ID, caseId);

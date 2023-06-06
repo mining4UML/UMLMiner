@@ -41,8 +41,9 @@ public class LogStreamer {
     private static final FileFilter logFileFilter = new FileNameExtensionFilter(
             "Log File " + Arrays.toString(logExtensions.toArray()),
             logExtensions.toArray(String[]::new));
-    private static final String LOG_FILENAME_REGEX = String.format(".*\\.(%s)",
-            logExtensions.stream().reduce("", (t, u) -> String.join("|", t, u)));
+    public static final String LOG_EXTENSIONS_REGEX = "\\.(" + logExtensions.stream().reduce("",
+            (t, u) -> String.join("|", t, u)) + ")";
+    public static final String LOG_FILENAME_REGEX = String.format(".*%s", LOG_EXTENSIONS_REGEX);
 
     private LogStreamer() {
 

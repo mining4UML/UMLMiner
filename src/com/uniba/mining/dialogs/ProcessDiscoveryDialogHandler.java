@@ -53,6 +53,32 @@ import util.ModelExporter;
 public class ProcessDiscoveryDialogHandler implements IDialogHandler {
     private static final ViewManager viewManager = Application.getViewManager();
 
+    private static final List<ConstraintTemplate> minerfulNotSupportedTemplates = Arrays.asList(
+            ConstraintTemplate.Exactly1,
+            ConstraintTemplate.Exactly2,
+            ConstraintTemplate.Choice, ConstraintTemplate.Exclusive_Choice);
+    private static final List<ConstraintTemplate> unaryTemplates = Arrays.asList(ConstraintTemplate.Absence,
+            ConstraintTemplate.Absence2,
+            ConstraintTemplate.Absence3, ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2,
+            ConstraintTemplate.Existence, ConstraintTemplate.Existence2, ConstraintTemplate.Existence3,
+            ConstraintTemplate.Init);
+    private static final List<ConstraintTemplate> binaryPositiveTemplates = Arrays.asList(
+            ConstraintTemplate.Alternate_Precedence,
+            ConstraintTemplate.Alternate_Response, ConstraintTemplate.Alternate_Succession,
+            ConstraintTemplate.Chain_Precedence,
+            ConstraintTemplate.Chain_Response, ConstraintTemplate.Chain_Succession,
+            ConstraintTemplate.CoExistence,
+            ConstraintTemplate.Precedence, ConstraintTemplate.Responded_Existence, ConstraintTemplate.Response,
+            ConstraintTemplate.Succession);
+    private static final List<ConstraintTemplate> binaryNegativeTemplates = Arrays.asList(
+            ConstraintTemplate.Not_Chain_Succession,
+            ConstraintTemplate.Not_CoExistence, ConstraintTemplate.Not_Succession);
+    private static final List<ConstraintTemplate> choiceTemplates = Arrays.asList(ConstraintTemplate.Choice,
+            ConstraintTemplate.Exclusive_Choice);
+    private static final List<ConstraintTemplate> discoverDataNotSupportedTemplates = Arrays.asList(
+            ConstraintTemplate.Alternate_Succession,
+            ConstraintTemplate.CoExistence,
+            ConstraintTemplate.Succession);
     private static final String[] discoveryMethodItems = new String[] { DiscoveryMethod.DECLARE.getDisplayText(),
             DiscoveryMethod.MINERFUL.getDisplayText() };
     private static final String[] pruningTypeDeclareMinerItems = new String[] {
@@ -64,29 +90,36 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
             DataConditionType.ACTIVATIONS.getDisplayText(), DataConditionType.CORRELATIONS.getDisplayText(),
             DataConditionType.NONE.getDisplayText() };
 
+    boolean isDeclareMiner = true;
+    boolean withDiscoverDataCondition = false;
     private File[] selectedLogFiles;
     private Map<File, DiscoveryTaskResult> discoveryTaskResults = new HashMap<>();
 
     private JPanel rootPanel;
     private JComboBox<String> discoveryMethodComboBox;
-    private List<ConstraintTemplate> selectedTemplates = new ArrayList<>(
-            Arrays.asList(ConstraintTemplate.Absence, ConstraintTemplate.Absence2,
-                    ConstraintTemplate.Absence3, ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2,
-                    ConstraintTemplate.Existence, ConstraintTemplate.Existence2, ConstraintTemplate.Existence3,
-                    ConstraintTemplate.Init,
-                    ConstraintTemplate.Alternate_Precedence,
-                    ConstraintTemplate.Alternate_Response, ConstraintTemplate.Alternate_Succession,
-                    ConstraintTemplate.Chain_Precedence,
-                    ConstraintTemplate.Chain_Response, ConstraintTemplate.Chain_Succession,
-                    ConstraintTemplate.CoExistence,
-                    ConstraintTemplate.Precedence, ConstraintTemplate.Responded_Existence, ConstraintTemplate.Response,
-                    ConstraintTemplate.Succession,
-                    ConstraintTemplate.Not_Chain_Succession,
-                    ConstraintTemplate.Not_CoExistence, ConstraintTemplate.Not_Succession,
-                    ConstraintTemplate.Choice,
-                    ConstraintTemplate.Exclusive_Choice));
+    private final List<ConstraintTemplate> selectedTemplates = new ArrayList<>(Arrays.asList(ConstraintTemplate.Absence,
+            ConstraintTemplate.Absence2,
+            ConstraintTemplate.Absence3, ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2,
+            ConstraintTemplate.Existence, ConstraintTemplate.Existence2, ConstraintTemplate.Existence3,
+            ConstraintTemplate.Init,
+            ConstraintTemplate.Alternate_Precedence,
+            ConstraintTemplate.Alternate_Response, ConstraintTemplate.Alternate_Succession,
+            ConstraintTemplate.Chain_Precedence,
+            ConstraintTemplate.Chain_Response, ConstraintTemplate.Chain_Succession,
+            ConstraintTemplate.CoExistence,
+            ConstraintTemplate.Precedence, ConstraintTemplate.Responded_Existence, ConstraintTemplate.Response,
+            ConstraintTemplate.Succession,
+            ConstraintTemplate.Not_Chain_Succession,
+            ConstraintTemplate.Not_CoExistence, ConstraintTemplate.Not_Succession,
+            ConstraintTemplate.Choice,
+            ConstraintTemplate.Exclusive_Choice));
+
+    private JCheckBox unaryCheckBox;
+    private JCheckBox binaryPositiveCheckBox;
+    private JCheckBox binaryNegativeCheckBox;
     private JCheckBox choiceCheckBox;
     private JSlider constraintSupportSlider;
+    private JLabel pruningTypeLabel;
     private JComboBox<String> pruningTypeComboBox;
     private JToggleButton vacuousAsViolatedButton;
     private JToggleButton considerLifecycleButton;
@@ -138,11 +171,21 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         discoveryMethodComboBox = new JComboBox<>(discoveryMethodItems);
         discoveryMethodComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                boolean isDeclareMiner = e.getItem().equals("Declare Miner");
+                isDeclareMiner = e.getItem().equals("Declare Miner");
                 choiceCheckBox.setVisible(isDeclareMiner);
                 pruningTypeComboBox.removeAllItems();
                 for (String pruningTypeItem : isDeclareMiner ? pruningTypeDeclareMinerItems : pruningTypeMinerfulItems)
                     pruningTypeComboBox.addItem(pruningTypeItem);
+                if (isDeclareMiner) {
+                    if (!withDiscoverDataCondition) {
+                        setSelectedTemplates(unaryCheckBox,
+                                Arrays.asList(ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2));
+                        setSelectedTemplates(choiceCheckBox, Arrays.asList(ConstraintTemplate.Choice,
+                                ConstraintTemplate.Exclusive_Choice));
+                    }
+                } else
+                    selectedTemplates.removeAll(minerfulNotSupportedTemplates);
+                pruningTypeLabel.setText(String.format("Pruning Type (%s)", isDeclareMiner ? "Declare" : "MINERful"));
                 pruningTypeComboBox.setMaximumSize(pruningTypeComboBox.getPreferredSize());
                 vacuousAsViolatedButton.setEnabled(isDeclareMiner);
                 considerLifecycleButton.setEnabled(isDeclareMiner);
@@ -154,56 +197,32 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         return discoveryMethodPanel;
     }
 
+    private void setSelectedTemplates(JCheckBox checkBox, List<ConstraintTemplate> templates) {
+        if (checkBox.isSelected())
+            selectedTemplates.addAll(templates);
+        else
+            selectedTemplates.removeAll(templates);
+        if (!isDeclareMiner)
+            selectedTemplates.removeAll(minerfulNotSupportedTemplates);
+    }
+
     private Component getTemplatesPanel() {
         JPanel templatesPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
         JLabel templatesLabel = new JLabel("Templates");
-        JCheckBox unaryCheckBox = new JCheckBox("Unary", true);
-        JCheckBox binaryPositiveCheckBox = new JCheckBox("Binary Positive", true);
-        JCheckBox binaryNegativeCheckBox = new JCheckBox("Binary Negative", true);
+        unaryCheckBox = new JCheckBox("Unary", true);
+        binaryPositiveCheckBox = new JCheckBox("Binary Positive", true);
+        binaryNegativeCheckBox = new JCheckBox("Binary Negative", true);
         choiceCheckBox = new JCheckBox("Choice", true);
 
-        unaryCheckBox.addActionListener(e -> {
-            List<ConstraintTemplate> templates = Arrays.asList(ConstraintTemplate.Absence, ConstraintTemplate.Absence2,
-                    ConstraintTemplate.Absence3, ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2,
-                    ConstraintTemplate.Existence, ConstraintTemplate.Existence2, ConstraintTemplate.Existence3,
-                    ConstraintTemplate.Init);
-            if (unaryCheckBox.isSelected())
-                selectedTemplates.addAll(templates);
-            else
-                selectedTemplates.removeAll(templates);
-        });
+        unaryCheckBox.addActionListener(e -> setSelectedTemplates(unaryCheckBox, unaryTemplates));
 
-        binaryPositiveCheckBox.addActionListener(e -> {
-            List<ConstraintTemplate> templates = Arrays.asList(ConstraintTemplate.Alternate_Precedence,
-                    ConstraintTemplate.Alternate_Response, ConstraintTemplate.Alternate_Succession,
-                    ConstraintTemplate.Chain_Precedence,
-                    ConstraintTemplate.Chain_Response, ConstraintTemplate.Chain_Succession,
-                    ConstraintTemplate.CoExistence,
-                    ConstraintTemplate.Precedence, ConstraintTemplate.Responded_Existence, ConstraintTemplate.Response,
-                    ConstraintTemplate.Succession);
-            if (binaryPositiveCheckBox.isSelected())
-                selectedTemplates.addAll(templates);
-            else
-                selectedTemplates.removeAll(templates);
-        });
+        binaryPositiveCheckBox
+                .addActionListener(e -> setSelectedTemplates(binaryPositiveCheckBox, binaryPositiveTemplates));
 
-        binaryNegativeCheckBox.addActionListener(e -> {
-            List<ConstraintTemplate> templates = Arrays.asList(ConstraintTemplate.Not_Chain_Succession,
-                    ConstraintTemplate.Not_CoExistence, ConstraintTemplate.Not_Succession);
-            if (binaryNegativeCheckBox.isSelected())
-                selectedTemplates.addAll(templates);
-            else
-                selectedTemplates.removeAll(templates);
-        });
+        binaryNegativeCheckBox
+                .addActionListener(e -> setSelectedTemplates(binaryNegativeCheckBox, binaryNegativeTemplates));
 
-        choiceCheckBox.addActionListener(e -> {
-            List<ConstraintTemplate> templates = Arrays.asList(ConstraintTemplate.Choice,
-                    ConstraintTemplate.Exclusive_Choice);
-            if (choiceCheckBox.isSelected())
-                selectedTemplates.addAll(templates);
-            else
-                selectedTemplates.removeAll(templates);
-        });
+        choiceCheckBox.addActionListener(e -> setSelectedTemplates(choiceCheckBox, choiceTemplates));
 
         GUI.addAll(templatesPanel, templatesLabel, unaryCheckBox, binaryPositiveCheckBox, binaryNegativeCheckBox,
                 choiceCheckBox);
@@ -212,12 +231,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
     private static void setToggleButtonText(JToggleButton toggleButton) {
         toggleButton.setText(toggleButton.isSelected() ? "Enabled" : "Disabled");
-    };
+    }
 
     private Component getGeneralParametersPanel() {
         JPanel generalParametersPanel = new JPanel();
         JLabel constraintSupportLabel = new JLabel("Constraint Support");
-        JLabel pruningTypeLabel = new JLabel("Pruning Type");
+        pruningTypeLabel = new JLabel("Pruning Type");
         JLabel vacuousAsViolatedLabel = new JLabel("Vacuous as Violated");
         JLabel considerLifecycleLabel = new JLabel("Consider Lifecycle");
         JLabel discoverTimeConditionsLabel = new JLabel("Discover Time Conditions");
@@ -228,6 +247,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         considerLifecycleButton = new JToggleButton("Disabled");
         discoverTimeConditionsButton = new JToggleButton("Disabled");
         discoverDataConditionsComboBox = new JComboBox<>(discoverDataConditions);
+        discoverDataConditionsComboBox.setSelectedItem(DataConditionType.NONE.getDisplayText());
         Box constraintSupportBox = new Box(BoxLayout.LINE_AXIS);
         Box pruningTypeBox = new Box(BoxLayout.LINE_AXIS);
         Box vacuousAsViolatedBox = new Box(BoxLayout.LINE_AXIS);
@@ -243,6 +263,27 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         vacuousAsViolatedButton.addActionListener(e -> setToggleButtonText(vacuousAsViolatedButton));
         considerLifecycleButton.addActionListener(e -> setToggleButtonText(considerLifecycleButton));
         discoverTimeConditionsButton.addActionListener(e -> setToggleButtonText(discoverTimeConditionsButton));
+        discoverDataConditionsComboBox.addActionListener(e -> {
+            withDiscoverDataCondition = !discoverDataConditionsComboBox.getSelectedItem()
+                    .equals(DataConditionType.NONE.getDisplayText());
+            if (withDiscoverDataCondition) {
+                unaryCheckBox.setVisible(false);
+                binaryPositiveCheckBox.setVisible(false);
+                choiceCheckBox.setVisible(false);
+                selectedTemplates.removeAll(unaryTemplates);
+                selectedTemplates.removeAll(discoverDataNotSupportedTemplates);
+                selectedTemplates.removeAll(binaryNegativeTemplates);
+                selectedTemplates.removeAll(choiceTemplates);
+            } else {
+                unaryCheckBox.setVisible(true);
+                binaryPositiveCheckBox.setVisible(true);
+                if (isDeclareMiner)
+                    choiceCheckBox.setVisible(true);
+                setSelectedTemplates(unaryCheckBox, unaryTemplates);
+                setSelectedTemplates(binaryPositiveCheckBox, binaryPositiveTemplates);
+                setSelectedTemplates(choiceCheckBox, choiceTemplates);
+            }
+        });
         discoverDataConditionsComboBox.setMaximumSize(discoverDataConditionsComboBox.getPreferredSize());
         GUI.addAll(constraintSupportBox, true, constraintSupportLabel,
                 constraintSupportSlider);
@@ -364,7 +405,8 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
                 for (Entry<File, DiscoveryTaskResult> discoveryEntry : discoveryTaskResults.entrySet()) {
                     File selectedLogFile = discoveryEntry.getKey();
                     DiscoveryTaskResult discoveryTaskResult = discoveryEntry.getValue();
-                    String selectedLogFileNameWithoutExtension = selectedLogFile.getName().replaceAll("\\..*", "");
+                    String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
+                            .replace(LogStreamer.LOG_EXTENSIONS_REGEX, "");
                     Path modelDeclPath = LogStreamer.getModelsDirectory()
                             .resolve(selectedLogFileNameWithoutExtension + ".decl");
                     Path modelTextPath = LogStreamer.getModelsDirectory()
@@ -385,6 +427,10 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
                 }
                 LogStreamer.exportZip(filePath, modelFiles.toArray(File[]::new));
+                viewManager.showMessageDialog(rootPanel,
+                        "Model exported successfully.",
+                        ProcessDiscoveryActionController.ACTION_NAME,
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         });
 

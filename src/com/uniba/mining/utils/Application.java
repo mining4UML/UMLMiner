@@ -1,8 +1,5 @@
 package com.uniba.mining.utils;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Point;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;

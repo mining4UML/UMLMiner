@@ -18,16 +18,14 @@ public class ExportLogsActionController implements VPActionController {
     public void performAction(VPAction vpAction) {
 
         if (LogStreamer.countLogs() == 0) {
-            viewManager.showMessageDialog(viewManager.getRootFrame(), "No logs found.", ACTION_NAME,
-                    JOptionPane.WARNING_MESSAGE);
+            GUI.showWarningMessageDialog(viewManager.getRootFrame(), "No logs found.", ACTION_NAME);
             return;
         }
 
         JFileChooser fileChooser = GUI.createExportFileChooser(ACTION_NAME);
         if (fileChooser.showOpenDialog(viewManager.getRootFrame()) == JFileChooser.APPROVE_OPTION) {
             LogStreamer.exportLogs(fileChooser.getSelectedFile().toPath());
-            viewManager.showMessageDialog(viewManager.getRootFrame(), "Logs successfully exported.", ACTION_NAME,
-                    JOptionPane.INFORMATION_MESSAGE);
+            GUI.showInformationMessageDialog(viewManager.getRootFrame(), "Logs successfully exported.", ACTION_NAME);
         }
 
     }

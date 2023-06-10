@@ -23,8 +23,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -37,7 +37,6 @@ import com.uniba.mining.tasks.DiscoveryTask;
 import com.uniba.mining.tasks.MinerfulDiscoveryTask;
 import com.uniba.mining.utils.Application;
 import com.uniba.mining.utils.GUI;
-import com.vp.plugin.ViewManager;
 import com.vp.plugin.view.IDialog;
 import com.vp.plugin.view.IDialogHandler;
 
@@ -51,7 +50,6 @@ import util.ConstraintTemplate;
 import util.ModelExporter;
 
 public class ProcessDiscoveryDialogHandler implements IDialogHandler {
-    private static final ViewManager viewManager = Application.getViewManager();
 
     private static final List<ConstraintTemplate> minerfulNotSupportedTemplates = Arrays.asList(
             ConstraintTemplate.Exactly1,
@@ -68,7 +66,8 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
             ConstraintTemplate.Chain_Precedence,
             ConstraintTemplate.Chain_Response, ConstraintTemplate.Chain_Succession,
             ConstraintTemplate.CoExistence,
-            ConstraintTemplate.Precedence, ConstraintTemplate.Responded_Existence, ConstraintTemplate.Response,
+            ConstraintTemplate.Precedence, ConstraintTemplate.Responded_Existence,
+            ConstraintTemplate.Response,
             ConstraintTemplate.Succession);
     private static final List<ConstraintTemplate> binaryNegativeTemplates = Arrays.asList(
             ConstraintTemplate.Not_Chain_Succession,
@@ -79,16 +78,17 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
             ConstraintTemplate.Alternate_Succession,
             ConstraintTemplate.CoExistence,
             ConstraintTemplate.Succession);
-    private static final String[] discoveryMethodItems = new String[] { DiscoveryMethod.DECLARE.getDisplayText(),
+    private static final String[] discoveryMethodItems = { DiscoveryMethod.DECLARE.getDisplayText(),
             DiscoveryMethod.MINERFUL.getDisplayText() };
-    private static final String[] pruningTypeDeclareMinerItems = new String[] {
-            DeclarePruningType.ALL_REDUCTIONS.getDisplayText(), DeclarePruningType.HIERARCHY_BASED.getDisplayText(),
-            DeclarePruningType.TRANSITIVE_CLOSURE.getDisplayText(), DeclarePruningType.NONE.getDisplayText() };
-    private static final String[] pruningTypeMinerfulItems = new String[] { "None", "Hierarchy", "Conflicts",
-            "Redundancy", "Double redundancy" };
-    private static final String[] discoverDataConditions = new String[] {
-            DataConditionType.ACTIVATIONS.getDisplayText(), DataConditionType.CORRELATIONS.getDisplayText(),
-            DataConditionType.NONE.getDisplayText() };
+    private static final String[] pruningTypeDeclareMinerItems = {
+            DeclarePruningType.ALL_REDUCTIONS.getDisplayText(),
+            DeclarePruningType.HIERARCHY_BASED.getDisplayText(),
+            DeclarePruningType.TRANSITIVE_CLOSURE.getDisplayText(),
+            DeclarePruningType.NONE.getDisplayText() };
+    private static final String[] pruningTypeMinerfulItems = { "None", "Hierarchy", "Conflicts", "Redundancy",
+            "Double redundancy" };
+    private static final String[] discoverDataConditions = { DataConditionType.ACTIVATIONS.getDisplayText(),
+            DataConditionType.CORRELATIONS.getDisplayText(), DataConditionType.NONE.getDisplayText() };
 
     boolean isDeclareMiner = true;
     boolean withDiscoverDataCondition = false;
@@ -97,7 +97,8 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
     private JPanel rootPanel;
     private JComboBox<String> discoveryMethodComboBox;
-    private final List<ConstraintTemplate> selectedTemplates = new ArrayList<>(Arrays.asList(ConstraintTemplate.Absence,
+    private final List<ConstraintTemplate> selectedTemplates = new ArrayList<>(Arrays.asList(
+            ConstraintTemplate.Absence,
             ConstraintTemplate.Absence2,
             ConstraintTemplate.Absence3, ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2,
             ConstraintTemplate.Existence, ConstraintTemplate.Existence2, ConstraintTemplate.Existence3,
@@ -107,7 +108,8 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
             ConstraintTemplate.Chain_Precedence,
             ConstraintTemplate.Chain_Response, ConstraintTemplate.Chain_Succession,
             ConstraintTemplate.CoExistence,
-            ConstraintTemplate.Precedence, ConstraintTemplate.Responded_Existence, ConstraintTemplate.Response,
+            ConstraintTemplate.Precedence, ConstraintTemplate.Responded_Existence,
+            ConstraintTemplate.Response,
             ConstraintTemplate.Succession,
             ConstraintTemplate.Not_Chain_Succession,
             ConstraintTemplate.Not_CoExistence, ConstraintTemplate.Not_Succession,
@@ -129,39 +131,37 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
     private JButton actionsExportButton;
 
     private Component getHeaderPanel() {
-        JPanel headerPanel = new JPanel();
-        JLabel selectFileLabel = new JLabel("Log Files");
-        Box selectFileBox = new Box(BoxLayout.PAGE_AXIS);
-        Box selectFileInputBox = new Box(BoxLayout.LINE_AXIS);
-        JTextField selectFileTextField = new JTextField("No file selected", 20);
-        JButton selectFileButton = new JButton("Select File");
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JLabel selectLogLabel = new JLabel("Select the log files of which discover the model process");
+        Box selectLogBox = new Box(BoxLayout.PAGE_AXIS);
+        Box selectLogInputBox = new Box(BoxLayout.LINE_AXIS);
+        JTextField selectLogTextField = new JTextField("No logs selected", 20);
+        JButton selectLogButton = new JButton("Select Logs");
 
-        selectFileLabel.setLabelFor(selectFileInputBox);
-        selectFileTextField.setEnabled(false);
-        selectFileButton.addActionListener(e -> {
-            JFileChooser fileChooser = viewManager.createJFileChooser();
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fileChooser.setFileFilter(LogStreamer.getLogFileFilter());
-            fileChooser.setMultiSelectionEnabled(true);
-            fileChooser.setCurrentDirectory(LogStreamer.getLogDirectory().toFile());
-            fileChooser.setDialogTitle("Select log files");
-            fileChooser.setApproveButtonText("Select");
+        selectLogLabel.setLabelFor(selectLogInputBox);
+        selectLogTextField.setEnabled(false);
+        selectLogButton.addActionListener(e -> {
+            JFileChooser fileChooser = GUI.createSelectFileChooser(
+                    ProcessDiscoveryActionController.ACTION_NAME, LogStreamer.getLogFileFilter(),
+                    true);
+            fileChooser.setCurrentDirectory(LogStreamer.getLogsDirectory().toFile());
 
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
                 selectedLogFiles = fileChooser.getSelectedFiles();
-                selectFileTextField
+                selectLogTextField
                         .setText(Arrays.toString(
-                                Arrays.stream(selectedLogFiles).map(File::getName).toArray(String[]::new)));
+                                Arrays.stream(selectedLogFiles).map(File::getName)
+                                        .toArray(String[]::new)));
                 discoveryTaskResults.clear();
                 actionsExportButton.setEnabled(false);
                 actionsDiscoveryButton.setEnabled(true);
             }
         });
-        GUI.addAll(selectFileInputBox, true, selectFileTextField, selectFileButton);
-        GUI.addAll(selectFileBox, true, selectFileLabel, selectFileInputBox);
-        selectFileLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        selectFileInputBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-        GUI.addAll(headerPanel, selectFileBox);
+        selectLogLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        selectLogInputBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        GUI.addAll(selectLogInputBox, GUI.DEFAULT_PADDING, selectLogTextField, selectLogButton);
+        GUI.addAll(selectLogBox, GUI.DEFAULT_PADDING, selectLogLabel, selectLogInputBox);
+        GUI.addAll(headerPanel, selectLogBox);
         return headerPanel;
     }
 
@@ -174,18 +174,22 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
                 isDeclareMiner = e.getItem().equals("Declare Miner");
                 choiceCheckBox.setVisible(isDeclareMiner);
                 pruningTypeComboBox.removeAllItems();
-                for (String pruningTypeItem : isDeclareMiner ? pruningTypeDeclareMinerItems : pruningTypeMinerfulItems)
+                for (String pruningTypeItem : isDeclareMiner ? pruningTypeDeclareMinerItems
+                        : pruningTypeMinerfulItems)
                     pruningTypeComboBox.addItem(pruningTypeItem);
                 if (isDeclareMiner) {
                     if (!withDiscoverDataCondition) {
                         setSelectedTemplates(unaryCheckBox,
-                                Arrays.asList(ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2));
-                        setSelectedTemplates(choiceCheckBox, Arrays.asList(ConstraintTemplate.Choice,
-                                ConstraintTemplate.Exclusive_Choice));
+                                Arrays.asList(ConstraintTemplate.Exactly1,
+                                        ConstraintTemplate.Exactly2));
+                        setSelectedTemplates(choiceCheckBox,
+                                Arrays.asList(ConstraintTemplate.Choice,
+                                        ConstraintTemplate.Exclusive_Choice));
                     }
                 } else
                     selectedTemplates.removeAll(minerfulNotSupportedTemplates);
-                pruningTypeLabel.setText(String.format("Pruning Type (%s)", isDeclareMiner ? "Declare" : "MINERful"));
+                pruningTypeLabel.setText(String.format("Pruning Type (%s)",
+                        isDeclareMiner ? "Declare" : "MINERful"));
                 pruningTypeComboBox.setMaximumSize(pruningTypeComboBox.getPreferredSize());
                 vacuousAsViolatedButton.setEnabled(isDeclareMiner);
                 considerLifecycleButton.setEnabled(isDeclareMiner);
@@ -217,14 +221,17 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         unaryCheckBox.addActionListener(e -> setSelectedTemplates(unaryCheckBox, unaryTemplates));
 
         binaryPositiveCheckBox
-                .addActionListener(e -> setSelectedTemplates(binaryPositiveCheckBox, binaryPositiveTemplates));
+                .addActionListener(e -> setSelectedTemplates(binaryPositiveCheckBox,
+                        binaryPositiveTemplates));
 
         binaryNegativeCheckBox
-                .addActionListener(e -> setSelectedTemplates(binaryNegativeCheckBox, binaryNegativeTemplates));
+                .addActionListener(e -> setSelectedTemplates(binaryNegativeCheckBox,
+                        binaryNegativeTemplates));
 
         choiceCheckBox.addActionListener(e -> setSelectedTemplates(choiceCheckBox, choiceTemplates));
 
-        GUI.addAll(templatesPanel, templatesLabel, unaryCheckBox, binaryPositiveCheckBox, binaryNegativeCheckBox,
+        GUI.addAll(templatesPanel, templatesLabel, unaryCheckBox, binaryPositiveCheckBox,
+                binaryNegativeCheckBox,
                 choiceCheckBox);
         return templatesPanel;
     }
@@ -285,21 +292,22 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
             }
         });
         discoverDataConditionsComboBox.setMaximumSize(discoverDataConditionsComboBox.getPreferredSize());
-        GUI.addAll(constraintSupportBox, true, constraintSupportLabel,
+        GUI.addAll(constraintSupportBox, GUI.DEFAULT_PADDING, constraintSupportLabel,
                 constraintSupportSlider);
-        GUI.addAll(pruningTypeBox, true, pruningTypeLabel, pruningTypeComboBox);
-        GUI.addAll(vacuousAsViolatedBox, true, vacuousAsViolatedLabel,
+        GUI.addAll(pruningTypeBox, GUI.DEFAULT_PADDING, pruningTypeLabel, pruningTypeComboBox);
+        GUI.addAll(vacuousAsViolatedBox, GUI.DEFAULT_PADDING, vacuousAsViolatedLabel,
                 vacuousAsViolatedButton);
-        GUI.addAll(considerLifecycleBox, true, considerLifecycleLabel,
+        GUI.addAll(considerLifecycleBox, GUI.DEFAULT_PADDING, considerLifecycleLabel,
                 considerLifecycleButton);
-        GUI.addAll(discoverTimeConditionsBox, true, discoverTimeConditionsLabel,
+        GUI.addAll(discoverTimeConditionsBox, GUI.DEFAULT_PADDING, discoverTimeConditionsLabel,
                 discoverTimeConditionsButton);
-        GUI.addAll(discoverDataConditionsBox, true, discoverDataConditionsLabel,
+        GUI.addAll(discoverDataConditionsBox, GUI.DEFAULT_PADDING, discoverDataConditionsLabel,
                 discoverDataConditionsComboBox);
 
         generalParametersPanel.setLayout(new BoxLayout(generalParametersPanel, BoxLayout.PAGE_AXIS));
         generalParametersPanel.setBorder(GUI.getDefaultTitledBorder("General Parameters"));
-        GUI.addAll(generalParametersPanel, true, constraintSupportBox, pruningTypeBox, vacuousAsViolatedBox,
+        GUI.addAll(generalParametersPanel, GUI.DEFAULT_PADDING, constraintSupportBox, pruningTypeBox,
+                vacuousAsViolatedBox,
                 considerLifecycleBox, discoverTimeConditionsBox, discoverDataConditionsBox);
         constraintSupportBox.setAlignmentX(Component.LEFT_ALIGNMENT);
         pruningTypeBox.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -314,7 +322,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         JPanel contentPanel = new JPanel();
 
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
-        GUI.addAll(contentPanel, true, new JSeparator(), getDiscoveryMethodPanel(),
+        GUI.addAll(contentPanel, GUI.DEFAULT_PADDING, new JSeparator(), getDiscoveryMethodPanel(),
                 getTemplatesPanel(), getGeneralParametersPanel());
 
         return contentPanel;
@@ -324,29 +332,34 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
         System.out.println("Discovery model completed for file: " + selectedLogFile.getName());
         discoveryTaskResults.put(selectedLogFile, discoveryTaskResult);
         if (selectedLogFiles.length == discoveryTaskResults.size()) {
-            viewManager.showMessageDialog(rootPanel,
+            GUI.showInformationMessageDialog(rootPanel,
                     "Process discovery finished for the selected files.",
-                    ProcessDiscoveryActionController.ACTION_NAME,
-                    JOptionPane.INFORMATION_MESSAGE);
+                    ProcessDiscoveryActionController.ACTION_NAME);
             actionsExportButton.setEnabled(true);
         }
     }
 
     private Component getActionsPanel() {
-        JPanel actionsPanel = new JPanel();
+        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
         actionsDiscoveryButton = new JButton("Discover");
         actionsExportButton = new JButton("Export Models");
+        JProgressBar progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setVisible(false);
+
         actionsDiscoveryButton.setEnabled(false);
         actionsExportButton.setEnabled(false);
 
         actionsDiscoveryButton.addActionListener(e -> {
             actionsDiscoveryButton.setEnabled(false);
+            progressBar.setVisible(true);
             DiscoveryTask discoveryTask;
             MpEnhancer mpEnhancer = new MpEnhancer();
-            mpEnhancer.setMinSupport(discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()
-                    ? constraintSupportSlider
-                            .getValue()
-                    : constraintSupportSlider.getValue() / 100d);
+            mpEnhancer.setMinSupport(
+                    discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()
+                            ? constraintSupportSlider
+                                    .getValue()
+                            : constraintSupportSlider.getValue() / 100d);
             mpEnhancer.setConditionType(
                     DataConditionType.values()[discoverDataConditionsComboBox.getSelectedIndex()]);
 
@@ -356,10 +369,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
                 discoveryTaskDeclare.setSelectedTemplates(selectedTemplates);
                 discoveryTaskDeclare.setMinSupport(constraintSupportSlider.getValue());
                 discoveryTaskDeclare
-                        .setPruningType(DeclarePruningType.values()[pruningTypeComboBox.getSelectedIndex()]);
+                        .setPruningType(DeclarePruningType.values()[pruningTypeComboBox
+                                .getSelectedIndex()]);
                 discoveryTaskDeclare.setVacuityAsViolation(vacuousAsViolatedButton.isSelected());
                 discoveryTaskDeclare.setConsiderLifecycle(considerLifecycleButton.isSelected());
-                discoveryTaskDeclare.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
+                discoveryTaskDeclare
+                        .setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
 
                 if (DataConditionType.values()[discoverDataConditionsComboBox
                         .getSelectedIndex()] != DataConditionType.NONE) {
@@ -374,8 +389,10 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
                 discoveryTaskMinerful.setSelectedTemplates(selectedTemplates);
                 discoveryTaskMinerful.setMinSupport(constraintSupportSlider.getValue());
                 discoveryTaskMinerful
-                        .setPruningType(PostProcessingAnalysisType.values()[pruningTypeComboBox.getSelectedIndex()]);
-                discoveryTaskMinerful.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
+                        .setPruningType(PostProcessingAnalysisType.values()[pruningTypeComboBox
+                                .getSelectedIndex()]);
+                discoveryTaskMinerful
+                        .setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
 
                 if (DataConditionType.values()[discoverDataConditionsComboBox
                         .getSelectedIndex()] != DataConditionType.NONE) {
@@ -390,8 +407,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
             for (File selectedLogFile : selectedLogFiles) {
                 System.out.println("Discover model for file: " + selectedLogFile.getName());
                 discoveryTask.setLogFile(selectedLogFile);
-                Application.run(() -> putDiscoveryResult(selectedLogFile, discoveryTask.call()));
+                Application.run(() -> {
+                    progressBar.setVisible(false);
+                    putDiscoveryResult(selectedLogFile, discoveryTask.call());
+                });
             }
+
         });
 
         actionsExportButton.addActionListener(event -> {
@@ -400,9 +421,11 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
                 Path directoryPath = fileChooser.getSelectedFile().toPath();
                 Path filePath = directoryPath
-                        .resolve(Paths.get(Application.getTimestampString() + LogStreamer.ZIP_EXTENSION));
+                        .resolve(Paths.get(Application.getTimestampString()
+                                + LogStreamer.ZIP_EXTENSION));
                 List<File> modelFiles = new ArrayList<>();
-                for (Entry<File, DiscoveryTaskResult> discoveryEntry : discoveryTaskResults.entrySet()) {
+                for (Entry<File, DiscoveryTaskResult> discoveryEntry : discoveryTaskResults
+                        .entrySet()) {
                     File selectedLogFile = discoveryEntry.getKey();
                     DiscoveryTaskResult discoveryTaskResult = discoveryEntry.getValue();
                     String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
@@ -413,11 +436,14 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
                             .resolve(selectedLogFileNameWithoutExtension + ".txt");
                     try {
                         File modelDeclFile = Files
-                                .writeString(modelDeclPath, ModelExporter.getDeclString(selectedLogFile,
-                                        discoveryTaskResult.getActivities(), discoveryTaskResult.getConstraints()))
+                                .writeString(modelDeclPath, ModelExporter.getDeclString(
+                                        selectedLogFile,
+                                        discoveryTaskResult.getActivities(),
+                                        discoveryTaskResult.getConstraints()))
                                 .toFile();
                         File modelTextFile = Files.writeString(modelTextPath,
-                                ModelExporter.getTextString(discoveryTaskResult.getActivities(),
+                                ModelExporter.getTextString(
+                                        discoveryTaskResult.getActivities(),
                                         discoveryTaskResult.getConstraints()))
                                 .toFile();
                         modelFiles.addAll(Arrays.asList(modelDeclFile, modelTextFile));
@@ -427,14 +453,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
                 }
                 LogStreamer.exportZip(filePath, modelFiles.toArray(File[]::new));
-                viewManager.showMessageDialog(rootPanel,
-                        "Model exported successfully.",
-                        ProcessDiscoveryActionController.ACTION_NAME,
-                        JOptionPane.INFORMATION_MESSAGE);
+                GUI.showInformationMessageDialog(rootPanel, "Model exported successfully.",
+                        ProcessDiscoveryActionController.ACTION_NAME);
             }
         });
 
-        GUI.addAll(actionsPanel, actionsDiscoveryButton, actionsExportButton);
+        GUI.addAll(actionsPanel, actionsDiscoveryButton, actionsExportButton, progressBar);
 
         return actionsPanel;
     }

@@ -8,8 +8,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -39,10 +37,11 @@ public class LogStreamer {
     private static final Set<String> logExtensions = new HashSet<>(
             Arrays.asList("xes", "csv", "jsoncel", "xmlocel"));
     private static final FileFilter logFileFilter = new FileNameExtensionFilter(
-            "Log File " + Arrays.toString(logExtensions.toArray()),
+            "Log " + Arrays.toString(logExtensions.toArray()),
             logExtensions.toArray(String[]::new));
+    private static final FileFilter modelFileFilter = new FileNameExtensionFilter("MP-Declare File", "decl");
     public static final String LOG_EXTENSIONS_REGEX = "\\.(" + logExtensions.stream().reduce("",
-            (t, u) -> String.join("|", t, u)) + ")";
+            (t, u) -> String.join(t.isEmpty() ? "" : "|", t, u)) + ").*";
     public static final String LOG_FILENAME_REGEX = String.format(".*%s", LOG_EXTENSIONS_REGEX);
 
     private LogStreamer() {
@@ -64,7 +63,7 @@ public class LogStreamer {
         createDirectories();
     }
 
-    public static Path getLogDirectory() {
+    public static Path getLogsDirectory() {
         return logsDirectory;
     }
 
@@ -74,6 +73,10 @@ public class LogStreamer {
 
     public static FileFilter getLogFileFilter() {
         return logFileFilter;
+    }
+
+    public static FileFilter getModelFileFilter() {
+        return modelFileFilter;
     }
 
     private static String getLogName() {

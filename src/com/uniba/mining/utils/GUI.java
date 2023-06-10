@@ -6,17 +6,14 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.font.TextAttribute;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -28,16 +25,21 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.filechooser.FileFilter;
 
 import com.uniba.mining.plugin.Config;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.view.IDialog;
 
 public class GUI {
-    private static final int DEFAULT_PADDING = 4;
-    private static final int DEFAULT_BORDER_SIZE = 1;
+    public static final int LOW_PADDING = 2;
+    public static final int DEFAULT_PADDING = 4;
+    public static final int HIGH_PADDING = 8;
+    public static final int ULTRA_HIGH_PADDING = 16;
+    public static final int DEFAULT_BORDER_SIZE = 1;
     private static final Dimension defaultPaddingDimension = new Dimension(DEFAULT_PADDING, DEFAULT_PADDING);
     private static final Border defaultPaddingBorder = BorderFactory.createEmptyBorder(DEFAULT_PADDING, DEFAULT_PADDING,
             DEFAULT_PADDING, DEFAULT_PADDING);
@@ -48,8 +50,12 @@ public class GUI {
     private GUI() {
     }
 
+    public static JComponent getPaddingComponent(Dimension dimension) {
+        return (JComponent) Box.createRigidArea(dimension);
+    }
+
     public static JComponent getDefaultPaddingComponent() {
-        return (JComponent) Box.createRigidArea(defaultPaddingDimension);
+        return getPaddingComponent(defaultPaddingDimension);
     }
 
     public static Border getDefaultBorder() {
@@ -70,12 +76,12 @@ public class GUI {
         return new Point(xCoordinate, yCoordinate);
     }
 
-    public static void addAll(Container container, boolean withPadding, Component... components) {
+    public static void addAll(Container container, int padding, Component... components) {
         Component lastComponent = components[components.length - 1];
         for (Component component : components) {
             container.add(component);
-            if (withPadding && component != lastComponent) {
-                JComponent defaultPaddingComponent = getDefaultPaddingComponent();
+            if (padding > 0 && component != lastComponent) {
+                JComponent defaultPaddingComponent = getPaddingComponent(new Dimension(padding, padding));
                 defaultPaddingComponent.setAlignmentX(component.getAlignmentX());
                 defaultPaddingComponent.setAlignmentY(component.getAlignmentY());
                 container.add(defaultPaddingComponent);
@@ -84,7 +90,7 @@ public class GUI {
     }
 
     public static void addAll(Container container, Component... components) {
-        addAll(container, false, components);
+        addAll(container, 0, components);
     }
 
     public static void prepareDialog(IDialog dialog, String title) {
@@ -180,20 +186,42 @@ public class GUI {
         }
     }
 
+    public static JFileChooser createSelectFileChooser(String title, FileFilter fileFilter, boolean multiple) {
+        String fullTitle = String.join(" - ", Config.PLUGIN_NAME, title);
+        JFileChooser fileChooser = viewManager.createJFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileFilter(fileFilter);
+        fileChooser.setMultiSelectionEnabled(multiple);
+        fileChooser.setDialogTitle(fullTitle);
+        fileChooser.setToolTipText(fullTitle);
+        fileChooser.setApproveButtonText("Select");
+        fileChooser.setApproveButtonToolTipText(fullTitle);
+        return fileChooser;
+    }
+
     public static JFileChooser createExportFileChooser(String title) {
-        String actionName = "Export";
-        String fullTitle = String.join(" - ", title, actionName);
+        String fullTitle = String.join(" - ", Config.PLUGIN_NAME, title);
         JFileChooser fileChooser = viewManager.createJFileChooser();
         fileChooser.setLocale(Locale.ENGLISH);
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setName(fullTitle);
         fileChooser.setDialogTitle(fullTitle);
         fileChooser.setToolTipText(fullTitle);
-        fileChooser.setApproveButtonText(actionName);
-        fileChooser.setApproveButtonToolTipText(actionName);
+        fileChooser.setApproveButtonText("Export");
+        fileChooser.setApproveButtonToolTipText(title);
 
         disableTextFields(fileChooser);
 
         return fileChooser;
+    }
+
+    public static void showInformationMessageDialog(Component component, String title, String msg) {
+        viewManager.showMessageDialog(component, msg, String.join(" - ", Config.PLUGIN_NAME, title),
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static void showWarningMessageDialog(Component component, String title, String msg) {
+        viewManager.showMessageDialog(component, msg, String.join(" - ", Config.PLUGIN_NAME, title),
+                JOptionPane.WARNING_MESSAGE);
     }
 }

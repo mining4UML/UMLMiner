@@ -5,7 +5,7 @@ import java.io.File;
 import task.discovery.DiscoveryTaskResult;
 
 public interface DiscoveryTask {
-    public DiscoveryTaskResult call();
+    void setLogFile(File logFile);
 
-    public void setLogFile(File logFile);
+    DiscoveryTaskResult call();
 }

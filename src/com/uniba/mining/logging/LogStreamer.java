@@ -26,11 +26,13 @@ import com.uniba.mining.utils.Application;
 
 public class LogStreamer {
     public static final String LOG_EXTENSION = ".xes";
+    public static final String CSV_EXTENSION = ".csv";
     public static final String ZIP_EXTENSION = ".zip";
     private static final String USER_NAME = System.getProperty("user.name");
     private static final String USER_DIR = System.getProperty("user.dir");
     private static final Path logsDirectory = Paths.get(USER_DIR, "logs", USER_NAME);
     private static final Path modelsDirectory = Paths.get(USER_DIR, "models", USER_NAME);
+    private static final Path reportsDirectory = Paths.get(USER_DIR, "reports", USER_NAME);
     private static final Logger logger = new Logger(LogStreamer.class);
     private static final XesXmlParser xesXmlParser = new XesXmlParser();
     private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
@@ -54,6 +56,8 @@ public class LogStreamer {
                 Files.createDirectories(logsDirectory);
             if (Files.notExists(modelsDirectory))
                 Files.createDirectories(modelsDirectory);
+            if (Files.notExists(reportsDirectory))
+                Files.createDirectories(reportsDirectory);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -69,6 +73,10 @@ public class LogStreamer {
 
     public static Path getModelsDirectory() {
         return modelsDirectory;
+    }
+
+    public static Path getReportsDirectory() {
+        return reportsDirectory;
     }
 
     public static FileFilter getLogFileFilter() {
@@ -127,7 +135,7 @@ public class LogStreamer {
         return logsDirectory.toFile().listFiles(LogStreamer::isLogFile).length;
     }
 
-    public static void exportZip(Path filePath, File[] files) {
+    public static void exportZip(Path filePath, File... files) {
         try (OutputStream outputStream = new FileOutputStream(Files.createFile(filePath).toFile());
                 ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
 

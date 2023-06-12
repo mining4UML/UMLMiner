@@ -340,8 +340,8 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		discoveryTaskResults.put(selectedLogFile, discoveryTaskResult);
 		if (selectedLogFiles.length == discoveryTaskResults.size()) {
 			GUI.showInformationMessageDialog(rootPanel,
-					"Process discovery finished for the selected files.",
-					ProcessDiscoveryActionController.ACTION_NAME);
+					ProcessDiscoveryActionController.ACTION_NAME,
+					"Process discovery finished for the selected files.");
 			actionsExportButton.setEnabled(true);
 		}
 	}
@@ -417,8 +417,8 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 				System.out.println("Discover model for file: " + selectedLogFile.getName());
 				discoveryTask.setLogFile(selectedLogFile);
 				Application.run(() -> {
-					progressBar.setVisible(false);
 					putDiscoveryResult(selectedLogFile, discoveryTask.call());
+					progressBar.setVisible(false);
 				});
 			}
 
@@ -462,8 +462,8 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 				}
 				LogStreamer.exportZip(filePath, modelFiles.toArray(File[]::new));
-				GUI.showInformationMessageDialog(rootPanel, "Model exported successfully.",
-						ProcessDiscoveryActionController.ACTION_NAME);
+				GUI.showInformationMessageDialog(rootPanel, ProcessDiscoveryActionController.ACTION_NAME,
+						"Model exported successfully.");
 			}
 		});
 

@@ -341,7 +341,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		if (selectedLogFiles.length == discoveryTaskResults.size()) {
 			GUI.showInformationMessageDialog(rootPanel,
 					ProcessDiscoveryActionController.ACTION_NAME,
-					"Process discovery finished for the selected files.");
+					"Process discovery finished for the selected logs.");
 			actionsExportButton.setEnabled(true);
 		}
 	}

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,10 +27,13 @@ import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
+import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.out.XesXmlSerializer;
+import org.processmining.plugins.DataConformance.framework.ActivityMatchCost;
+import org.processmining.plugins.DataConformance.framework.ReplayableActivity;
 
 import com.uniba.mining.actions.ConformanceCheckingActionController;
 import com.uniba.mining.logging.LogStreamer;
@@ -42,6 +47,7 @@ import com.vp.plugin.view.IDialog;
 import com.vp.plugin.view.IDialogHandler;
 
 import controller.conformance.ConformanceMethod;
+import controller.conformance.datarow.FlowCostDataRow;
 import task.conformance.ConformanceStatisticType;
 import task.conformance.ConformanceTaskResult;
 import task.conformance.ConformanceTaskResultGroup;
@@ -58,6 +64,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
     private JComboBox<String> checkingMethodComboBox;
     private JComboBox<String> optionsGroupComboBox;
     private JButton actionsCheckButton;
+    private JButton actionsExportButton;
+    private IDialog dialog;
 
     private File selectedModelFile;
     private File selectedLogFile;
@@ -90,6 +98,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                 optionsPanel.setVisible(false);
                 if (selectedModelFile != null && selectedLogFile != null)
                     actionsCheckButton.setEnabled(true);
+                actionsExportButton.setEnabled(false);
+                dialog.pack();
             }
         });
         selectLogLabel.setLabelFor(selectLogBox);
@@ -105,6 +115,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                 optionsPanel.setVisible(false);
                 if (selectedModelFile != null && selectedLogFile != null)
                     actionsCheckButton.setEnabled(true);
+                actionsExportButton.setEnabled(false);
+                dialog.pack();
             }
         });
         selectModelLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -125,17 +137,24 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         checkingMethodComboBox = new JComboBox<>(checkingMethodItems);
 
         checkingMethodLabel.setLabelFor(checkingMethodComboBox);
+
+        checkingMethodComboBox.addActionListener(e -> {
+            actionsCheckButton.setEnabled(true);
+            actionsExportButton.setEnabled(false);
+        });
+
         GUI.addAll(checkingMethodPanel, checkingMethodLabel, checkingMethodComboBox);
         return checkingMethodPanel;
     }
 
     private Component getOptionsPanel() {
-        optionsPanel = new JPanel();
+        optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
         JLabel optionsGroupLabel = new JLabel("Group Results By");
         optionsGroupComboBox = new JComboBox<>(optionsGroupItems);
 
         optionsPanel.setVisible(false);
         GUI.addAll(optionsPanel, optionsGroupLabel, optionsGroupComboBox);
+        optionsPanel.setBorder(GUI.getDefaultTitledBorder("Options"));
         return optionsPanel;
     }
 
@@ -303,10 +322,37 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         return null;
     }
 
+    private List<ActivityMatchCost> getActivityMatchCosts() {
+        List<ActivityMatchCost> activityMatchCosts = new ArrayList<>();
+
+        // Insertion default (may be overridden below)
+        ActivityMatchCost defaultInsertionMatchCost = new ActivityMatchCost();
+        defaultInsertionMatchCost.setAllEvents(false);
+        defaultInsertionMatchCost.setAllProcessActivities(true);
+        defaultInsertionMatchCost.setCost(10f);
+        defaultInsertionMatchCost.setEventClass(null);
+        defaultInsertionMatchCost.setProcessActivity(null);
+
+        // Deletion default (may be overridden below)
+        ActivityMatchCost defaultDeletionMatchCost = new ActivityMatchCost();
+        defaultDeletionMatchCost.setAllEvents(true);
+        defaultDeletionMatchCost.setAllProcessActivities(false);
+        defaultDeletionMatchCost.setCost(10f);
+        defaultDeletionMatchCost.setEventClass(null);
+        defaultDeletionMatchCost.setProcessActivity(null);
+
+        // Default cost objects must be added last, otherwise Declare Replayer and
+        // DataAware Declare Replayer ignore specific costs
+        activityMatchCosts.add(defaultInsertionMatchCost);
+        activityMatchCosts.add(defaultDeletionMatchCost);
+
+        return activityMatchCosts;
+    }
+
     private Component getActionsPanel() {
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
         actionsCheckButton = new JButton("Check");
-        JButton actionsExportButton = new JButton("Export Reports");
+        actionsExportButton = new JButton("Export Reports");
         JProgressBar progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setString("Checking conformance...");
@@ -324,6 +370,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             ConformanceTask conformanceTask = conformanceMethod == ConformanceMethod.ANALYZER
                     ? new ConformanceAnalyzerTask()
                     : new ConformanceReplayerTask();
+            if (conformanceMethod == ConformanceMethod.REPLAYER)
+                ((ConformanceReplayerTask) conformanceTask).setActivityMatchCosts(getActivityMatchCosts());
             Application.run(() -> {
                 conformanceTask.setLogFile(selectedLogFile);
                 try {
@@ -334,7 +382,10 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                 conformanceTaskResult = conformanceTask.call();
                 progressBar.setVisible(false);
                 optionsPanel.setVisible(true);
-                actionsExportButton.setVisible(false);
+                actionsExportButton.setEnabled(true);
+                dialog.pack();
+                GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
+                        "Conformance checking completed for the selected files.");
             });
         });
 
@@ -342,10 +393,11 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             JFileChooser fileChooser = GUI.createExportFileChooser(ConformanceCheckingActionController.ACTION_NAME);
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
                 Path directoryPath = fileChooser.getSelectedFile().toPath();
-                Path filePath = directoryPath.resolve(Paths.get(Application.getTimestampString()));
+                Path filePath = directoryPath
+                        .resolve(Paths.get(Application.getTimestampString()) + LogStreamer.ZIP_EXTENSION);
                 LogStreamer.exportZip(filePath, exportCsvData(), exportFulfilledLog(), exportViolatedLog());
                 GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
-                        "Report successfully exported");
+                        "Report successfully exported.");
             }
         });
 
@@ -371,6 +423,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 
     @Override
     public void prepare(IDialog dialog) {
+        this.dialog = dialog;
         GUI.prepareDialog(dialog, ConformanceCheckingActionController.ACTION_NAME);
     }
 

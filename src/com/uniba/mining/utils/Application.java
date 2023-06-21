@@ -2,8 +2,11 @@ package com.uniba.mining.utils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -15,13 +18,14 @@ import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
 
 public class Application {
+    private static final long DEFAULT_DELAY = 100;
+    private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd_HH.mm.ss";
     private static final ApplicationManager manager = ApplicationManager.instance();
     private static final ExecutorService executorService = Executors
             .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private static final ScheduledExecutorService scheduledExecutorService = Executors
             .newSingleThreadScheduledExecutor();
-    private static final long DEFAULT_DELAY = 100;
-    private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd_HH.mm.ss";
+    private static final List<Future<?>> tasks = new ArrayList<>();
 
     private Application() {
         // Empty
@@ -48,15 +52,23 @@ public class Application {
     }
 
     public static void run(Runnable runnable) {
-        executorService.execute(runnable);
+        tasks.add(executorService.submit(runnable));
+
     }
 
     public static void runDelayed(Runnable runnable, long delay) {
-        scheduledExecutorService.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+        tasks.add(scheduledExecutorService.schedule(runnable, delay, TimeUnit.MILLISECONDS));
     }
 
     public static void runDelayed(Runnable runnable) {
         runDelayed(runnable, DEFAULT_DELAY);
+    }
+
+    public static void cancelTasks() {
+        for (Future<?> task : tasks) {
+            task.cancel(true);
+        }
+        tasks.clear();
     }
 
     public static String getTimestampString() {

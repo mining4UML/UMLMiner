@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -27,17 +27,16 @@ import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
-import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.out.XesXmlSerializer;
 import org.processmining.plugins.DataConformance.framework.ActivityMatchCost;
-import org.processmining.plugins.DataConformance.framework.ReplayableActivity;
 
 import com.uniba.mining.actions.ConformanceCheckingActionController;
 import com.uniba.mining.logging.LogStreamer;
 import com.uniba.mining.logging.Logger;
+import com.uniba.mining.plugin.Config;
 import com.uniba.mining.tasks.ConformanceAnalyzerTask;
 import com.uniba.mining.tasks.ConformanceReplayerTask;
 import com.uniba.mining.tasks.ConformanceTask;
@@ -47,7 +46,6 @@ import com.vp.plugin.view.IDialog;
 import com.vp.plugin.view.IDialogHandler;
 
 import controller.conformance.ConformanceMethod;
-import controller.conformance.datarow.FlowCostDataRow;
 import task.conformance.ConformanceStatisticType;
 import task.conformance.ConformanceTaskResult;
 import task.conformance.ConformanceTaskResultGroup;
@@ -83,6 +81,9 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         Box selectLogInputBox = new Box(BoxLayout.LINE_AXIS);
         JTextField selectLogTextField = new JTextField("No log selected", 20);
         JButton selectLogButton = new JButton("Select Log");
+        String checkingImagePath = String.join("/", Config.ICONS_PATH, "checklist.png");
+        ImageIcon checkingImage = GUI.loadImage(checkingImagePath, "Conformance checking icon", 0.5f);
+        JLabel checkingLabel = new JLabel(checkingImage);
 
         selectModelLabel.setLabelFor(selectModelInputBox);
         selectModelTextField.setEnabled(false);
@@ -127,7 +128,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         GUI.addAll(selectLogInputBox, GUI.DEFAULT_PADDING, selectLogTextField, selectLogButton);
         GUI.addAll(selectModelBox, GUI.DEFAULT_PADDING, selectModelLabel, selectModelInputBox);
         GUI.addAll(selectLogBox, GUI.DEFAULT_PADDING, selectLogLabel, selectLogInputBox);
-        GUI.addAll(headerPanel, selectModelBox, selectLogBox);
+        GUI.addAll(headerPanel, selectModelBox, selectLogBox, checkingLabel);
         return headerPanel;
     }
 
@@ -363,7 +364,15 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         actionsExportButton.setEnabled(false);
 
         actionsCheckButton.addActionListener(e -> {
-            actionsCheckButton.setEnabled(false);
+            if (actionsCheckButton.getText().equals("Cancel")) {
+                actionsCheckButton.setText("Check");
+                progressBar.setVisible(false);
+                Application.cancelTasks();
+                conformanceTaskResult = null;
+                return;
+            }
+
+            actionsCheckButton.setText("Cancel");
             progressBar.setVisible(true);
             ConformanceMethod conformanceMethod = ConformanceMethod.values()[checkingMethodComboBox
                     .getSelectedIndex()];

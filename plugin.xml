@@ -21,7 +21,7 @@
 				actionType="generalAction"
 				label="%actions.ProcessDiscovery.label"
 				tooltip="%actions.ProcessDiscovery.label"
-				icon="assets/icons/lightbulb.png"
+				icon="assets/icons/spaceman.png"
 				style="normal"
 				ribbonPath="Toolbar/#">
 				<actionController class="com.uniba.mining.actions.ProcessDiscoveryActionController" />
@@ -31,7 +31,7 @@
 				actionType="generalAction"
 				label="%actions.ConformanceChecking.label"
 				tooltip="%actions.ConformanceChecking.label"
-				icon="assets/icons/test.png"
+				icon="assets/icons/checklist.png"
 				style="normal"
 				ribbonPath="Toolbar/Discovery">
 				<actionController

@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -32,6 +33,7 @@ import javax.swing.JToggleButton;
 
 import com.uniba.mining.actions.ProcessDiscoveryActionController;
 import com.uniba.mining.logging.LogStreamer;
+import com.uniba.mining.plugin.Config;
 import com.uniba.mining.tasks.DeclareDiscoveryTask;
 import com.uniba.mining.tasks.DiscoveryTask;
 import com.uniba.mining.tasks.MinerfulDiscoveryTask;
@@ -129,7 +131,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private JToggleButton discoverTimeConditionsButton;
 	private JComboBox<String> discoverDataConditionsComboBox;
 	private JButton actionsDiscoveryButton;
-	private JButton actionsExportButton;
+	private JProgressBar progressBar;
 
 	private Component getHeaderPanel() {
 		JPanel headerPanel = new JPanel();
@@ -138,6 +140,9 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		Box selectFileInputBox = new Box(BoxLayout.LINE_AXIS);
 		JTextField selectFileTextField = new JTextField("No logs selected", 20);
 		JButton selectFileButton = new JButton("Select Log");
+		String discoverImagePath = String.join("/", Config.ICONS_PATH, "spaceman.png");
+		ImageIcon discoverImage = GUI.loadImage(discoverImagePath, "Process discovery icon", 0.5f);
+		JLabel discoverLabel = new JLabel(discoverImage);
 
 		selectFileLabel.setLabelFor(selectFileInputBox);
 		selectFileTextField.setEnabled(false);
@@ -154,15 +159,14 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 								Arrays.stream(selectedLogFiles).map(File::getName)
 										.toArray(String[]::new)));
 				discoveryTaskResults.clear();
-				actionsExportButton.setEnabled(false);
 				actionsDiscoveryButton.setEnabled(true);
 			}
 		});
-		GUI.addAll(selectFileInputBox, GUI.DEFAULT_PADDING, selectFileTextField, selectFileButton);
-		GUI.addAll(selectFileBox, GUI.DEFAULT_PADDING, selectFileLabel, selectFileInputBox);
 		selectFileLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		selectFileInputBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-		GUI.addAll(headerPanel, selectFileBox);
+		GUI.addAll(selectFileInputBox, GUI.DEFAULT_PADDING, selectFileTextField, selectFileButton);
+		GUI.addAll(selectFileBox, GUI.DEFAULT_PADDING, selectFileLabel, selectFileInputBox);
+		GUI.addAll(headerPanel, selectFileBox, discoverLabel);
 		return headerPanel;
 	}
 
@@ -338,136 +342,150 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private void putDiscoveryResult(File selectedLogFile, DiscoveryTaskResult discoveryTaskResult) {
 		System.out.println("Discovery model completed for file: " + selectedLogFile.getName());
 		discoveryTaskResults.put(selectedLogFile, discoveryTaskResult);
-		if (selectedLogFiles.length == discoveryTaskResults.size()) {
-			GUI.showInformationMessageDialog(rootPanel,
-					ProcessDiscoveryActionController.ACTION_NAME,
-					"Process discovery finished for the selected logs.");
-			actionsExportButton.setEnabled(true);
+	}
+
+	private void discoverModel(Runnable callback) {
+		DiscoveryTask discoveryTask;
+		MpEnhancer mpEnhancer = new MpEnhancer();
+		mpEnhancer.setMinSupport(
+				discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()
+						? constraintSupportSlider
+								.getValue()
+						: constraintSupportSlider.getValue() / 100d);
+		mpEnhancer.setConditionType(
+				DataConditionType.values()[discoverDataConditionsComboBox.getSelectedIndex()]);
+
+		if (discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()) {
+			DeclareDiscoveryTask discoveryTaskDeclare = new DeclareDiscoveryTask();
+
+			discoveryTaskDeclare.setSelectedTemplates(selectedTemplates);
+			discoveryTaskDeclare.setMinSupport(constraintSupportSlider.getValue());
+			discoveryTaskDeclare
+					.setPruningType(DeclarePruningType.values()[pruningTypeComboBox
+							.getSelectedIndex()]);
+			discoveryTaskDeclare.setVacuityAsViolation(vacuousAsViolatedButton.isSelected());
+			discoveryTaskDeclare.setConsiderLifecycle(considerLifecycleButton.isSelected());
+			discoveryTaskDeclare
+					.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
+
+			if (DataConditionType.values()[discoverDataConditionsComboBox
+					.getSelectedIndex()] != DataConditionType.NONE) {
+				discoveryTaskDeclare.setMinSupport(0);
+				discoveryTaskDeclare.setMpEnhancer(mpEnhancer);
+			} else
+				discoveryTaskDeclare.setMinSupport(constraintSupportSlider.getValue());
+
+			discoveryTask = discoveryTaskDeclare;
+		} else {
+			MinerfulDiscoveryTask discoveryTaskMinerful = new MinerfulDiscoveryTask();
+			discoveryTaskMinerful.setSelectedTemplates(selectedTemplates);
+			discoveryTaskMinerful.setMinSupport(constraintSupportSlider.getValue());
+			discoveryTaskMinerful
+					.setPruningType(PostProcessingAnalysisType.values()[pruningTypeComboBox
+							.getSelectedIndex()]);
+			discoveryTaskMinerful
+					.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
+
+			if (DataConditionType.values()[discoverDataConditionsComboBox
+					.getSelectedIndex()] != DataConditionType.NONE) {
+				discoveryTaskMinerful.setMinSupport(0);
+				discoveryTaskMinerful.setMpEnhancer(mpEnhancer);
+			} else
+				discoveryTaskMinerful.setMinSupport(constraintSupportSlider.getValue() / 100d);
+
+			discoveryTask = discoveryTaskMinerful;
 		}
+
+		for (File selectedLogFile : selectedLogFiles) {
+			System.out.println("Discover model for file: " + selectedLogFile.getName());
+			discoveryTask.setLogFile(selectedLogFile);
+			Application.run(() -> {
+				DiscoveryTaskResult discoveryTaskResult = discoveryTask.call();
+				if (discoveryTaskResult != null) {
+					putDiscoveryResult(selectedLogFile, discoveryTaskResult);
+					if (selectedLogFile == selectedLogFiles[selectedLogFiles.length - 1]) {
+						callback.run();
+					}
+				}
+			});
+		}
+	}
+
+	private void exportModel(Path directoryPath) {
+		Path filePath = directoryPath
+				.resolve(Paths.get(Application.getTimestampString()
+						+ LogStreamer.ZIP_EXTENSION));
+		List<File> modelFiles = new ArrayList<>();
+		for (Entry<File, DiscoveryTaskResult> discoveryEntry : discoveryTaskResults
+				.entrySet()) {
+			File selectedLogFile = discoveryEntry.getKey();
+			DiscoveryTaskResult discoveryTaskResult = discoveryEntry.getValue();
+			String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
+					.replace(LogStreamer.LOG_EXTENSIONS_REGEX, "");
+			Path modelDeclPath = LogStreamer.getModelsDirectory()
+					.resolve(selectedLogFileNameWithoutExtension + ".decl");
+			Path modelTextPath = LogStreamer.getModelsDirectory()
+					.resolve(selectedLogFileNameWithoutExtension + ".txt");
+			try {
+				File modelDeclFile = Files
+						.writeString(modelDeclPath, ModelExporter.getDeclString(
+								selectedLogFile,
+								discoveryTaskResult.getActivities(),
+								discoveryTaskResult.getConstraints()))
+						.toFile();
+				File modelTextFile = Files.writeString(modelTextPath,
+						ModelExporter.getTextString(
+								discoveryTaskResult.getActivities(),
+								discoveryTaskResult.getConstraints()))
+						.toFile();
+				modelFiles.addAll(Arrays.asList(modelDeclFile, modelTextFile));
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
+
+		}
+		LogStreamer.exportZip(filePath, modelFiles.toArray(File[]::new));
 	}
 
 	private Component getActionsPanel() {
 		JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 		actionsDiscoveryButton = new JButton("Discover");
-		actionsExportButton = new JButton("Export Models");
-		JProgressBar progressBar = new JProgressBar();
+		progressBar = new JProgressBar();
 		progressBar.setIndeterminate(true);
 		progressBar.setStringPainted(true);
 		progressBar.setString("Discovering model...");
 		progressBar.setVisible(false);
 
 		actionsDiscoveryButton.setEnabled(false);
-		actionsExportButton.setEnabled(false);
 
 		actionsDiscoveryButton.addActionListener(e -> {
-			actionsDiscoveryButton.setEnabled(false);
-			progressBar.setVisible(true);
-			DiscoveryTask discoveryTask;
-			MpEnhancer mpEnhancer = new MpEnhancer();
-			mpEnhancer.setMinSupport(
-					discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()
-							? constraintSupportSlider
-									.getValue()
-							: constraintSupportSlider.getValue() / 100d);
-			mpEnhancer.setConditionType(
-					DataConditionType.values()[discoverDataConditionsComboBox.getSelectedIndex()]);
-
-			if (discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()) {
-				DeclareDiscoveryTask discoveryTaskDeclare = new DeclareDiscoveryTask();
-
-				discoveryTaskDeclare.setSelectedTemplates(selectedTemplates);
-				discoveryTaskDeclare.setMinSupport(constraintSupportSlider.getValue());
-				discoveryTaskDeclare
-						.setPruningType(DeclarePruningType.values()[pruningTypeComboBox
-								.getSelectedIndex()]);
-				discoveryTaskDeclare.setVacuityAsViolation(vacuousAsViolatedButton.isSelected());
-				discoveryTaskDeclare.setConsiderLifecycle(considerLifecycleButton.isSelected());
-				discoveryTaskDeclare
-						.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
-
-				if (DataConditionType.values()[discoverDataConditionsComboBox
-						.getSelectedIndex()] != DataConditionType.NONE) {
-					discoveryTaskDeclare.setMinSupport(0);
-					discoveryTaskDeclare.setMpEnhancer(mpEnhancer);
-				} else
-					discoveryTaskDeclare.setMinSupport(constraintSupportSlider.getValue());
-
-				discoveryTask = discoveryTaskDeclare;
-			} else {
-				MinerfulDiscoveryTask discoveryTaskMinerful = new MinerfulDiscoveryTask();
-				discoveryTaskMinerful.setSelectedTemplates(selectedTemplates);
-				discoveryTaskMinerful.setMinSupport(constraintSupportSlider.getValue());
-				discoveryTaskMinerful
-						.setPruningType(PostProcessingAnalysisType.values()[pruningTypeComboBox
-								.getSelectedIndex()]);
-				discoveryTaskMinerful
-						.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
-
-				if (DataConditionType.values()[discoverDataConditionsComboBox
-						.getSelectedIndex()] != DataConditionType.NONE) {
-					discoveryTaskMinerful.setMinSupport(0);
-					discoveryTaskMinerful.setMpEnhancer(mpEnhancer);
-				} else
-					discoveryTaskMinerful.setMinSupport(constraintSupportSlider.getValue() / 100d);
-
-				discoveryTask = discoveryTaskMinerful;
+			if (actionsDiscoveryButton.getText().equals("Cancel")) {
+				actionsDiscoveryButton.setText("Discover");
+				progressBar.setVisible(false);
+				Application.cancelTasks();
+				discoveryTaskResults.clear();
+				return;
 			}
 
-			for (File selectedLogFile : selectedLogFiles) {
-				System.out.println("Discover model for file: " + selectedLogFile.getName());
-				discoveryTask.setLogFile(selectedLogFile);
-				Application.run(() -> {
-					putDiscoveryResult(selectedLogFile, discoveryTask.call());
+			JFileChooser fileChooser = GUI
+					.createExportFileChooser(ProcessDiscoveryActionController.ACTION_NAME);
+			if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
+				actionsDiscoveryButton.setText("Cancel");
+				progressBar.setVisible(true);
+				discoverModel(() -> {
+					actionsDiscoveryButton.setText("Discover");
 					progressBar.setVisible(false);
+					exportModel(fileChooser.getSelectedFile().toPath());
+					discoveryTaskResults.clear();
+					GUI.showInformationMessageDialog(rootPanel,
+							ProcessDiscoveryActionController.ACTION_NAME,
+							"Process model(s) successfully discovered and exported");
 				});
 			}
 
 		});
 
-		actionsExportButton.addActionListener(event -> {
-			JFileChooser fileChooser = GUI
-					.createExportFileChooser(ProcessDiscoveryActionController.ACTION_NAME);
-			if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
-				Path directoryPath = fileChooser.getSelectedFile().toPath();
-				Path filePath = directoryPath
-						.resolve(Paths.get(Application.getTimestampString()
-								+ LogStreamer.ZIP_EXTENSION));
-				List<File> modelFiles = new ArrayList<>();
-				for (Entry<File, DiscoveryTaskResult> discoveryEntry : discoveryTaskResults
-						.entrySet()) {
-					File selectedLogFile = discoveryEntry.getKey();
-					DiscoveryTaskResult discoveryTaskResult = discoveryEntry.getValue();
-					String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
-							.replace(LogStreamer.LOG_EXTENSIONS_REGEX, "");
-					Path modelDeclPath = LogStreamer.getModelsDirectory()
-							.resolve(selectedLogFileNameWithoutExtension + ".decl");
-					Path modelTextPath = LogStreamer.getModelsDirectory()
-							.resolve(selectedLogFileNameWithoutExtension + ".txt");
-					try {
-						File modelDeclFile = Files
-								.writeString(modelDeclPath, ModelExporter.getDeclString(
-										selectedLogFile,
-										discoveryTaskResult.getActivities(),
-										discoveryTaskResult.getConstraints()))
-								.toFile();
-						File modelTextFile = Files.writeString(modelTextPath,
-								ModelExporter.getTextString(
-										discoveryTaskResult.getActivities(),
-										discoveryTaskResult.getConstraints()))
-								.toFile();
-						modelFiles.addAll(Arrays.asList(modelDeclFile, modelTextFile));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
-				}
-				LogStreamer.exportZip(filePath, modelFiles.toArray(File[]::new));
-				GUI.showInformationMessageDialog(rootPanel, ProcessDiscoveryActionController.ACTION_NAME,
-						"Model exported successfully.");
-			}
-		});
-
-		GUI.addAll(actionsPanel, actionsDiscoveryButton, actionsExportButton, progressBar);
+		GUI.addAll(actionsPanel, actionsDiscoveryButton, progressBar);
 
 		return actionsPanel;
 	}

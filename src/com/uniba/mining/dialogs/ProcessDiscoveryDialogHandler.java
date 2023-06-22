@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 
 import com.uniba.mining.actions.ProcessDiscoveryActionController;
@@ -138,14 +138,14 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		JLabel selectFileLabel = new JLabel("Log Files");
 		Box selectFileBox = new Box(BoxLayout.PAGE_AXIS);
 		Box selectFileInputBox = new Box(BoxLayout.LINE_AXIS);
-		JTextField selectFileTextField = new JTextField("No logs selected", 20);
+		JTextArea selectFileTextArea = new JTextArea("No logs selected", 1, 20);
 		JButton selectFileButton = new JButton("Select Log");
 		String discoverImagePath = String.join("/", Config.ICONS_PATH, "spaceman.png");
 		ImageIcon discoverImage = GUI.loadImage(discoverImagePath, "Process discovery icon", 0.5f);
 		JLabel discoverLabel = new JLabel(discoverImage);
 
 		selectFileLabel.setLabelFor(selectFileInputBox);
-		selectFileTextField.setEnabled(false);
+		selectFileTextArea.setEnabled(false);
 		selectFileButton.addActionListener(e -> {
 			JFileChooser fileChooser = GUI.createSelectFileChooser(
 					ProcessDiscoveryActionController.ACTION_NAME, LogStreamer.getLogFileFilter(),
@@ -154,17 +154,17 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 			if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
 				selectedLogFiles = fileChooser.getSelectedFiles();
-				selectFileTextField
-						.setText(Arrays.toString(
-								Arrays.stream(selectedLogFiles).map(File::getName)
-										.toArray(String[]::new)));
+				selectFileTextArea.setRows(selectedLogFiles.length);
+				selectFileTextArea.setText(
+						Arrays.stream(selectedLogFiles).map(File::getName).reduce("",
+								(t, u) -> t.isEmpty() ? "\u2022 " + u : String.join("\n", t, "\u2022 " + u)).trim());
 				discoveryTaskResults.clear();
 				actionsDiscoveryButton.setEnabled(true);
 			}
 		});
 		selectFileLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		selectFileInputBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-		GUI.addAll(selectFileInputBox, GUI.DEFAULT_PADDING, selectFileTextField, selectFileButton);
+		GUI.addAll(selectFileInputBox, GUI.DEFAULT_PADDING, selectFileTextArea, selectFileButton);
 		GUI.addAll(selectFileBox, GUI.DEFAULT_PADDING, selectFileLabel, selectFileInputBox);
 		GUI.addAll(headerPanel, selectFileBox, discoverLabel);
 		return headerPanel;
@@ -253,7 +253,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		JLabel considerLifecycleLabel = new JLabel("Consider Lifecycle");
 		JLabel discoverTimeConditionsLabel = new JLabel("Discover Time Conditions");
 		JLabel discoverDataConditionsLabel = new JLabel("Discover Data Conditions");
-		constraintSupportSlider = new JSlider(0, 100);
+		constraintSupportSlider = new JSlider(0, 100, 90);
 		pruningTypeComboBox = new JComboBox<>(pruningTypeDeclareMinerItems);
 		vacuousAsViolatedButton = new JToggleButton("Disabled");
 		considerLifecycleButton = new JToggleButton("Disabled");
@@ -421,7 +421,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 			File selectedLogFile = discoveryEntry.getKey();
 			DiscoveryTaskResult discoveryTaskResult = discoveryEntry.getValue();
 			String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
-					.replace(LogStreamer.LOG_EXTENSIONS_REGEX, "");
+					.replaceAll(LogStreamer.LOG_EXTENSIONS_REGEX, "");
 			Path modelDeclPath = LogStreamer.getModelsDirectory()
 					.resolve(selectedLogFileNameWithoutExtension + ".decl");
 			Path modelTextPath = LogStreamer.getModelsDirectory()

@@ -174,14 +174,16 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		JPanel discoveryMethodPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 		JLabel discoveryMethodLabel = new JLabel("Discovery Method");
 		discoveryMethodComboBox = new JComboBox<>(discoveryMethodItems);
+		discoveryMethodComboBox.setSelectedItem(discoveryMethodLabel);
 		discoveryMethodComboBox.addItemListener(e -> {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
 				isDeclareMiner = e.getItem().equals("Declare Miner");
 				choiceCheckBox.setVisible(isDeclareMiner);
 				pruningTypeComboBox.removeAllItems();
 				for (String pruningTypeItem : isDeclareMiner ? pruningTypeDeclareMinerItems
-						: pruningTypeMinerfulItems)
+						: pruningTypeMinerfulItems) {
 					pruningTypeComboBox.addItem(pruningTypeItem);
+				}
 				if (isDeclareMiner) {
 					if (!withDiscoverDataCondition) {
 						setSelectedTemplates(unaryCheckBox,
@@ -191,8 +193,17 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 								Arrays.asList(ConstraintTemplate.Choice,
 										ConstraintTemplate.Exclusive_Choice));
 					}
-				} else
+				} else {
 					selectedTemplates.removeAll(minerfulNotSupportedTemplates);
+					pruningTypeComboBox.setSelectedIndex(1);
+					vacuousAsViolatedButton.setSelected(true);
+					vacuousAsViolatedButton.doClick();
+					considerLifecycleButton.setSelected(false);
+					considerLifecycleButton.doClick();
+					discoverTimeConditionsButton.setSelected(false);
+					discoverTimeConditionsButton.doClick();
+					discoverDataConditionsComboBox.setSelectedIndex(2);
+				}
 				pruningTypeLabel.setText(String.format("Pruning Type (%s)",
 						isDeclareMiner ? "Declare" : "MINERful"));
 				pruningTypeComboBox.setMaximumSize(pruningTypeComboBox.getPreferredSize());
@@ -255,7 +266,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		JLabel discoverDataConditionsLabel = new JLabel("Discover Data Conditions");
 		constraintSupportSlider = new JSlider(0, 100, 90);
 		pruningTypeComboBox = new JComboBox<>(pruningTypeDeclareMinerItems);
-		vacuousAsViolatedButton = new JToggleButton("Enabled");
+		vacuousAsViolatedButton = new JToggleButton("Disabled");
 		considerLifecycleButton = new JToggleButton("Disabled");
 		discoverTimeConditionsButton = new JToggleButton("Disabled");
 		discoverDataConditionsComboBox = new JComboBox<>(discoverDataConditions);

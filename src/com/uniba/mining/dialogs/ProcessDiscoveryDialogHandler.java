@@ -99,6 +99,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private Map<File, DiscoveryTaskResult> discoveryTaskResults = new HashMap<>();
 
 	private JPanel rootPanel;
+	private JButton selectLogsButton;
 	private JComboBox<String> discoveryMethodComboBox;
 	private final List<ConstraintTemplate> selectedTemplates = new ArrayList<>(Arrays.asList(
 			ConstraintTemplate.Absence,
@@ -130,7 +131,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private JToggleButton considerLifecycleButton;
 	private JToggleButton discoverTimeConditionsButton;
 	private JComboBox<String> discoverDataConditionsComboBox;
-	private JButton actionsDiscoveryButton;
+	private JButton discoveryButton;
 	private JProgressBar progressBar;
 
 	private Component getHeaderPanel() {
@@ -139,14 +140,14 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		Box selectFileBox = new Box(BoxLayout.PAGE_AXIS);
 		Box selectFileInputBox = new Box(BoxLayout.LINE_AXIS);
 		JTextArea selectFileTextArea = new JTextArea("No logs selected", 1, 20);
-		JButton selectFileButton = new JButton("Select Logs");
+		selectLogsButton = new JButton("Select Logs");
 		String discoverImagePath = String.join("/", Config.ICONS_PATH, "spaceman.png");
 		ImageIcon discoverImage = GUI.loadImage(discoverImagePath, "Process discovery icon", 0.5f);
 		JLabel discoverLabel = new JLabel(discoverImage);
 
 		selectFileLabel.setLabelFor(selectFileInputBox);
 		selectFileTextArea.setEnabled(false);
-		selectFileButton.addActionListener(e -> {
+		selectLogsButton.addActionListener(e -> {
 			JFileChooser fileChooser = GUI.createSelectFileChooser(
 					ProcessDiscoveryActionController.ACTION_NAME, LogStreamer.getLogFileFilter(),
 					true);
@@ -159,12 +160,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 						Arrays.stream(selectedLogFiles).map(File::getName).reduce("",
 								(t, u) -> t.isEmpty() ? "\u2022 " + u : String.join("\n", t, "\u2022 " + u)).trim());
 				discoveryTaskResults.clear();
-				actionsDiscoveryButton.setEnabled(true);
+				discoveryButton.setEnabled(true);
 			}
 		});
 		selectFileLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		selectFileInputBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-		GUI.addAll(selectFileInputBox, GUI.DEFAULT_PADDING, selectFileTextArea, selectFileButton);
+		GUI.addAll(selectFileInputBox, GUI.DEFAULT_PADDING, selectFileTextArea, selectLogsButton);
 		GUI.addAll(selectFileBox, GUI.DEFAULT_PADDING, selectFileLabel, selectFileInputBox);
 		GUI.addAll(headerPanel, selectFileBox, discoverLabel);
 		return headerPanel;
@@ -411,13 +412,15 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 				discoveryTask.setLogFile(selectedLogFile);
 
 				DiscoveryTaskResult discoveryTaskResult = discoveryTask.call();
-				if (discoveryTaskResult != null) {
-					discoveryTaskResults.put(selectedLogFile, discoveryTaskResult);
-					System.out.println(String.format("Discovery model completed for file: %s (%d/%d)",
-							selectedLogFile.getName(), discoveryTaskResults.size(), selectedLogFiles.length));
-				}
+				if (discoveryTaskResult == null)
+					return;
+				discoveryTaskResults.put(selectedLogFile, discoveryTaskResult);
+				System.out.println(String.format("Discovery model completed for file: %s (%d/%d)",
+						selectedLogFile.getName(), discoveryTaskResults.size(), selectedLogFiles.length));
+
 			}
-			callback.run();
+			if (selectedLogFiles.length == discoveryTaskResults.size())
+				callback.run();
 		});
 	}
 
@@ -459,18 +462,17 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private Component getActionsPanel() {
 		JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
-		actionsDiscoveryButton = new JButton("Discover");
+		discoveryButton = new JButton("Discover");
 		progressBar = new JProgressBar();
 		progressBar.setIndeterminate(true);
 		progressBar.setStringPainted(true);
 		progressBar.setString("Discovering model...");
 		progressBar.setVisible(false);
 
-		actionsDiscoveryButton.setEnabled(false);
-
-		actionsDiscoveryButton.addActionListener(e -> {
-			if (actionsDiscoveryButton.getText().equals("Cancel")) {
-				actionsDiscoveryButton.setText("Discover");
+		discoveryButton.addActionListener(e -> {
+			if (discoveryButton.getText().equals("Cancel")) {
+				discoveryButton.setText("Discover");
+				selectLogsButton.setEnabled(true);
 				progressBar.setVisible(false);
 				Application.cancelTasks();
 				discoveryTaskResults.clear();
@@ -480,11 +482,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 			JFileChooser fileChooser = GUI
 					.createExportFileChooser(ProcessDiscoveryActionController.ACTION_NAME);
 			if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
-				actionsDiscoveryButton.setText("Cancel");
+				discoveryButton.setText("Cancel");
+				selectLogsButton.setEnabled(false);
 				progressBar.setVisible(true);
 				discoverModel(() -> {
-
-					actionsDiscoveryButton.setText("Discover");
+					discoveryButton.setText("Discover");
+					selectLogsButton.setEnabled(true);
 					progressBar.setVisible(false);
 					exportModel(fileChooser.getSelectedFile().toPath());
 					discoveryTaskResults.clear();
@@ -496,7 +499,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 		});
 
-		GUI.addAll(actionsPanel, actionsDiscoveryButton, progressBar);
+		GUI.addAll(actionsPanel, discoveryButton, progressBar);
 
 		return actionsPanel;
 	}

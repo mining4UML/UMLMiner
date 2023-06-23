@@ -72,12 +72,12 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
     private Component getHeaderPanel() {
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, GUI.ULTRA_HIGH_PADDING, GUI.DEFAULT_PADDING));
         Box selectBox = new Box(BoxLayout.PAGE_AXIS);
-        JLabel selectModelLabel = new JLabel("MP-Declare File");
+        JLabel selectModelLabel = new JLabel("MP-Declare");
         Box selectModelBox = new Box(BoxLayout.PAGE_AXIS);
         Box selectModelInputBox = new Box(BoxLayout.LINE_AXIS);
         JTextField selectModelTextField = new JTextField("No model selected", 20);
         JButton selectModelButton = new JButton("Select Model");
-        JLabel selectLogLabel = new JLabel("Log File");
+        JLabel selectLogLabel = new JLabel("Log");
         Box selectLogBox = new Box(BoxLayout.PAGE_AXIS);
         Box selectLogInputBox = new Box(BoxLayout.LINE_AXIS);
         JTextField selectLogTextField = new JTextField("No log selected", 20);

@@ -368,59 +368,57 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		System.out.println("- timeConditions = " + discoverTimeConditionsButton.isSelected());
 		System.out.println("- dataConditions = " + dataConditionType.toString());
 
-		for (File selectedLogFile : selectedLogFiles) {
-			System.out.println("Discover model for file: " + selectedLogFile.getName());
-			DiscoveryTask discoveryTask;
-			if (discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()) {
-				DeclarePruningType declarePruningType = DeclarePruningType.values()[pruningTypeComboBox
-						.getSelectedIndex()];
-				DeclareDiscoveryTask discoveryTaskDeclare = new DeclareDiscoveryTask();
+		DiscoveryTask discoveryTask;
+		if (discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()) {
+			DeclarePruningType declarePruningType = DeclarePruningType.values()[pruningTypeComboBox
+					.getSelectedIndex()];
+			DeclareDiscoveryTask discoveryTaskDeclare = new DeclareDiscoveryTask();
 
-				discoveryTaskDeclare.setSelectedTemplates(selectedTemplates);
+			discoveryTaskDeclare.setSelectedTemplates(selectedTemplates);
+			discoveryTaskDeclare.setMinSupport(constraintSupport);
+			discoveryTaskDeclare.setPruningType(declarePruningType);
+			discoveryTaskDeclare.setVacuityAsViolation(vacuousAsViolatedButton.isSelected());
+			discoveryTaskDeclare.setConsiderLifecycle(considerLifecycleButton.isSelected());
+			discoveryTaskDeclare.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
+
+			if (dataConditionType != DataConditionType.NONE) {
+				discoveryTaskDeclare.setMinSupport(0);
+				discoveryTaskDeclare.setMpEnhancer(mpEnhancer);
+			} else
 				discoveryTaskDeclare.setMinSupport(constraintSupport);
-				discoveryTaskDeclare.setPruningType(declarePruningType);
-				discoveryTaskDeclare.setVacuityAsViolation(vacuousAsViolatedButton.isSelected());
-				discoveryTaskDeclare.setConsiderLifecycle(considerLifecycleButton.isSelected());
-				discoveryTaskDeclare.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
 
-				if (dataConditionType != DataConditionType.NONE) {
-					discoveryTaskDeclare.setMinSupport(0);
-					discoveryTaskDeclare.setMpEnhancer(mpEnhancer);
-				} else
-					discoveryTaskDeclare.setMinSupport(constraintSupport);
+			discoveryTask = discoveryTaskDeclare;
+		} else {
+			PostProcessingAnalysisType pruningType = PostProcessingAnalysisType.values()[pruningTypeComboBox
+					.getSelectedIndex()];
+			MinerfulDiscoveryTask discoveryTaskMinerful = new MinerfulDiscoveryTask();
+			discoveryTaskMinerful.setSelectedTemplates(selectedTemplates);
+			discoveryTaskMinerful.setMinSupport(constraintSupport);
+			discoveryTaskMinerful.setPruningType(pruningType);
+			discoveryTaskMinerful.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
 
-				discoveryTask = discoveryTaskDeclare;
-			} else {
-				PostProcessingAnalysisType pruningType = PostProcessingAnalysisType.values()[pruningTypeComboBox
-						.getSelectedIndex()];
-				MinerfulDiscoveryTask discoveryTaskMinerful = new MinerfulDiscoveryTask();
-				discoveryTaskMinerful.setSelectedTemplates(selectedTemplates);
-				discoveryTaskMinerful.setMinSupport(constraintSupport);
-				discoveryTaskMinerful.setPruningType(pruningType);
-				discoveryTaskMinerful.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
+			if (dataConditionType != DataConditionType.NONE) {
+				discoveryTaskMinerful.setMinSupport(0d);
+				discoveryTaskMinerful.setMpEnhancer(mpEnhancer);
+			} else
+				discoveryTaskMinerful.setMinSupport(constraintSupport / 100d);
 
-				if (dataConditionType != DataConditionType.NONE) {
-					discoveryTaskMinerful.setMinSupport(0d);
-					discoveryTaskMinerful.setMpEnhancer(mpEnhancer);
-				} else
-					discoveryTaskMinerful.setMinSupport(constraintSupport / 100d);
+			discoveryTask = discoveryTaskMinerful;
+		}
+		Application.run(() -> {
+			for (File selectedLogFile : selectedLogFiles) {
+				System.out.println("Discover model for file: " + selectedLogFile.getName());
+				discoveryTask.setLogFile(selectedLogFile);
 
-				discoveryTask = discoveryTaskMinerful;
-			}
-			discoveryTask.setLogFile(selectedLogFile);
-
-			Application.run(() -> {
 				DiscoveryTaskResult discoveryTaskResult = discoveryTask.call();
 				if (discoveryTaskResult != null) {
 					discoveryTaskResults.put(selectedLogFile, discoveryTaskResult);
 					System.out.println(String.format("Discovery model completed for file: %s (%d/%d)",
 							selectedLogFile.getName(), discoveryTaskResults.size(), selectedLogFiles.length));
-					if (selectedLogFiles.length == discoveryTaskResults.size()) {
-						callback.run();
-					}
 				}
-			});
-		}
+			}
+			callback.run();
+		});
 	}
 
 	private void exportModel(Path directoryPath) {
@@ -485,6 +483,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 				actionsDiscoveryButton.setText("Cancel");
 				progressBar.setVisible(true);
 				discoverModel(() -> {
+
 					actionsDiscoveryButton.setText("Discover");
 					progressBar.setVisible(false);
 					exportModel(fileChooser.getSelectedFile().toPath());

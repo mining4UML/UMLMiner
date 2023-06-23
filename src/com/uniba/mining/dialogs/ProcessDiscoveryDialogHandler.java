@@ -266,7 +266,8 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		JLabel discoverDataConditionsLabel = new JLabel("Discover Data Conditions");
 		constraintSupportSlider = new JSlider(0, 100, 90);
 		pruningTypeComboBox = new JComboBox<>(pruningTypeDeclareMinerItems);
-		vacuousAsViolatedButton = new JToggleButton("Disabled");
+		vacuousAsViolatedButton = new JToggleButton("Enabled");
+		vacuousAsViolatedButton.setSelected(true);
 		considerLifecycleButton = new JToggleButton("Disabled");
 		discoverTimeConditionsButton = new JToggleButton("Disabled");
 		discoverDataConditionsComboBox = new JComboBox<>(discoverDataConditions);

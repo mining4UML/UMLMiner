@@ -308,8 +308,6 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		discoverTimeConditionsButton.addActionListener(e -> {
 			setToggleButtonText(discoverTimeConditionsButton);
 			withDiscoverTimeConditions = discoverTimeConditionsButton.isSelected();
-			System.out.println("withDiscoverTimeConditions = " + Boolean.toString(withDiscoverTimeConditions));
-			System.out.println("withDiscoverDataCondition = " + Boolean.toString(withDiscoverDataCondition));
 			binaryNegativeCheckBox.setVisible(!withDiscoverTimeConditions && !withDiscoverDataCondition);
 			choiceCheckBox.setVisible(isDeclareMiner && !withDiscoverTimeConditions && !withDiscoverDataCondition);
 			if (withDiscoverTimeConditions) {
@@ -325,8 +323,6 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		discoverDataConditionsComboBox.addActionListener(e -> {
 			withDiscoverDataCondition = !discoverDataConditionsComboBox.getSelectedItem()
 					.equals(DataConditionType.NONE.getDisplayText());
-			System.out.println("withDiscoverTimeConditions = " + Boolean.toString(withDiscoverTimeConditions));
-			System.out.println("withDiscoverDataCondition = " + Boolean.toString(withDiscoverDataCondition));
 			unaryCheckBox.setVisible(!withDiscoverDataCondition);
 			binaryNegativeCheckBox.setVisible(!withDiscoverTimeConditions && !withDiscoverDataCondition);
 			choiceCheckBox.setVisible(isDeclareMiner && !withDiscoverTimeConditions && !withDiscoverDataCondition);

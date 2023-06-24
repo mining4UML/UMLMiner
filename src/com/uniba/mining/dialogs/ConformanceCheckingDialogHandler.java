@@ -135,11 +135,6 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         checkingMethodComboBox = new JComboBox<>(checkingMethodItems);
 
         checkingMethodLabel.setLabelFor(checkingMethodComboBox);
-
-        checkingMethodComboBox.addActionListener(e -> {
-            actionsCheckButton.setEnabled(true);
-        });
-
         GUI.addAll(checkingMethodPanel, checkingMethodLabel, checkingMethodComboBox);
         return checkingMethodPanel;
     }
@@ -149,7 +144,6 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         JLabel optionsGroupLabel = new JLabel("Group Results By");
         optionsGroupComboBox = new JComboBox<>(optionsGroupItems);
 
-        optionsPanel.setVisible(false);
         GUI.addAll(optionsPanel, optionsGroupLabel, optionsGroupComboBox);
         optionsPanel.setBorder(GUI.getDefaultTitledBorder("Options"));
         return optionsPanel;

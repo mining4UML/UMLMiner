@@ -2,6 +2,7 @@ package com.uniba.mining.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,11 +61,9 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
     private JPanel rootPanel;
     private JButton selectModelButton;
     private JButton selectLogButton;
-    private JPanel optionsPanel;
     private JComboBox<String> checkingMethodComboBox;
     private JComboBox<String> optionsGroupComboBox;
     private JButton actionsCheckButton;
-    private IDialog dialog;
 
     private File selectedModelFile;
     private File selectedLogFile;
@@ -86,8 +85,11 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         String checkingImagePath = String.join("/", Config.ICONS_PATH, "checklist.png");
         ImageIcon checkingImage = GUI.loadImage(checkingImagePath, "Conformance checking icon", 0.5f);
         JLabel checkingLabel = new JLabel(checkingImage);
+        Dimension textFieldDimension = new Dimension(150, 20);
 
         selectModelLabel.setLabelFor(selectModelInputBox);
+        selectModelTextField.setPreferredSize(textFieldDimension);
+        selectModelTextField.setMaximumSize(textFieldDimension);
         selectModelTextField.setEnabled(false);
         selectModelButton.addActionListener(e -> {
             JFileChooser fileChooser = GUI.createSelectFileChooser(
@@ -103,6 +105,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             }
         });
         selectLogLabel.setLabelFor(selectLogBox);
+        selectLogTextField.setPreferredSize(textFieldDimension);
+        selectLogTextField.setMaximumSize(textFieldDimension);
         selectLogTextField.setEnabled(false);
         selectLogButton.addActionListener(e -> {
             JFileChooser fileChooser = GUI.createSelectFileChooser(
@@ -140,7 +144,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
     }
 
     private Component getOptionsPanel() {
-        optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
         JLabel optionsGroupLabel = new JLabel("Group Results By");
         optionsGroupComboBox = new JComboBox<>(optionsGroupItems);
 
@@ -428,7 +432,6 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 
     @Override
     public void prepare(IDialog dialog) {
-        this.dialog = dialog;
         GUI.prepareDialog(dialog, ConformanceCheckingActionController.ACTION_NAME);
     }
 

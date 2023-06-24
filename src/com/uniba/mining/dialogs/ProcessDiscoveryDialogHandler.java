@@ -2,6 +2,7 @@ package com.uniba.mining.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.io.File;
@@ -297,14 +298,27 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		Box considerLifecycleBox = new Box(BoxLayout.LINE_AXIS);
 		Box discoverTimeConditionsBox = new Box(BoxLayout.LINE_AXIS);
 		Box discoverDataConditionsBox = new Box(BoxLayout.LINE_AXIS);
+		Dimension labelDimension = new Dimension(120, 20);
 
+		constraintSupportLabel.setPreferredSize(labelDimension);
+		constraintSupportLabel.setMaximumSize(labelDimension);
+		pruningTypeLabel.setPreferredSize(labelDimension);
+		pruningTypeLabel.setMaximumSize(labelDimension);
 		constraintSupportSlider.setMajorTickSpacing(10);
 		constraintSupportSlider.setMinorTickSpacing(1);
 		constraintSupportSlider.setPaintTicks(true);
 		constraintSupportSlider.setPaintLabels(true);
+		pruningTypeLabel.setPreferredSize(labelDimension);
+		pruningTypeLabel.setMaximumSize(labelDimension);
 		pruningTypeComboBox.setMaximumSize(pruningTypeComboBox.getPreferredSize());
+		vacuousAsViolatedLabel.setPreferredSize(labelDimension);
+		vacuousAsViolatedLabel.setMaximumSize(labelDimension);
 		vacuousAsViolatedButton.addActionListener(e -> setToggleButtonText(vacuousAsViolatedButton));
+		considerLifecycleLabel.setPreferredSize(labelDimension);
+		considerLifecycleLabel.setMaximumSize(labelDimension);
 		considerLifecycleButton.addActionListener(e -> setToggleButtonText(considerLifecycleButton));
+		discoverTimeConditionsLabel.setPreferredSize(labelDimension);
+		discoverTimeConditionsLabel.setMaximumSize(labelDimension);
 		discoverTimeConditionsButton.addActionListener(e -> {
 			setToggleButtonText(discoverTimeConditionsButton);
 			withDiscoverTimeConditions = discoverTimeConditionsButton.isSelected();
@@ -320,6 +334,9 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 				setSelectedTemplates(choiceCheckBox, choiceTemplates);
 			}
 		});
+		discoverDataConditionsLabel.setPreferredSize(labelDimension);
+		discoverDataConditionsLabel.setMaximumSize(labelDimension);
+		discoverDataConditionsComboBox.setMaximumSize(discoverDataConditionsComboBox.getPreferredSize());
 		discoverDataConditionsComboBox.addActionListener(e -> {
 			withDiscoverDataCondition = !discoverDataConditionsComboBox.getSelectedItem()
 					.equals(DataConditionType.NONE.getDisplayText());
@@ -338,7 +355,6 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 				setSelectedTemplates(choiceCheckBox, choiceTemplates);
 			}
 		});
-		discoverDataConditionsComboBox.setMaximumSize(discoverDataConditionsComboBox.getPreferredSize());
 		GUI.addAll(constraintSupportBox,
 				GUI.DEFAULT_PADDING, constraintSupportLabel,
 				constraintSupportSlider);

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -107,7 +108,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private JPanel rootPanel;
 	private JButton selectLogsButton;
 	private JComboBox<String> discoveryMethodComboBox;
-	private final List<ConstraintTemplate> selectedTemplates = new ArrayList<>(Arrays.asList(
+	private List<ConstraintTemplate> selectedTemplates = new ArrayList<>(Arrays.asList(
 			ConstraintTemplate.Absence,
 			ConstraintTemplate.Absence2,
 			ConstraintTemplate.Absence3, ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2,
@@ -385,8 +386,10 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		int constraintSupport = constraintSupportSlider.getValue();
 		DataConditionType dataConditionType = DataConditionType.values()[discoverDataConditionsComboBox
 				.getSelectedIndex()];
+		DiscoveryTask discoveryTask;
 		MpEnhancer mpEnhancer = new MpEnhancer();
 
+		selectedTemplates = selectedTemplates.stream().distinct().collect(Collectors.toList());
 		if (dataConditionType != DataConditionType.NONE) {
 			mpEnhancer.setMinSupport(constraintSupport / 100d);
 			mpEnhancer.setConditionType(dataConditionType);
@@ -398,7 +401,6 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		System.out.println("- timeConditions = " + discoverTimeConditionsButton.isSelected());
 		System.out.println("- dataConditions = " + dataConditionType.toString());
 
-		DiscoveryTask discoveryTask;
 		if (discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()) {
 			DeclarePruningType declarePruningType = DeclarePruningType.values()[pruningTypeComboBox
 					.getSelectedIndex()];

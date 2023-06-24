@@ -80,6 +80,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 			ConstraintTemplate.Exclusive_Choice);
 	private static final List<ConstraintTemplate> discoverDataNotSupportedTemplates = Arrays.asList(
 			ConstraintTemplate.Alternate_Succession,
+			ConstraintTemplate.Chain_Succession,
 			ConstraintTemplate.CoExistence,
 			ConstraintTemplate.Succession);
 	private static final List<ConstraintTemplate> discoverTimeNotSupportedTemplates = Arrays.asList(

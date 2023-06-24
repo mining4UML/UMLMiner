@@ -51,6 +51,7 @@ import minerful.postprocessing.params.PostProcessingCmdParameters.PostProcessing
 import task.discovery.DiscoveryTaskResult;
 import task.discovery.mp_enhancer.MpEnhancer;
 import util.ConstraintTemplate;
+import util.LogUtils;
 import util.ModelExporter;
 
 public class ProcessDiscoveryDialogHandler implements IDialogHandler {
@@ -396,54 +397,63 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		DiscoveryMethod discoveryMethod = DiscoveryMethod.values()[discoveryMethodComboBox.getSelectedIndex()];
 		DataConditionType dataConditionType = DataConditionType.values()[discoverDataConditionsComboBox
 				.getSelectedIndex()];
+		boolean vacuousAsViolated = vacuousAsViolatedButton.isSelected();
+		boolean considerLifecycle = considerLifecycleButton.isSelected();
+		boolean discoverTimeConditions = discoverTimeConditionsButton.isSelected();
 		DiscoveryTask discoveryTask;
 
 		System.out.println("Start discovering model(s) with the parameters:");
 		System.out.println("- discoveryMethod = " + discoveryMethod);
 		System.out.println("- selectedTemplates = " + selectedTemplates);
 		System.out.println("- constraintSupport = " + constraintSupport);
-		System.out.println("- timeConditions = " + discoverTimeConditionsButton.isSelected());
+		System.out.println("- vacuousAsViolated = " + vacuousAsViolated);
+		System.out.println("- considerLifecycle = " + considerLifecycle);
+		System.out.println("- timeConditions = " + discoverTimeConditions);
 		System.out.println("- dataConditions = " + dataConditionType);
 
 		if (discoveryMethod.equals(DiscoveryMethod.DECLARE)) {
-			DeclarePruningType declarePruningType = DeclarePruningType.values()[pruningTypeComboBox
+			DeclarePruningType pruningType = DeclarePruningType.values()[pruningTypeComboBox
 					.getSelectedIndex()];
 			DeclareDiscoveryTask discoveryTaskDeclare = new DeclareDiscoveryTask();
 
-			discoveryTaskDeclare.setSelectedTemplates(new ArrayList<>(selectedTemplates));
-			discoveryTaskDeclare.setPruningType(declarePruningType);
-			discoveryTaskDeclare.setVacuityAsViolation(vacuousAsViolatedButton.isSelected());
-			discoveryTaskDeclare.setConsiderLifecycle(considerLifecycleButton.isSelected());
-			discoveryTaskDeclare.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
+			System.out.println("- pruningType = " + pruningType);
 
-			if (dataConditionType != DataConditionType.NONE) {
-				MpEnhancer mpEnhancer = createMpEnhancer(constraintSupport / 100d, dataConditionType);
-				discoveryTaskDeclare.setMinSupport(0);
-				discoveryTaskDeclare.setMpEnhancer(mpEnhancer);
-			} else
-				discoveryTaskDeclare.setMinSupport(constraintSupport);
+			discoveryTaskDeclare.setSelectedTemplates(new ArrayList<>(selectedTemplates));
+			discoveryTaskDeclare.setPruningType(pruningType);
+			discoveryTaskDeclare.setVacuityAsViolation(vacuousAsViolated);
+			discoveryTaskDeclare.setConsiderLifecycle(considerLifecycle);
+			discoveryTaskDeclare.setComuputeTimeDistances(discoverTimeConditions);
+			discoveryTaskDeclare.setMinSupport(constraintSupport);
 
 			discoveryTask = discoveryTaskDeclare;
 		} else {
 			PostProcessingAnalysisType pruningType = PostProcessingAnalysisType.values()[pruningTypeComboBox
 					.getSelectedIndex()];
 			MinerfulDiscoveryTask discoveryTaskMinerful = new MinerfulDiscoveryTask();
+
+			System.out.println("- pruningType = " + pruningType);
+
 			discoveryTaskMinerful.setSelectedTemplates(new ArrayList<>(selectedTemplates));
 			discoveryTaskMinerful.setPruningType(pruningType);
-			discoveryTaskMinerful.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
-
-			if (dataConditionType != DataConditionType.NONE) {
-				MpEnhancer mpEnhancer = createMpEnhancer(constraintSupport / 100d, dataConditionType);
-				discoveryTaskMinerful.setMinSupport(0d);
-				discoveryTaskMinerful.setMpEnhancer(mpEnhancer);
-			} else
-				discoveryTaskMinerful.setMinSupport(constraintSupport / 100d);
+			discoveryTaskMinerful.setComuputeTimeDistances(discoverTimeConditions);
+			discoveryTaskMinerful.setMinSupport(constraintSupport / 100d);
 
 			discoveryTask = discoveryTaskMinerful;
 		}
 		Application.run(() -> {
 			for (File selectedLogFile : selectedLogFiles) {
 				System.out.println("Discover model for file: " + selectedLogFile.getName());
+
+				if (dataConditionType.isDataAware()) {
+					try {
+						LogUtils.checkDataExistence(selectedLogFile);
+						MpEnhancer mpEnhancer = createMpEnhancer(constraintSupport / 100d, dataConditionType);
+						discoveryTask.setMpEnhancer(mpEnhancer);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+
 				discoveryTask.setLogFile(selectedLogFile);
 
 				DiscoveryTaskResult discoveryTaskResult = discoveryTask.call();

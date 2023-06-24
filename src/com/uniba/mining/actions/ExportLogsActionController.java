@@ -1,7 +1,6 @@
 package com.uniba.mining.actions;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import com.uniba.mining.logging.LogStreamer;
 import com.uniba.mining.utils.Application;
@@ -18,14 +17,14 @@ public class ExportLogsActionController implements VPActionController {
     public void performAction(VPAction vpAction) {
 
         if (LogStreamer.countLogs() == 0) {
-            GUI.showWarningMessageDialog(viewManager.getRootFrame(), "No logs found.", ACTION_NAME);
+            GUI.showWarningMessageDialog(viewManager.getRootFrame(), ACTION_NAME, "No logs found.");
             return;
         }
 
         JFileChooser fileChooser = GUI.createExportFileChooser(ACTION_NAME);
         if (fileChooser.showOpenDialog(viewManager.getRootFrame()) == JFileChooser.APPROVE_OPTION) {
             LogStreamer.exportLogs(fileChooser.getSelectedFile().toPath());
-            GUI.showInformationMessageDialog(viewManager.getRootFrame(), "Logs successfully exported.", ACTION_NAME);
+            GUI.showInformationMessageDialog(viewManager.getRootFrame(), ACTION_NAME, "Logs successfully exported.");
         }
 
     }

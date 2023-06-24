@@ -80,6 +80,11 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 			ConstraintTemplate.Alternate_Succession,
 			ConstraintTemplate.CoExistence,
 			ConstraintTemplate.Succession);
+	private static final List<ConstraintTemplate> discoverTimeNotSupportedTemplates = Arrays.asList(
+			ConstraintTemplate.Absence,
+			ConstraintTemplate.Absence2,
+			ConstraintTemplate.Absence3, ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2,
+			ConstraintTemplate.Init);
 	private static final String[] discoveryMethodItems = new String[] { DiscoveryMethod.DECLARE.getDisplayText(),
 			DiscoveryMethod.MINERFUL.getDisplayText() };
 	private static final String[] pruningTypeDeclareMinerItems = new String[] {
@@ -95,6 +100,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	boolean isDeclareMiner = true;
 	boolean withDiscoverDataCondition = false;
+	boolean withDiscoverTimeConditions = false;
 	private File[] selectedLogFiles;
 	private Map<File, DiscoveryTaskResult> discoveryTaskResults = new HashMap<>();
 
@@ -171,6 +177,26 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		return headerPanel;
 	}
 
+	private void setSelectedTemplates(JCheckBox checkBox, List<ConstraintTemplate> templates) {
+		if (checkBox.isSelected())
+			selectedTemplates.addAll(templates);
+		else
+			selectedTemplates.removeAll(templates);
+		if (!isDeclareMiner)
+			selectedTemplates.removeAll(minerfulNotSupportedTemplates);
+		if (withDiscoverTimeConditions) {
+			selectedTemplates.removeAll(discoverTimeNotSupportedTemplates);
+			selectedTemplates.removeAll(binaryNegativeTemplates);
+			selectedTemplates.removeAll(choiceTemplates);
+		}
+		if (withDiscoverDataCondition) {
+			selectedTemplates.removeAll(unaryTemplates);
+			selectedTemplates.removeAll(discoverDataNotSupportedTemplates);
+			selectedTemplates.removeAll(binaryNegativeTemplates);
+			selectedTemplates.removeAll(choiceTemplates);
+		}
+	}
+
 	private Component getDiscoveryMethodPanel() {
 		JPanel discoveryMethodPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 		JLabel discoveryMethodLabel = new JLabel("Discovery Method");
@@ -186,7 +212,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 					pruningTypeComboBox.addItem(pruningTypeItem);
 				}
 				if (isDeclareMiner) {
-					if (!withDiscoverDataCondition) {
+					if (!withDiscoverDataCondition && !withDiscoverTimeConditions) {
 						setSelectedTemplates(unaryCheckBox,
 								Arrays.asList(ConstraintTemplate.Exactly1,
 										ConstraintTemplate.Exactly2));
@@ -218,15 +244,6 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		return discoveryMethodPanel;
 	}
 
-	private void setSelectedTemplates(JCheckBox checkBox, List<ConstraintTemplate> templates) {
-		if (checkBox.isSelected())
-			selectedTemplates.addAll(templates);
-		else
-			selectedTemplates.removeAll(templates);
-		if (!isDeclareMiner)
-			selectedTemplates.removeAll(minerfulNotSupportedTemplates);
-	}
-
 	private Component getTemplatesPanel() {
 		JPanel templatesPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 		JLabel templatesLabel = new JLabel("Templates");
@@ -236,15 +253,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		choiceCheckBox = new JCheckBox("Choice", true);
 
 		unaryCheckBox.addActionListener(e -> setSelectedTemplates(unaryCheckBox, unaryTemplates));
-
 		binaryPositiveCheckBox
 				.addActionListener(e -> setSelectedTemplates(binaryPositiveCheckBox,
 						binaryPositiveTemplates));
-
 		binaryNegativeCheckBox
 				.addActionListener(e -> setSelectedTemplates(binaryNegativeCheckBox,
 						binaryNegativeTemplates));
-
 		choiceCheckBox.addActionListener(e -> setSelectedTemplates(choiceCheckBox, choiceTemplates));
 
 		GUI.addAll(templatesPanel, templatesLabel, unaryCheckBox, binaryPositiveCheckBox,
@@ -287,25 +301,40 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		pruningTypeComboBox.setMaximumSize(pruningTypeComboBox.getPreferredSize());
 		vacuousAsViolatedButton.addActionListener(e -> setToggleButtonText(vacuousAsViolatedButton));
 		considerLifecycleButton.addActionListener(e -> setToggleButtonText(considerLifecycleButton));
-		discoverTimeConditionsButton.addActionListener(e -> setToggleButtonText(discoverTimeConditionsButton));
-		discoverDataConditionsComboBox.addActionListener(e -> {
-			withDiscoverDataCondition = !discoverDataConditionsComboBox.getSelectedItem()
-					.equals(DataConditionType.NONE.getDisplayText());
-			if (withDiscoverDataCondition) {
-				unaryCheckBox.setVisible(false);
-				binaryPositiveCheckBox.setVisible(false);
-				choiceCheckBox.setVisible(false);
-				selectedTemplates.removeAll(unaryTemplates);
-				selectedTemplates.removeAll(discoverDataNotSupportedTemplates);
+		discoverTimeConditionsButton.addActionListener(e -> {
+			setToggleButtonText(discoverTimeConditionsButton);
+			withDiscoverTimeConditions = discoverTimeConditionsButton.isSelected();
+			System.out.println("withDiscoverTimeConditions = " + Boolean.toString(withDiscoverTimeConditions));
+			System.out.println("withDiscoverDataCondition = " + Boolean.toString(withDiscoverDataCondition));
+			binaryNegativeCheckBox.setVisible(!withDiscoverTimeConditions && !withDiscoverDataCondition);
+			choiceCheckBox.setVisible(isDeclareMiner && !withDiscoverTimeConditions && !withDiscoverDataCondition);
+			if (withDiscoverTimeConditions) {
+				selectedTemplates.removeAll(discoverTimeNotSupportedTemplates);
 				selectedTemplates.removeAll(binaryNegativeTemplates);
 				selectedTemplates.removeAll(choiceTemplates);
 			} else {
-				unaryCheckBox.setVisible(true);
-				binaryPositiveCheckBox.setVisible(true);
-				if (isDeclareMiner)
-					choiceCheckBox.setVisible(true);
+				setSelectedTemplates(unaryCheckBox, discoverTimeNotSupportedTemplates);
+				setSelectedTemplates(binaryNegativeCheckBox, binaryNegativeTemplates);
+				setSelectedTemplates(choiceCheckBox, choiceTemplates);
+			}
+		});
+		discoverDataConditionsComboBox.addActionListener(e -> {
+			withDiscoverDataCondition = !discoverDataConditionsComboBox.getSelectedItem()
+					.equals(DataConditionType.NONE.getDisplayText());
+			System.out.println("withDiscoverTimeConditions = " + Boolean.toString(withDiscoverTimeConditions));
+			System.out.println("withDiscoverDataCondition = " + Boolean.toString(withDiscoverDataCondition));
+			unaryCheckBox.setVisible(!withDiscoverDataCondition);
+			binaryNegativeCheckBox.setVisible(!withDiscoverTimeConditions && !withDiscoverDataCondition);
+			choiceCheckBox.setVisible(isDeclareMiner && !withDiscoverTimeConditions && !withDiscoverDataCondition);
+			if (withDiscoverDataCondition) {
+				selectedTemplates.removeAll(discoverDataNotSupportedTemplates);
+				selectedTemplates.removeAll(unaryTemplates);
+				selectedTemplates.removeAll(binaryNegativeTemplates);
+				selectedTemplates.removeAll(choiceTemplates);
+			} else {
+				setSelectedTemplates(binaryPositiveCheckBox, discoverDataNotSupportedTemplates);
 				setSelectedTemplates(unaryCheckBox, unaryTemplates);
-				setSelectedTemplates(binaryPositiveCheckBox, binaryPositiveTemplates);
+				setSelectedTemplates(binaryNegativeCheckBox, binaryNegativeTemplates);
 				setSelectedTemplates(choiceCheckBox, choiceTemplates);
 			}
 		});

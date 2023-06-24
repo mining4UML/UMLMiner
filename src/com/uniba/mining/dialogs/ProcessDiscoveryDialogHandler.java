@@ -12,10 +12,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -108,7 +109,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private JPanel rootPanel;
 	private JButton selectLogsButton;
 	private JComboBox<String> discoveryMethodComboBox;
-	private List<ConstraintTemplate> selectedTemplates = new ArrayList<>(Arrays.asList(
+	private final Set<ConstraintTemplate> selectedTemplates = new HashSet<>(Arrays.asList(
 			ConstraintTemplate.Absence,
 			ConstraintTemplate.Absence2,
 			ConstraintTemplate.Absence3, ConstraintTemplate.Exactly1, ConstraintTemplate.Exactly2,
@@ -382,38 +383,40 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		return contentPanel;
 	}
 
+	private MpEnhancer createMpEnhancer(double minSupport, DataConditionType dataConditionType) {
+		MpEnhancer mpEnhancer = new MpEnhancer();
+		mpEnhancer.setMinSupport(minSupport);
+		mpEnhancer.setConditionType(dataConditionType);
+		return mpEnhancer;
+	}
+
 	private void discoverModel(Runnable callback) {
 		int constraintSupport = constraintSupportSlider.getValue();
+		DiscoveryMethod discoveryMethod = DiscoveryMethod.values()[discoveryMethodComboBox.getSelectedIndex()];
 		DataConditionType dataConditionType = DataConditionType.values()[discoverDataConditionsComboBox
 				.getSelectedIndex()];
 		DiscoveryTask discoveryTask;
-		MpEnhancer mpEnhancer = new MpEnhancer();
-
-		selectedTemplates = selectedTemplates.stream().distinct().collect(Collectors.toList());
-		if (dataConditionType != DataConditionType.NONE) {
-			mpEnhancer.setMinSupport(constraintSupport / 100d);
-			mpEnhancer.setConditionType(dataConditionType);
-		}
 
 		System.out.println("Start discovering model(s) with the parameters:");
+		System.out.println("- discoveryMethod = " + discoveryMethod);
 		System.out.println("- selectedTemplates = " + selectedTemplates);
 		System.out.println("- constraintSupport = " + constraintSupport);
 		System.out.println("- timeConditions = " + discoverTimeConditionsButton.isSelected());
-		System.out.println("- dataConditions = " + dataConditionType.toString());
+		System.out.println("- dataConditions = " + dataConditionType);
 
-		if (discoveryMethodComboBox.getSelectedIndex() == DiscoveryMethod.DECLARE.ordinal()) {
+		if (discoveryMethod.equals(DiscoveryMethod.DECLARE)) {
 			DeclarePruningType declarePruningType = DeclarePruningType.values()[pruningTypeComboBox
 					.getSelectedIndex()];
 			DeclareDiscoveryTask discoveryTaskDeclare = new DeclareDiscoveryTask();
 
-			discoveryTaskDeclare.setSelectedTemplates(selectedTemplates);
-			discoveryTaskDeclare.setMinSupport(constraintSupport);
+			discoveryTaskDeclare.setSelectedTemplates(new ArrayList<>(selectedTemplates));
 			discoveryTaskDeclare.setPruningType(declarePruningType);
 			discoveryTaskDeclare.setVacuityAsViolation(vacuousAsViolatedButton.isSelected());
 			discoveryTaskDeclare.setConsiderLifecycle(considerLifecycleButton.isSelected());
 			discoveryTaskDeclare.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
 
 			if (dataConditionType != DataConditionType.NONE) {
+				MpEnhancer mpEnhancer = createMpEnhancer(constraintSupport / 100d, dataConditionType);
 				discoveryTaskDeclare.setMinSupport(0);
 				discoveryTaskDeclare.setMpEnhancer(mpEnhancer);
 			} else
@@ -424,12 +427,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 			PostProcessingAnalysisType pruningType = PostProcessingAnalysisType.values()[pruningTypeComboBox
 					.getSelectedIndex()];
 			MinerfulDiscoveryTask discoveryTaskMinerful = new MinerfulDiscoveryTask();
-			discoveryTaskMinerful.setSelectedTemplates(selectedTemplates);
-			discoveryTaskMinerful.setMinSupport(constraintSupport);
+			discoveryTaskMinerful.setSelectedTemplates(new ArrayList<>(selectedTemplates));
 			discoveryTaskMinerful.setPruningType(pruningType);
 			discoveryTaskMinerful.setComuputeTimeDistances(discoverTimeConditionsButton.isSelected());
 
 			if (dataConditionType != DataConditionType.NONE) {
+				MpEnhancer mpEnhancer = createMpEnhancer(constraintSupport / 100d, dataConditionType);
 				discoveryTaskMinerful.setMinSupport(0d);
 				discoveryTaskMinerful.setMpEnhancer(mpEnhancer);
 			} else

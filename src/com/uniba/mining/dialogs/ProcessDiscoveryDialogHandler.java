@@ -471,7 +471,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private void exportModel(Path directoryPath) {
 		Path filePath = directoryPath
-				.resolve(Paths.get(Application.getTimestampString()
+				.resolve(Paths.get(Application.getStringTimestamp()
 						+ LogStreamer.ZIP_EXTENSION));
 		List<File> modelFiles = new ArrayList<>();
 		for (Entry<File, DiscoveryTaskResult> discoveryEntry : discoveryTaskResults
@@ -538,7 +538,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 					discoveryTaskResults.clear();
 					GUI.showInformationMessageDialog(rootPanel,
 							ProcessDiscoveryActionController.ACTION_NAME,
-							"Process model(s) successfully discovered and exported");
+							"Process model(s) successfully discovered and exported.");
 				});
 			}
 

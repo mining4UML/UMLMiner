@@ -140,13 +140,15 @@ public class LogStreamer {
                 ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
 
             for (File file : files) {
-                ZipEntry zipEntry = new ZipEntry(file.getName());
-                zipOutputStream.putNextEntry(zipEntry);
+                if (file != null) {
+                    ZipEntry zipEntry = new ZipEntry(file.getName());
+                    zipOutputStream.putNextEntry(zipEntry);
 
-                try (FileInputStream logInputStream = new FileInputStream(file)) {
-                    byte[] bytes = new byte[logInputStream.available()];
-                    if (logInputStream.read(bytes) != -1)
-                        zipOutputStream.write(bytes);
+                    try (FileInputStream logInputStream = new FileInputStream(file)) {
+                        byte[] bytes = new byte[logInputStream.available()];
+                        if (logInputStream.read(bytes) != -1)
+                            zipOutputStream.write(bytes);
+                    }
                 }
             }
 
@@ -158,7 +160,7 @@ public class LogStreamer {
     }
 
     public static void exportLogs(Path directoryPath) {
-        String fileName = Application.getTimestampString() + ZIP_EXTENSION;
+        String fileName = Application.getStringTimestamp() + ZIP_EXTENSION;
         Path filePath = directoryPath.resolve(fileName);
 
         exportZip(filePath, logsDirectory.toFile().listFiles(LogStreamer::isLogFile));

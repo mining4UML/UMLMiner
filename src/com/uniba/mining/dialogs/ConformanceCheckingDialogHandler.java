@@ -58,11 +58,12 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             ConformanceMethod.REPLAYER.getDisplayText() };
     private String[] optionsGroupItems = { "Traces", "Constraints" };
     private JPanel rootPanel;
+    private JButton selectModelButton;
+    private JButton selectLogButton;
     private JPanel optionsPanel;
     private JComboBox<String> checkingMethodComboBox;
     private JComboBox<String> optionsGroupComboBox;
     private JButton actionsCheckButton;
-    private JButton actionsExportButton;
     private IDialog dialog;
 
     private File selectedModelFile;
@@ -76,12 +77,12 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         Box selectModelBox = new Box(BoxLayout.PAGE_AXIS);
         Box selectModelInputBox = new Box(BoxLayout.LINE_AXIS);
         JTextField selectModelTextField = new JTextField("No model selected", 20);
-        JButton selectModelButton = new JButton("Select Model");
+        selectModelButton = new JButton("Select Model");
         JLabel selectLogLabel = new JLabel("Log");
         Box selectLogBox = new Box(BoxLayout.PAGE_AXIS);
         Box selectLogInputBox = new Box(BoxLayout.LINE_AXIS);
         JTextField selectLogTextField = new JTextField("No log selected", 20);
-        JButton selectLogButton = new JButton("Select Log");
+        selectLogButton = new JButton("Select Log");
         String checkingImagePath = String.join("/", Config.ICONS_PATH, "checklist.png");
         ImageIcon checkingImage = GUI.loadImage(checkingImagePath, "Conformance checking icon", 0.5f);
         JLabel checkingLabel = new JLabel(checkingImage);
@@ -97,11 +98,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
                 selectedModelFile = fileChooser.getSelectedFile();
                 selectModelTextField.setText(selectedModelFile.getName());
-                optionsPanel.setVisible(false);
                 if (selectedModelFile != null && selectedLogFile != null)
                     actionsCheckButton.setEnabled(true);
-                actionsExportButton.setEnabled(false);
-                dialog.pack();
             }
         });
         selectLogLabel.setLabelFor(selectLogBox);
@@ -114,11 +112,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
                 selectedLogFile = fileChooser.getSelectedFile();
                 selectLogTextField.setText(selectedLogFile.getName());
-                optionsPanel.setVisible(false);
                 if (selectedModelFile != null && selectedLogFile != null)
                     actionsCheckButton.setEnabled(true);
-                actionsExportButton.setEnabled(false);
-                dialog.pack();
             }
         });
         selectModelLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -143,7 +138,6 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 
         checkingMethodComboBox.addActionListener(e -> {
             actionsCheckButton.setEnabled(true);
-            actionsExportButton.setEnabled(false);
         });
 
         GUI.addAll(checkingMethodPanel, checkingMethodLabel, checkingMethodComboBox);
@@ -352,10 +346,31 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         return activityMatchCosts;
     }
 
+    private void checkConformance(Runnable callback) {
+        ConformanceMethod conformanceMethod = ConformanceMethod.values()[checkingMethodComboBox
+                .getSelectedIndex()];
+        ConformanceTask conformanceTask = conformanceMethod == ConformanceMethod.ANALYZER
+                ? new ConformanceAnalyzerTask()
+                : new ConformanceReplayerTask();
+        if (conformanceMethod == ConformanceMethod.REPLAYER)
+            ((ConformanceReplayerTask) conformanceTask).setActivityMatchCosts(getActivityMatchCosts());
+        Application.run(() -> {
+            conformanceTask.setLogFile(selectedLogFile);
+            try {
+                conformanceTask.setXmlModel(ModelUtils.createTmpXmlModel(selectedModelFile));
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+            conformanceTaskResult = conformanceTask.call();
+            if (conformanceTaskResult == null)
+                return;
+            callback.run();
+        });
+    }
+
     private Component getActionsPanel() {
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
         actionsCheckButton = new JButton("Check");
-        actionsExportButton = new JButton("Export Reports");
         JProgressBar progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setString("Checking conformance...");
@@ -363,59 +378,41 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         progressBar.setVisible(false);
 
         actionsCheckButton.setEnabled(false);
-        actionsExportButton.setEnabled(false);
 
         actionsCheckButton.addActionListener(e -> {
             if (actionsCheckButton.getText().equals("Cancel")) {
                 actionsCheckButton.setText("Check");
+                selectModelButton.setEnabled(true);
+                selectLogButton.setEnabled(true);
                 progressBar.setVisible(false);
                 Application.cancelTasks();
                 conformanceTaskResult = null;
                 return;
             }
 
-            actionsCheckButton.setText("Cancel");
-            progressBar.setVisible(true);
-            ConformanceMethod conformanceMethod = ConformanceMethod.values()[checkingMethodComboBox
-                    .getSelectedIndex()];
-            ConformanceTask conformanceTask = conformanceMethod == ConformanceMethod.ANALYZER
-                    ? new ConformanceAnalyzerTask()
-                    : new ConformanceReplayerTask();
-            if (conformanceMethod == ConformanceMethod.REPLAYER)
-                ((ConformanceReplayerTask) conformanceTask).setActivityMatchCosts(getActivityMatchCosts());
-            Application.run(() -> {
-                conformanceTask.setLogFile(selectedLogFile);
-                try {
-                    conformanceTask.setXmlModel(ModelUtils.createTmpXmlModel(selectedModelFile));
-                } catch (IOException exception) {
-                    exception.printStackTrace();
-                }
-                conformanceTaskResult = conformanceTask.call();
-                actionsCheckButton.setText("Check");
-                progressBar.setVisible(false);
-                if (conformanceTaskResult == null)
-                    return;
-                optionsPanel.setVisible(true);
-                actionsExportButton.setEnabled(true);
-                dialog.pack();
-                GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
-                        "Conformance checking completed for the selected files.");
-            });
-        });
-
-        actionsExportButton.addActionListener(e -> {
             JFileChooser fileChooser = GUI.createExportFileChooser(ConformanceCheckingActionController.ACTION_NAME);
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
-                Path directoryPath = fileChooser.getSelectedFile().toPath();
-                Path filePath = directoryPath
-                        .resolve(Paths.get(Application.getTimestampString()) + LogStreamer.ZIP_EXTENSION);
-                LogStreamer.exportZip(filePath, exportCsvData(), exportFulfilledLog(), exportViolatedLog());
-                GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
-                        "Report successfully exported.");
+                actionsCheckButton.setText("Cancel");
+                selectModelButton.setEnabled(false);
+                selectLogButton.setEnabled(false);
+                progressBar.setVisible(true);
+
+                checkConformance(() -> {
+                    actionsCheckButton.setText("Check");
+                    selectModelButton.setEnabled(true);
+                    selectLogButton.setEnabled(true);
+                    progressBar.setVisible(false);
+                    Path directoryPath = fileChooser.getSelectedFile().toPath();
+                    Path filePath = directoryPath
+                            .resolve(Paths.get(Application.getStringTimestamp()) + LogStreamer.ZIP_EXTENSION);
+                    LogStreamer.exportZip(filePath, exportCsvData(), exportFulfilledLog(), exportViolatedLog());
+                    GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
+                            "Report successfully created and exported.");
+                });
             }
         });
 
-        GUI.addAll(actionsPanel, actionsCheckButton, actionsExportButton, progressBar);
+        GUI.addAll(actionsPanel, actionsCheckButton, progressBar);
 
         return actionsPanel;
     }

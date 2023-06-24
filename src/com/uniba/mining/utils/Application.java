@@ -71,7 +71,7 @@ public class Application {
         tasks.clear();
     }
 
-    public static String getTimestampString() {
+    public static String getStringTimestamp() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT));
     }
 }

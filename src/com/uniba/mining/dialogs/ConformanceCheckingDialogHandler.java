@@ -391,7 +391,10 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                     exception.printStackTrace();
                 }
                 conformanceTaskResult = conformanceTask.call();
+                actionsCheckButton.setText("Check");
                 progressBar.setVisible(false);
+                if (conformanceTaskResult == null)
+                    return;
                 optionsPanel.setVisible(true);
                 actionsExportButton.setEnabled(true);
                 dialog.pack();

@@ -197,12 +197,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 				} else {
 					selectedTemplates.removeAll(minerfulNotSupportedTemplates);
 					pruningTypeComboBox.setSelectedIndex(1);
-					vacuousAsViolatedButton.setSelected(true);
-					vacuousAsViolatedButton.doClick();
-					considerLifecycleButton.setSelected(false);
-					considerLifecycleButton.doClick();
-					discoverTimeConditionsButton.setSelected(false);
-					discoverTimeConditionsButton.doClick();
+					if (!vacuousAsViolatedButton.isSelected())
+						vacuousAsViolatedButton.doClick();
+					if (considerLifecycleButton.isSelected())
+						considerLifecycleButton.doClick();
+					if (discoverTimeConditionsButton.isSelected())
+						discoverTimeConditionsButton.doClick();
 					discoverDataConditionsComboBox.setSelectedIndex(2);
 				}
 				pruningTypeLabel.setText(String.format("Pruning Type (%s)",

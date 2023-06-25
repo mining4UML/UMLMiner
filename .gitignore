@@ -1,4 +1,4 @@
 **/classes
-lib/rum-*.jar
+lib/rum-*
 lib/logs
 .vscode

@@ -85,7 +85,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         String checkingImagePath = String.join("/", Config.ICONS_PATH, "checklist.png");
         ImageIcon checkingImage = GUI.loadImage(checkingImagePath, "Conformance checking icon", 0.5f);
         JLabel checkingLabel = new JLabel(checkingImage);
-        Dimension textFieldDimension = new Dimension(150, 20);
+        Dimension textFieldDimension = new Dimension(140, 20);
 
         selectModelLabel.setLabelFor(selectModelInputBox);
         selectModelTextField.setPreferredSize(textFieldDimension);

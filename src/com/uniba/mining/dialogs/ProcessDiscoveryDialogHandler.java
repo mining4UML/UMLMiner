@@ -279,7 +279,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private Component getGeneralParametersPanel() {
 		JPanel generalParametersPanel = new JPanel();
 		JLabel constraintSupportLabel = new JLabel("Constraint Support");
-		pruningTypeLabel = new JLabel("Pruning Type");
+		pruningTypeLabel = new JLabel("Pruning Type (Declare)");
 		JLabel vacuousAsViolatedLabel = new JLabel("Vacuous as Violated");
 		JLabel considerLifecycleLabel = new JLabel("Consider Lifecycle");
 		JLabel discoverTimeConditionsLabel = new JLabel("Discover Time Conditions");
@@ -298,7 +298,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		Box considerLifecycleBox = new Box(BoxLayout.LINE_AXIS);
 		Box discoverTimeConditionsBox = new Box(BoxLayout.LINE_AXIS);
 		Box discoverDataConditionsBox = new Box(BoxLayout.LINE_AXIS);
-		Dimension labelDimension = new Dimension(120, 20);
+		Dimension labelDimension = new Dimension(140, 20);
 
 		constraintSupportLabel.setPreferredSize(labelDimension);
 		constraintSupportLabel.setMaximumSize(labelDimension);

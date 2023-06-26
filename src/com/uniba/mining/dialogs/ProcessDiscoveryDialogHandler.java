@@ -397,9 +397,9 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		return contentPanel;
 	}
 
-	private MpEnhancer createMpEnhancer(double minSupport, DataConditionType dataConditionType) {
+	private MpEnhancer createMpEnhancer(int minSupport, DataConditionType dataConditionType) {
 		MpEnhancer mpEnhancer = new MpEnhancer();
-		mpEnhancer.setMinSupport(minSupport);
+		mpEnhancer.setMinSupport(minSupport / 100d);
 		mpEnhancer.setConditionType(dataConditionType);
 		return mpEnhancer;
 	}
@@ -459,7 +459,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 				if (dataConditionType.isDataAware()) {
 					try {
 						LogUtils.checkDataExistence(selectedLogFile);
-						MpEnhancer mpEnhancer = createMpEnhancer(constraintSupport / 100d, dataConditionType);
+						MpEnhancer mpEnhancer = createMpEnhancer(constraintSupport, dataConditionType);
 						discoveryTask.setMpEnhancer(mpEnhancer);
 					} catch (Exception e) {
 						e.printStackTrace();

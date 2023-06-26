@@ -142,7 +142,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private JToggleButton considerLifecycleButton;
 	private JToggleButton discoverTimeConditionsButton;
 	private JComboBox<String> discoverDataConditionsComboBox;
-	private JButton discoveryButton;
+	private JButton discoverButton;
 	private JProgressBar progressBar;
 
 	private Component getHeaderPanel() {
@@ -171,7 +171,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 						Arrays.stream(selectedLogFiles).map(File::getName).reduce("",
 								(t, u) -> t.isEmpty() ? "\u2022 " + u : String.join("\n", t, "\u2022 " + u)).trim());
 				discoveryTaskResults.clear();
-				discoveryButton.setEnabled(true);
+				discoverButton.setEnabled(true);
 			}
 		});
 		selectFileLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -519,16 +519,17 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private Component getActionsPanel() {
 		JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
-		discoveryButton = new JButton("Discover");
+		discoverButton = new JButton("Discover");
 		progressBar = new JProgressBar();
 		progressBar.setIndeterminate(true);
 		progressBar.setStringPainted(true);
 		progressBar.setString("Discovering model...");
 		progressBar.setVisible(false);
 
-		discoveryButton.addActionListener(e -> {
-			if (discoveryButton.getText().equals("Cancel")) {
-				discoveryButton.setText("Discover");
+		discoverButton.setEnabled(false);
+		discoverButton.addActionListener(e -> {
+			if (discoverButton.getText().equals("Cancel")) {
+				discoverButton.setText("Discover");
 				selectLogsButton.setEnabled(true);
 				progressBar.setVisible(false);
 				Application.cancelTasks();
@@ -539,11 +540,11 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 			JFileChooser fileChooser = GUI
 					.createExportFileChooser(ProcessDiscoveryActionController.ACTION_NAME);
 			if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
-				discoveryButton.setText("Cancel");
+				discoverButton.setText("Cancel");
 				selectLogsButton.setEnabled(false);
 				progressBar.setVisible(true);
 				discoverModel(() -> {
-					discoveryButton.setText("Discover");
+					discoverButton.setText("Discover");
 					selectLogsButton.setEnabled(true);
 					progressBar.setVisible(false);
 					exportModel(fileChooser.getSelectedFile().toPath());
@@ -556,7 +557,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 		});
 
-		GUI.addAll(actionsPanel, discoveryButton, progressBar);
+		GUI.addAll(actionsPanel, discoverButton, progressBar);
 
 		return actionsPanel;
 	}

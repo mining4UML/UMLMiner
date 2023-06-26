@@ -63,7 +63,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
     private JButton selectLogButton;
     private JComboBox<String> checkingMethodComboBox;
     private JComboBox<String> optionsGroupComboBox;
-    private JButton actionsCheckButton;
+    private JButton checkButton;
 
     private File selectedModelFile;
     private File selectedLogFile;
@@ -101,7 +101,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                 selectedModelFile = fileChooser.getSelectedFile();
                 selectModelTextField.setText(selectedModelFile.getName());
                 if (selectedModelFile != null && selectedLogFile != null)
-                    actionsCheckButton.setEnabled(true);
+                    checkButton.setEnabled(true);
             }
         });
         selectLogLabel.setLabelFor(selectLogBox);
@@ -117,7 +117,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                 selectedLogFile = fileChooser.getSelectedFile();
                 selectLogTextField.setText(selectedLogFile.getName());
                 if (selectedModelFile != null && selectedLogFile != null)
-                    actionsCheckButton.setEnabled(true);
+                    checkButton.setEnabled(true);
             }
         });
         selectModelLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -368,18 +368,18 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 
     private Component getActionsPanel() {
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
-        actionsCheckButton = new JButton("Check");
+        checkButton = new JButton("Check");
         JProgressBar progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setString("Checking conformance...");
         progressBar.setStringPainted(true);
         progressBar.setVisible(false);
 
-        actionsCheckButton.setEnabled(false);
+        checkButton.setEnabled(false);
 
-        actionsCheckButton.addActionListener(e -> {
-            if (actionsCheckButton.getText().equals("Cancel")) {
-                actionsCheckButton.setText("Check");
+        checkButton.addActionListener(e -> {
+            if (checkButton.getText().equals("Cancel")) {
+                checkButton.setText("Check");
                 selectModelButton.setEnabled(true);
                 selectLogButton.setEnabled(true);
                 progressBar.setVisible(false);
@@ -390,13 +390,13 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 
             JFileChooser fileChooser = GUI.createExportFileChooser(ConformanceCheckingActionController.ACTION_NAME);
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
-                actionsCheckButton.setText("Cancel");
+                checkButton.setText("Cancel");
                 selectModelButton.setEnabled(false);
                 selectLogButton.setEnabled(false);
                 progressBar.setVisible(true);
 
                 checkConformance(() -> {
-                    actionsCheckButton.setText("Check");
+                    checkButton.setText("Check");
                     selectModelButton.setEnabled(true);
                     selectLogButton.setEnabled(true);
                     progressBar.setVisible(false);
@@ -410,7 +410,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             }
         });
 
-        GUI.addAll(actionsPanel, actionsCheckButton, progressBar);
+        GUI.addAll(actionsPanel, checkButton, progressBar);
 
         return actionsPanel;
     }

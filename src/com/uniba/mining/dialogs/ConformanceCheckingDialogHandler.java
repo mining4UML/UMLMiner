@@ -70,22 +70,23 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
     private ConformanceTaskResult conformanceTaskResult;
 
     private Component getHeaderPanel() {
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, GUI.ULTRA_HIGH_PADDING, GUI.DEFAULT_PADDING));
+        final String selectButtonText = "Select";
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
         Box selectBox = new Box(BoxLayout.PAGE_AXIS);
-        JLabel selectModelLabel = new JLabel("MP-Declare");
+        JLabel selectModelLabel = GUI.createLabel("MP-Declare");
         Box selectModelBox = new Box(BoxLayout.PAGE_AXIS);
         Box selectModelInputBox = new Box(BoxLayout.LINE_AXIS);
         JTextField selectModelTextField = new JTextField("No model selected", 20);
-        selectModelButton = new JButton("Select Model");
-        JLabel selectLogLabel = new JLabel("Log");
+        selectModelButton = new JButton(selectButtonText);
+        JLabel selectLogLabel = GUI.createLabel("Log");
         Box selectLogBox = new Box(BoxLayout.PAGE_AXIS);
         Box selectLogInputBox = new Box(BoxLayout.LINE_AXIS);
         JTextField selectLogTextField = new JTextField("No log selected", 20);
-        selectLogButton = new JButton("Select Log");
+        selectLogButton = new JButton(selectButtonText);
         String checkingImagePath = String.join("/", Config.ICONS_PATH, "checklist.png");
-        ImageIcon checkingImage = GUI.loadImage(checkingImagePath, "Conformance checking icon", 0.5f);
-        JLabel checkingLabel = new JLabel(checkingImage);
-        Dimension textFieldDimension = new Dimension(140, 20);
+        ImageIcon checkImage = GUI.loadImage(checkingImagePath, "Conformance checking icon", 0.5f);
+        JLabel checkLabel = new JLabel(checkImage);
+        Dimension textFieldDimension = new Dimension(140, selectLogTextField.getMinimumSize().height);
 
         selectModelLabel.setLabelFor(selectModelInputBox);
         selectModelTextField.setPreferredSize(textFieldDimension);
@@ -129,13 +130,13 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         GUI.addAll(selectModelBox, GUI.DEFAULT_PADDING, selectModelLabel, selectModelInputBox);
         GUI.addAll(selectLogBox, GUI.DEFAULT_PADDING, selectLogLabel, selectLogInputBox);
         GUI.addAll(selectBox, GUI.HIGH_PADDING, selectModelBox, selectLogBox);
-        GUI.addAll(headerPanel, selectBox, checkingLabel);
+        GUI.addAll(headerPanel, selectBox, checkLabel);
         return headerPanel;
     }
 
     private Component getCheckingMethodPanel() {
         JPanel checkingMethodPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-        JLabel checkingMethodLabel = new JLabel("Checking Method");
+        JLabel checkingMethodLabel = GUI.createLabel("Checking Method");
         checkingMethodComboBox = new JComboBox<>(checkingMethodItems);
 
         checkingMethodLabel.setLabelFor(checkingMethodComboBox);
@@ -145,7 +146,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 
     private Component getOptionsPanel() {
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-        JLabel optionsGroupLabel = new JLabel("Group Results By");
+        JLabel optionsGroupLabel = GUI.createLabel("Group Results By");
         optionsGroupComboBox = new JComboBox<>(optionsGroupItems);
 
         GUI.addAll(optionsPanel, optionsGroupLabel, optionsGroupComboBox);
@@ -355,7 +356,9 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         Application.run(() -> {
             conformanceTask.setLogFile(selectedLogFile);
             try {
-                conformanceTask.setXmlModel(ModelUtils.createTmpXmlModel(selectedModelFile).getAbsoluteFile());
+                File xmlFile = ModelUtils.createTmpXmlModel(selectedModelFile).getAbsoluteFile();
+                System.out.println("Xml file: " + xmlFile.toString());
+                conformanceTask.setXmlModel(xmlFile);
             } catch (IOException exception) {
                 exception.printStackTrace();
             }

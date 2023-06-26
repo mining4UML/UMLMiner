@@ -146,12 +146,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 	private JProgressBar progressBar;
 
 	private Component getHeaderPanel() {
-		JPanel headerPanel = new JPanel();
-		JLabel selectFileLabel = new JLabel("Logs");
+		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		JLabel selectFileLabel = GUI.createLabel("Logs");
 		Box selectFileBox = new Box(BoxLayout.PAGE_AXIS);
 		Box selectFileInputBox = new Box(BoxLayout.LINE_AXIS);
 		JTextArea selectFileTextArea = new JTextArea("No logs selected", 1, 20);
-		selectLogsButton = new JButton("Select Logs");
+		selectLogsButton = new JButton("Select");
 		String discoverImagePath = String.join("/", Config.ICONS_PATH, "spaceman.png");
 		ImageIcon discoverImage = GUI.loadImage(discoverImagePath, "Process discovery icon", 0.5f);
 		JLabel discoverLabel = new JLabel(discoverImage);
@@ -204,7 +204,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private Component getDiscoveryMethodPanel() {
 		JPanel discoveryMethodPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-		JLabel discoveryMethodLabel = new JLabel("Discovery Method");
+		JLabel discoveryMethodLabel = GUI.createLabel("Discovery Method");
 		discoveryMethodComboBox = new JComboBox<>(discoveryMethodItems);
 		discoveryMethodComboBox.setSelectedItem(discoveryMethodLabel);
 		discoveryMethodComboBox.addItemListener(e -> {
@@ -251,7 +251,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private Component getTemplatesPanel() {
 		JPanel templatesPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-		JLabel templatesLabel = new JLabel("Templates");
+		JLabel templatesLabel = GUI.createLabel("Templates");
 		unaryCheckBox = new JCheckBox("Unary", true);
 		binaryPositiveCheckBox = new JCheckBox("Binary Positive", true);
 		binaryNegativeCheckBox = new JCheckBox("Binary Negative", true);
@@ -278,12 +278,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private Component getGeneralParametersPanel() {
 		JPanel generalParametersPanel = new JPanel();
-		JLabel constraintSupportLabel = new JLabel("Constraint Support");
-		pruningTypeLabel = new JLabel("Pruning Type (Declare)");
-		JLabel vacuousAsViolatedLabel = new JLabel("Vacuous as Violated");
-		JLabel considerLifecycleLabel = new JLabel("Consider Lifecycle");
-		JLabel discoverTimeConditionsLabel = new JLabel("Discover Time Conditions");
-		JLabel discoverDataConditionsLabel = new JLabel("Discover Data Conditions");
+		JLabel constraintSupportLabel = GUI.createLabel("Constraint Support");
+		pruningTypeLabel = GUI.createLabel("Pruning Type (Declare)");
+		JLabel vacuousAsViolatedLabel = GUI.createLabel("Vacuous as Violated");
+		JLabel considerLifecycleLabel = GUI.createLabel("Consider Lifecycle");
+		JLabel discoverTimeConditionsLabel = GUI.createLabel("Discover Time Conditions");
+		JLabel discoverDataConditionsLabel = GUI.createLabel("Discover Data Conditions");
 		constraintSupportSlider = new JSlider(0, 100, 90);
 		pruningTypeComboBox = new JComboBox<>(pruningTypeDeclareMinerItems);
 		vacuousAsViolatedButton = new JToggleButton("Enabled");
@@ -298,7 +298,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		Box considerLifecycleBox = new Box(BoxLayout.LINE_AXIS);
 		Box discoverTimeConditionsBox = new Box(BoxLayout.LINE_AXIS);
 		Box discoverDataConditionsBox = new Box(BoxLayout.LINE_AXIS);
-		Dimension labelDimension = new Dimension(140, 20);
+		Dimension labelDimension = new Dimension(150, 20);
 
 		constraintSupportLabel.setPreferredSize(labelDimension);
 		constraintSupportLabel.setMaximumSize(labelDimension);

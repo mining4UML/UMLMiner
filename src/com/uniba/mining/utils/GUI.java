@@ -6,6 +6,7 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -25,9 +26,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 import com.uniba.mining.plugin.Config;
@@ -38,7 +41,6 @@ public class GUI {
     public static final int LOW_PADDING = 2;
     public static final int DEFAULT_PADDING = 4;
     public static final int HIGH_PADDING = 8;
-    public static final int ULTRA_HIGH_PADDING = 16;
     public static final int DEFAULT_BORDER_SIZE = 1;
     private static final Dimension defaultPaddingDimension = new Dimension(DEFAULT_PADDING, DEFAULT_PADDING);
     private static final Border defaultPaddingBorder = BorderFactory.createEmptyBorder(DEFAULT_PADDING, DEFAULT_PADDING,
@@ -63,7 +65,9 @@ public class GUI {
     }
 
     public static Border getDefaultTitledBorder(String title) {
-        return BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder(title), defaultPaddingBorder);
+        TitledBorder titledBorder = BorderFactory.createTitledBorder(title);
+        titledBorder.setTitleFont(titledBorder.getTitleFont().deriveFont(Font.BOLD));
+        return BorderFactory.createCompoundBorder(titledBorder, defaultPaddingBorder);
     }
 
     public static Point getCenterPoint() {
@@ -174,6 +178,12 @@ public class GUI {
 
     public static JButton createLinkButton(String text, URI uri) {
         return createLinkButton(text, uri, null);
+    }
+
+    public static JLabel createLabel(String text) {
+        JLabel label = new JLabel(text + ":");
+        label.setFont(label.getFont().deriveFont(Font.BOLD));
+        return label;
     }
 
     private static void disableTextFields(Container container) {

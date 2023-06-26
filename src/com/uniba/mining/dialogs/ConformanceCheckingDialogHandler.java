@@ -355,7 +355,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         Application.run(() -> {
             conformanceTask.setLogFile(selectedLogFile);
             try {
-                conformanceTask.setXmlModel(ModelUtils.createTmpXmlModel(selectedModelFile));
+                conformanceTask.setXmlModel(ModelUtils.createTmpXmlModel(selectedModelFile).getAbsoluteFile());
             } catch (IOException exception) {
                 exception.printStackTrace();
             }

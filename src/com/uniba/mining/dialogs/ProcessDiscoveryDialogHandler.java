@@ -278,12 +278,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private Component getGeneralParametersPanel() {
 		JPanel generalParametersPanel = new JPanel();
-		JLabel constraintSupportLabel = GUI.createLabel("Constraint Support");
-		pruningTypeLabel = GUI.createLabel("Pruning Type (Declare)");
-		JLabel vacuousAsViolatedLabel = GUI.createLabel("Vacuous as Violated");
-		JLabel considerLifecycleLabel = GUI.createLabel("Consider Lifecycle");
-		JLabel discoverTimeConditionsLabel = GUI.createLabel("Discover Time Conditions");
-		JLabel discoverDataConditionsLabel = GUI.createLabel("Discover Data Conditions");
+		JLabel constraintSupportLabel = new JLabel("Constraint Support");
+		pruningTypeLabel = new JLabel("Pruning Type (Declare)");
+		JLabel vacuousAsViolatedLabel = new JLabel("Vacuous as Violated");
+		JLabel considerLifecycleLabel = new JLabel("Consider Lifecycle");
+		JLabel discoverTimeConditionsLabel = new JLabel("Discover Time Conditions");
+		JLabel discoverDataConditionsLabel = new JLabel("Discover Data Conditions");
 		constraintSupportSlider = new JSlider(0, 100, 90);
 		pruningTypeComboBox = new JComboBox<>(pruningTypeDeclareMinerItems);
 		vacuousAsViolatedButton = new JToggleButton("Enabled");

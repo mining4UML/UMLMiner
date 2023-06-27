@@ -146,7 +146,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 
     private Component getOptionsPanel() {
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-        JLabel optionsGroupLabel = GUI.createLabel("Group Results By");
+        JLabel optionsGroupLabel = new JLabel("Group Results By");
         optionsGroupComboBox = new JComboBox<>(optionsGroupItems);
 
         GUI.addAll(optionsPanel, optionsGroupLabel, optionsGroupComboBox);
@@ -356,8 +356,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         Application.run(() -> {
             conformanceTask.setLogFile(selectedLogFile);
             try {
-                File xmlFile = ModelUtils.createTmpXmlModel(selectedModelFile).getAbsoluteFile();
-                System.out.println("Xml file: " + xmlFile.toString());
+                File xmlFile = new File(ModelUtils.createTmpXmlModel(selectedModelFile).getAbsolutePath());
                 conformanceTask.setXmlModel(xmlFile);
             } catch (IOException exception) {
                 exception.printStackTrace();

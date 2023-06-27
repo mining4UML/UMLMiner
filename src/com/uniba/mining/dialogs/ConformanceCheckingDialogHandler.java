@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -356,7 +357,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         Application.run(() -> {
             conformanceTask.setLogFile(selectedLogFile);
             try {
-                File xmlFile = new File(ModelUtils.createTmpXmlModel(selectedModelFile).getAbsolutePath());
+                File xmlFile = new File(URI.create(ModelUtils.createTmpXmlModel(selectedModelFile).getAbsolutePath()));
                 conformanceTask.setXmlModel(xmlFile);
             } catch (IOException exception) {
                 exception.printStackTrace();

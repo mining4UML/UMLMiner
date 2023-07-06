@@ -73,6 +73,16 @@
 				ribbonPath="Toolbar/Separator2">
 				<actionController class="com.uniba.mining.actions.AboutActionController" />
 			</action>
+			<action
+				id="External"
+				actionType="generalAction"
+				label="%actions.External.label"
+				tooltip="%actions.External.label"
+				icon="assets/icons/external.png"
+				style="normal"
+				ribbonPath="Toolbar/External">
+				<actionController class="com.uniba.mining.actions.ExternalActionController" />
+			</action>
 		</actionSet>
 	</actionSets>
 

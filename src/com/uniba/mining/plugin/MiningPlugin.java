@@ -15,7 +15,7 @@ import com.vp.plugin.model.IProject;
 public class MiningPlugin implements VPPlugin {
 	private final Logger logger = new Logger(MiningPlugin.class);
 
-	public void loaded(VPPluginInfo info) {
+	public void loaded(VPPluginInfo pluginInfo) {
 		logger.info("Plugin loaded");
 
 		IProject project = Application.getProject();

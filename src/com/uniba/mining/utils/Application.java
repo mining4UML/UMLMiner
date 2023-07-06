@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.uniba.mining.plugin.Config;
 import com.vp.plugin.ApplicationManager;
+import com.vp.plugin.VPPluginInfo;
 import com.vp.plugin.VPProductInfo;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.diagram.IDiagramUIModel;
@@ -29,6 +30,10 @@ public class Application {
 
     private Application() {
         // Empty
+    }
+
+    public static VPPluginInfo getPluginInfo(String pluginId) {
+        return manager.getPluginInfo(pluginId);
     }
 
     public static VPProductInfo getProductInfo() {

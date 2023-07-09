@@ -199,6 +199,10 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 			selectedTemplates.removeAll(binaryNegativeTemplates);
 			selectedTemplates.removeAll(choiceTemplates);
 		}
+		if (selectedTemplates.isEmpty())
+			discoverButton.setEnabled(false);
+		else if (selectedLogFiles.length > 0)
+			discoverButton.setEnabled(true);
 	}
 
 	private Component getDiscoveryMethodPanel() {
@@ -256,7 +260,9 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		binaryNegativeCheckBox = new JCheckBox("Binary Negative", true);
 		choiceCheckBox = new JCheckBox("Choice", true);
 
-		unaryCheckBox.addActionListener(e -> setSelectedTemplates(unaryCheckBox, unaryTemplates));
+		unaryCheckBox.addActionListener(e -> {
+			setSelectedTemplates(unaryCheckBox, unaryTemplates);
+		});
 		binaryPositiveCheckBox
 				.addActionListener(e -> setSelectedTemplates(binaryPositiveCheckBox,
 						binaryPositiveTemplates));

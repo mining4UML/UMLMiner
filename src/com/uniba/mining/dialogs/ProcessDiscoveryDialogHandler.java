@@ -482,7 +482,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private void exportModel(Path directoryPath) {
 		Path filePath = directoryPath
-				.resolve(Paths.get(Application.getStringTimestamp()
+				.resolve(Paths.get(String.join("-", "discovery", Application.getStringTimestamp())
 						+ LogStreamer.ZIP_EXTENSION));
 		List<File> modelFiles = new ArrayList<>();
 		for (Entry<File, DiscoveryTaskResult> discoveryEntry : discoveryTaskResults

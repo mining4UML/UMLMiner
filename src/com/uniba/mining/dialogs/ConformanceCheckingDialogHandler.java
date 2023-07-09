@@ -417,7 +417,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                             .replaceAll(LogStreamer.LOG_EXTENSIONS_REGEX, "");
                     Path directoryPath = fileChooser.getSelectedFile().toPath();
                     Path filePath = directoryPath
-                            .resolve(String.join("-", selectedLogFileNameWithoutExtension,
+                            .resolve(String.join("-", "conformance", selectedLogFileNameWithoutExtension,
                                     Application.getStringTimestamp()) + LogStreamer.ZIP_EXTENSION);
                     LogStreamer.exportZip(filePath, exportCsvData(), exportFulfilledLog(), exportViolatedLog());
                     GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,

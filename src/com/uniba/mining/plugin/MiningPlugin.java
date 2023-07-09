@@ -24,6 +24,8 @@ public class MiningPlugin implements VPPlugin {
 
 	public void unloaded() {
 		logger.info("Plugin unloaded");
+
+		Config.storeExtProperties();
 	}
 
 }

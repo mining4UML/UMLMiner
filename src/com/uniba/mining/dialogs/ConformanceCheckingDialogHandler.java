@@ -96,8 +96,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         selectModelTextField.setEnabled(false);
         selectModelButton.addActionListener(e -> {
             JFileChooser fileChooser = GUI.createSelectFileChooser(
-                    ConformanceCheckingActionController.ACTION_NAME, LogStreamer.getModelFileFilter(),
-                    true);
+                    ConformanceCheckingActionController.ACTION_NAME, true, LogStreamer.getModelFileFilter());
             fileChooser.setCurrentDirectory(LogStreamer.getModelsDirectory().toFile());
 
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
@@ -113,8 +112,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         selectLogTextField.setEnabled(false);
         selectLogButton.addActionListener(e -> {
             JFileChooser fileChooser = GUI.createSelectFileChooser(
-                    ConformanceCheckingActionController.ACTION_NAME, LogStreamer.getLogFileFilter(),
-                    true);
+                    ConformanceCheckingActionController.ACTION_NAME, true, LogStreamer.getLogFileFilter());
             fileChooser.setCurrentDirectory(LogStreamer.getLogsDirectory().toFile());
             if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
                 selectedLogFile = fileChooser.getSelectedFile();

@@ -29,6 +29,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
@@ -86,8 +87,6 @@ public class GUI {
             container.add(component);
             if (padding > 0 && component != lastComponent) {
                 JComponent defaultPaddingComponent = getPaddingComponent(new Dimension(padding, padding));
-                defaultPaddingComponent.setAlignmentX(component.getAlignmentX());
-                defaultPaddingComponent.setAlignmentY(component.getAlignmentY());
                 container.add(defaultPaddingComponent);
             }
         }
@@ -120,6 +119,12 @@ public class GUI {
         int scaledWidth = Math.round(imageIcon.getIconWidth() * scale);
         int scaledHeight = Math.round(imageIcon.getIconHeight() * scale);
         Image scaledImage = imageIcon.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImage, description);
+    }
+
+    public static ImageIcon loadImage(String filePath, String description, int width, int height) {
+        ImageIcon imageIcon = loadImage(filePath, description);
+        Image scaledImage = imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImage, description);
     }
 
@@ -180,10 +185,18 @@ public class GUI {
         return createLinkButton(text, uri, null);
     }
 
-    public static JLabel createLabel(String text) {
-        JLabel label = new JLabel(text + ":");
+    public static JLabel createLabel(String text, Icon icon, int horizontalAlignment) {
+        JLabel label = new JLabel(text + ":", icon, horizontalAlignment);
         label.setFont(label.getFont().deriveFont(Font.BOLD));
         return label;
+    }
+
+    public static JLabel createLabel(String text, Icon icon) {
+        return createLabel(text, icon, SwingConstants.LEADING);
+    }
+
+    public static JLabel createLabel(String text) {
+        return createLabel(text, null);
     }
 
     private static void disableTextFields(Container container) {
@@ -196,11 +209,14 @@ public class GUI {
         }
     }
 
-    public static JFileChooser createSelectFileChooser(String title, FileFilter fileFilter, boolean multiple) {
+    public static JFileChooser createSelectFileChooser(String title, boolean multiple, FileFilter... fileFilters) {
         String fullTitle = String.join(" - ", Config.PLUGIN_NAME, title);
         JFileChooser fileChooser = viewManager.createJFileChooser();
+
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fileChooser.setFileFilter(fileFilter);
+        for (FileFilter fileFilter : fileFilters)
+            fileChooser.addChoosableFileFilter(fileFilter);
+        fileChooser.setFileFilter(fileFilters[0]);
         fileChooser.setMultiSelectionEnabled(multiple);
         fileChooser.setDialogTitle(fullTitle);
         fileChooser.setToolTipText(fullTitle);
@@ -209,9 +225,14 @@ public class GUI {
         return fileChooser;
     }
 
+    public static JFileChooser createSelectFileChooser(String title, FileFilter... fileFilters) {
+        return createSelectFileChooser(title, false, fileFilters);
+    }
+
     public static JFileChooser createExportFileChooser(String title) {
         String fullTitle = String.join(" - ", Config.PLUGIN_NAME, title);
         JFileChooser fileChooser = viewManager.createJFileChooser();
+
         fileChooser.setLocale(Locale.ENGLISH);
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setName(fullTitle);

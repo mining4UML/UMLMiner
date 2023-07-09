@@ -73,15 +73,54 @@
 				ribbonPath="Toolbar/Separator2">
 				<actionController class="com.uniba.mining.actions.AboutActionController" />
 			</action>
-			<action
+			<menu
 				id="External"
-				actionType="generalAction"
 				label="%actions.External.label"
-				tooltip="%actions.External.label"
+				ribbonPath="Toolbar/Separator2"
 				icon="assets/icons/external.png"
+			/>
+			<action
+				id="RuM"
+				actionType="generalAction"
+				label="%actions.External.RuM.label"
+				tooltip="%actions.External.RuM.label"
+				icon="assets/icons/rum.png"
 				style="normal"
-				ribbonPath="Toolbar/External">
+				ribbonPath="Toolbar/External/#">
 				<actionController class="com.uniba.mining.actions.ExternalActionController" />
+			</action>
+			<action
+				id="Disco"
+				actionType="generalAction"
+				label="%actions.External.Disco.label"
+				tooltip="%actions.External.Disco.label"
+				icon="assets/icons/disco.png"
+				style="normal"
+				ribbonPath="Toolbar/External/RuM">
+				<actionController class="com.uniba.mining.actions.ExternalActionController" />
+			</action>
+			<action
+				id="ProM"
+				actionType="generalAction"
+				label="%actions.External.ProM.label"
+				tooltip="%actions.External.ProM.label"
+				icon="assets/icons/prom.png"
+				style="normal"
+				ribbonPath="Toolbar/External/Disco">
+				<actionController class="com.uniba.mining.actions.ExternalActionController" />
+			</action>
+			<separator
+				id="ExternalSeparator"
+				ribbonPath="Toolbar/External/ProM" />
+			<action
+				id="ConfigureExternal"
+				actionType="generalAction"
+				label="%actions.External.ConfigureExternal.label"
+				tooltip="%actions.External.ConfigureExternal.label"
+				icon="assets/icons/settings.png"
+				style="normal"
+				ribbonPath="Toolbar/External/ExternalSeparator">
+				<actionController class="com.uniba.mining.actions.ConfigureExternalActionController" />
 			</action>
 		</actionSet>
 	</actionSets>

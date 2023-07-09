@@ -160,8 +160,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		selectFileTextArea.setEnabled(false);
 		selectLogsButton.addActionListener(e -> {
 			JFileChooser fileChooser = GUI.createSelectFileChooser(
-					ProcessDiscoveryActionController.ACTION_NAME, LogStreamer.getLogFileFilter(),
-					true);
+					ProcessDiscoveryActionController.ACTION_NAME, true, LogStreamer.getLogFileFilter());
 			fileChooser.setCurrentDirectory(LogStreamer.getLogsDirectory().toFile());
 
 			if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {

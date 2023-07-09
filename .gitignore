@@ -2,3 +2,4 @@
 lib/rum-*
 lib/logs
 .vscode
+ext.properties

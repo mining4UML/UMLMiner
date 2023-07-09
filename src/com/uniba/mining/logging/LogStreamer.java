@@ -23,6 +23,7 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.out.XesXmlSerializer;
 
 import com.uniba.mining.utils.Application;
+import com.vp.plugin.model.IProject;
 
 public class LogStreamer {
     public static final String LOG_EXTENSION = ".xes";
@@ -88,7 +89,8 @@ public class LogStreamer {
     }
 
     private static String getLogName() {
-        return Application.getProject().getId() + LOG_EXTENSION;
+        IProject project = Application.getProject();
+        return String.join("-", project.getName(), project.getId()) + LOG_EXTENSION;
     }
 
     private static boolean isLogFile(File dir, String name) {
@@ -160,7 +162,7 @@ public class LogStreamer {
     }
 
     public static void exportLogs(Path directoryPath) {
-        String fileName = Application.getStringTimestamp() + ZIP_EXTENSION;
+        String fileName = String.join("-", "logs", Application.getStringTimestamp()) + ZIP_EXTENSION;
         Path filePath = directoryPath.resolve(fileName);
 
         exportZip(filePath, logsDirectory.toFile().listFiles(LogStreamer::isLogFile));

@@ -11,7 +11,6 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -170,8 +169,11 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                 .map(ConformanceTaskResultGroup::getGroupStatistics)
                 .collect(Collectors.toList());
 
+        String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
+                .replaceAll(LogStreamer.LOG_EXTENSIONS_REGEX, "");
         Path directoryPath = LogStreamer.getReportsDirectory();
-        Path filePath = directoryPath.resolve(Paths.get("report" + LogStreamer.CSV_EXTENSION));
+        Path filePath = directoryPath
+                .resolve(String.join("-", selectedLogFileNameWithoutExtension, "report") + LogStreamer.CSV_EXTENSION);
         try {
             Files.writeString(filePath, ModelExporter.getConformanceDataAsCsv(statistics));
         } catch (IOException e) {
@@ -234,8 +236,11 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             fulfilledLog.getGlobalEventAttributes().addAll(originalLog.getGlobalEventAttributes());
             fulfilledLog.getGlobalTraceAttributes().addAll(originalLog.getGlobalTraceAttributes());
 
+            String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
+                    .replaceAll(LogStreamer.LOG_EXTENSIONS_REGEX, "");
             Path directoryPath = LogStreamer.getReportsDirectory();
-            Path filePath = directoryPath.resolve(Paths.get("fulfilledLog" + LogStreamer.LOG_EXTENSION));
+            Path filePath = directoryPath.resolve(String.join("-", selectedLogFileNameWithoutExtension, "fulfilledLog")
+                    + LogStreamer.LOG_EXTENSION);
             File file = filePath.toFile();
             try (FileOutputStream outStream = new FileOutputStream(file)) {
                 new XesXmlSerializer().serialize(fulfilledLog, outStream);
@@ -301,8 +306,11 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
             violatedLog.getGlobalEventAttributes().addAll(originalLog.getGlobalEventAttributes());
             violatedLog.getGlobalTraceAttributes().addAll(originalLog.getGlobalTraceAttributes());
 
+            String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
+                    .replaceAll(LogStreamer.LOG_EXTENSIONS_REGEX, "");
             Path directoryPath = LogStreamer.getReportsDirectory();
-            Path filePath = directoryPath.resolve(Paths.get("violatedLog" + LogStreamer.LOG_EXTENSION));
+            Path filePath = directoryPath.resolve(String.join("-", selectedLogFileNameWithoutExtension, "violatedLog")
+                    + LogStreamer.LOG_EXTENSION);
             File file = filePath.toFile();
             FileOutputStream outStream;
             try {
@@ -404,9 +412,13 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                     selectModelButton.setEnabled(true);
                     selectLogButton.setEnabled(true);
                     progressBar.setVisible(false);
+
+                    String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
+                            .replaceAll(LogStreamer.LOG_EXTENSIONS_REGEX, "");
                     Path directoryPath = fileChooser.getSelectedFile().toPath();
                     Path filePath = directoryPath
-                            .resolve(Paths.get(Application.getStringTimestamp()) + LogStreamer.ZIP_EXTENSION);
+                            .resolve(String.join("-", selectedLogFileNameWithoutExtension,
+                                    Application.getStringTimestamp()) + LogStreamer.ZIP_EXTENSION);
                     LogStreamer.exportZip(filePath, exportCsvData(), exportFulfilledLog(), exportViolatedLog());
                     GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
                             "Report successfully created and exported.");

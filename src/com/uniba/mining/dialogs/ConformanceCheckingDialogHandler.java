@@ -29,16 +29,23 @@ import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
+import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.extension.std.XConceptExtension;
+import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.deckfour.xes.model.impl.XAttributeMapImpl;
+import org.deckfour.xes.model.impl.XLogImpl;
+import org.deckfour.xes.model.impl.XTraceImpl;
 import org.deckfour.xes.out.XesXmlSerializer;
 import org.processmining.plugins.DataConformance.framework.ActivityMatchCost;
+import org.processmining.plugins.DeclareConformance.ReplayableActivityDefinition;
 
 import com.uniba.mining.actions.ConformanceCheckingActionController;
 import com.uniba.mining.logging.LogStreamer;
 import com.uniba.mining.logging.Logger;
 import com.uniba.mining.plugin.Config;
+import com.uniba.mining.tasks.ActivityMappingReplayerTask;
 import com.uniba.mining.tasks.ConformanceAnalyzerTask;
 import com.uniba.mining.tasks.ConformanceReplayerTask;
 import com.uniba.mining.tasks.ConformanceTask;
@@ -48,6 +55,7 @@ import com.vp.plugin.view.IDialog;
 import com.vp.plugin.view.IDialogHandler;
 
 import controller.conformance.ConformanceMethod;
+import task.conformance.ActivityConformanceType;
 import task.conformance.ConformanceStatisticType;
 import task.conformance.ConformanceTaskResult;
 import task.conformance.ConformanceTaskResultGroup;
@@ -326,6 +334,69 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         return null;
     }
 
+    private File exportAlignedLog() {
+        XLog originalLog = LogUtils.convertToXlog(selectedLogFile);
+
+        String newName;
+        if (XConceptExtension.instance().extractName(originalLog) != null)
+            newName = XConceptExtension.instance().extractName(originalLog) + " - Aligned";
+        else
+            newName = "Aligned log extracted from: " + selectedLogFile.getName();
+
+        XLog alignedLog = new XLogImpl(new XAttributeMapImpl());
+        XConceptExtension.instance().assignName(alignedLog, newName);
+        alignedLog.getExtensions().addAll(originalLog.getExtensions());
+        alignedLog.getClassifiers().addAll(originalLog.getClassifiers());
+        alignedLog.getGlobalEventAttributes().addAll(originalLog.getGlobalEventAttributes());
+        alignedLog.getGlobalTraceAttributes().addAll(originalLog.getGlobalTraceAttributes());
+
+        List<ConformanceTaskResultGroup> results = conformanceTaskResult.getResultsGroupedByTrace();
+        for (ConformanceTaskResultGroup res : results) {
+            XTrace alignedTrace = new XTraceImpl(new XAttributeMapImpl());
+            XTrace resTrace = res.getXtrace();
+
+            for (Map.Entry<String, XAttribute> entry : resTrace.getAttributes().entrySet())
+                alignedTrace.getAttributes().put(entry.getKey(), entry.getValue());
+
+            List<ActivityConformanceType> conformanceTypes = res.getGroupDetails().get(0).getActivityConformanceTypes();
+            for (int i = 0; i < conformanceTypes.size(); i++)
+                if (conformanceTypes.get(i).getType() != ActivityConformanceType.Type.DELETION_OTHER
+                        && conformanceTypes.get(i).getType() != ActivityConformanceType.Type.DELETION)
+                    alignedTrace.add(resTrace.get(i));
+
+            alignedLog.add(alignedTrace);
+        }
+
+        if (!alignedLog.isEmpty()) {
+            String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
+                    .replaceAll(LogStreamer.LOG_EXTENSIONS_REGEX, "");
+            Path directoryPath = LogStreamer.getReportsDirectory();
+            Path filePath = directoryPath.resolve(String.join("-", selectedLogFileNameWithoutExtension, "alignedLog")
+                    + LogStreamer.LOG_EXTENSION);
+            File file = filePath.toFile();
+
+            FileOutputStream outStream;
+            try {
+                outStream = new FileOutputStream(file);
+                new XesXmlSerializer().serialize(alignedLog, outStream);
+                outStream.flush();
+                outStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return file;
+        }
+        return null;
+    }
+
+    private Map<ReplayableActivityDefinition, XEventClass> getActivityMapping(File xmlFile) {
+        ActivityMappingReplayerTask activityMappingReplayerTask = new ActivityMappingReplayerTask();
+        activityMappingReplayerTask.setXmlModel(xmlFile);
+        activityMappingReplayerTask.setLogFile(selectedLogFile);
+        return activityMappingReplayerTask.call().getActivityMapping();
+    }
+
     private List<ActivityMatchCost> getActivityMatchCosts() {
         List<ActivityMatchCost> activityMatchCosts = new ArrayList<>();
 
@@ -359,19 +430,26 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         ConformanceTask conformanceTask = conformanceMethod == ConformanceMethod.ANALYZER
                 ? new ConformanceAnalyzerTask()
                 : new ConformanceReplayerTask();
-        if (conformanceMethod == ConformanceMethod.REPLAYER)
-            ((ConformanceReplayerTask) conformanceTask).setActivityMatchCosts(getActivityMatchCosts());
+
         Application.run(() -> {
-            conformanceTask.setLogFile(selectedLogFile);
             try {
                 File tmpXmlFile = ModelUtils.createTmpXmlModel(selectedModelFile);
                 String decodedPath = URLDecoder.decode(tmpXmlFile.getPath(), Charset.defaultCharset());
                 File xmlFile = new File(decodedPath);
                 conformanceTask.setXmlModel(xmlFile);
+                conformanceTask.setLogFile(selectedLogFile);
+                if (conformanceMethod == ConformanceMethod.REPLAYER) {
+                    ConformanceReplayerTask conformanceReplayerTask = (ConformanceReplayerTask) conformanceTask;
+                    Map<ReplayableActivityDefinition, XEventClass> activityMapping = getActivityMapping(xmlFile);
+                    List<ActivityMatchCost> activityMatchCosts = getActivityMatchCosts();
+                    conformanceReplayerTask.setActivityMapping(activityMapping);
+                    conformanceReplayerTask.setActivityMatchCosts(activityMatchCosts);
+                }
+                conformanceTaskResult = conformanceTask.call();
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
-            conformanceTaskResult = conformanceTask.call();
+
             if (conformanceTaskResult == null)
                 return;
             callback.run();
@@ -413,13 +491,19 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                     selectLogButton.setEnabled(true);
                     progressBar.setVisible(false);
 
+                    ConformanceMethod conformanceMethod = ConformanceMethod.values()[checkingMethodComboBox
+                            .getSelectedIndex()];
                     String selectedLogFileNameWithoutExtension = selectedLogFile.getName()
                             .replaceAll(LogStreamer.LOG_EXTENSIONS_REGEX, "");
                     Path directoryPath = fileChooser.getSelectedFile().toPath();
                     Path filePath = directoryPath
                             .resolve(String.join("-", "conformance", selectedLogFileNameWithoutExtension,
                                     Application.getStringTimestamp()) + LogStreamer.ZIP_EXTENSION);
-                    LogStreamer.exportZip(filePath, exportCsvData(), exportFulfilledLog(), exportViolatedLog());
+                    File[] files = conformanceMethod == ConformanceMethod.ANALYZER
+                            ? new File[] { exportCsvData(), exportFulfilledLog(), exportViolatedLog() }
+                            : new File[] { exportCsvData(), exportFulfilledLog(), exportViolatedLog(),
+                                    exportAlignedLog() };
+                    LogStreamer.exportZip(filePath, files);
                     GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
                             "Report successfully created and exported.");
                 });

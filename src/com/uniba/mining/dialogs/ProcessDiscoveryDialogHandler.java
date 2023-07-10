@@ -457,7 +457,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 			discoveryTask = discoveryTaskMinerful;
 		}
-		Application.run(() -> {
+		Application.submit(() -> {
 			for (File selectedLogFile : selectedLogFiles) {
 				System.out.println("Discover model for file: " + selectedLogFile.getName());
 

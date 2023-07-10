@@ -57,16 +57,19 @@ public class Application {
     }
 
     public static void run(Runnable runnable) {
-        tasks.add(executorService.submit(runnable));
-
+        runnable.run();
     }
 
-    public static void runDelayed(Runnable runnable, long delay) {
+    public static void submit(Runnable runnable) {
+        tasks.add(executorService.submit(runnable));
+    }
+
+    public static void scheduleSubmit(Runnable runnable, long delay) {
         tasks.add(scheduledExecutorService.schedule(runnable, delay, TimeUnit.MILLISECONDS));
     }
 
-    public static void runDelayed(Runnable runnable) {
-        runDelayed(runnable, DEFAULT_DELAY);
+    public static void scheduleSubmit(Runnable runnable) {
+        scheduleSubmit(runnable, DEFAULT_DELAY);
     }
 
     public static void cancelTasks() {

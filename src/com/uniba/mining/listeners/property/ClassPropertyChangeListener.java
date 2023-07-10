@@ -3,9 +3,9 @@ package com.uniba.mining.listeners.property;
 import java.util.Arrays;
 
 import com.uniba.mining.logging.LogActivity;
+import com.uniba.mining.logging.LogActivity.ActionType;
 import com.uniba.mining.logging.LogExtractor;
 import com.uniba.mining.logging.Logger;
-import com.uniba.mining.logging.LogActivity.ActionType;
 import com.uniba.mining.utils.Application;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IHasChildrenBaseModelElement;
@@ -30,7 +30,7 @@ class ClassPropertyChangeListener extends AbstractPropertyChangeListener<IClass>
 			IHasChildrenBaseModelElement childElement = (IHasChildrenBaseModelElement) newValue;
 			LogActivity logActivity = LogActivity.getInstance(ActionType.ADD, childElement.getModelType());
 
-			Application.runDelayed(() -> {
+			Application.scheduleSubmit(() -> {
 				Logger.createEvent(logActivity, childElement);
 				childElement.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(childElement));
 			});

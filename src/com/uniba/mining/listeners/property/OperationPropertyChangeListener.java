@@ -19,7 +19,7 @@ class OperationPropertyChangeListener extends AbstractPropertyChangeListener<IOp
 		if (propertyName.equals("childAdded")) {
 			IParameter parameter = (IParameter) newValue;
 
-			Application.runDelayed(() -> {
+			Application.scheduleSubmit(() -> {
 				Logger.createEvent(LogActivity.ADD_PARAMETER, operation);
 				parameter.addPropertyChangeListener(PropertyChangeListenerFactory.getInstance(parameter));
 			});

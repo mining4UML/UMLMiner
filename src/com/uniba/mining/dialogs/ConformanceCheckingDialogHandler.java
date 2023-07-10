@@ -431,7 +431,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                 ? new ConformanceAnalyzerTask()
                 : new ConformanceReplayerTask();
 
-        Application.run(() -> {
+        Application.submit(() -> {
             try {
                 File tmpXmlFile = ModelUtils.createTmpXmlModel(selectedModelFile);
                 String decodedPath = URLDecoder.decode(tmpXmlFile.getPath(), Charset.defaultCharset());

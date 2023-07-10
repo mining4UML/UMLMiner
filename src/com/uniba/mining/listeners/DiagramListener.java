@@ -6,10 +6,10 @@ import java.util.Map;
 
 import com.uniba.mining.listeners.property.PropertyChangeListenerFactory;
 import com.uniba.mining.logging.LogActivity;
-import com.uniba.mining.logging.LogExtractor;
-import com.uniba.mining.logging.Logger;
 import com.uniba.mining.logging.LogActivity.ActionType;
 import com.uniba.mining.logging.LogActivity.ModelType;
+import com.uniba.mining.logging.LogExtractor;
+import com.uniba.mining.logging.Logger;
 import com.uniba.mining.utils.Application;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
@@ -48,7 +48,7 @@ public class DiagramListener implements IDiagramListener {
 
 		logger.info("%s element added to the diagram", modelElement.getModelType());
 		LogActivity logActivity = LogExtractor.extractLogActivity(ActionType.ADD, modelElement);
-		Application.runDelayed(() -> {
+		Application.scheduleSubmit(() -> {
 			Logger.createEvent(logActivity, modelElement);
 			diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
 		});

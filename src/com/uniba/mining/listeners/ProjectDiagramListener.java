@@ -19,7 +19,7 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 		logger.info(String.format("%s \"%s\" added", diagramUIModel.getType(),
 				diagramUIModel.getName()));
 
-		Application.runDelayed(() -> {
+		Application.scheduleSubmit(() -> {
 			if (!Logger.hasDiagram(diagramUIModel))
 				Logger.createEvent(LogActivity.ADD_DIAGRAM, diagramUIModel);
 			diagramUIModel.addDiagramListener(new DiagramListener(diagramUIModel));

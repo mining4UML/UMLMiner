@@ -1,7 +1,6 @@
 package com.uniba.mining.plugin;
 
 import java.io.File;
-import java.nio.file.Path;
 
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -36,13 +35,9 @@ public enum ExternalTool {
         if (externalToolPath.endsWith(BASH_EXTENSION))
             return new String[] { "bash", externalToolPath };
         if (externalToolPath.endsWith(JAR_EXTENSION)) {
-            Path externalToolDirectoryPath = Path.of(externalToolPath).getParent();
-            String java = externalToolDirectoryPath.resolve("jre" + File.separator + "bin" + File.separator + "java")
-                    .toString();
-
+            String java = System.getenv("JAVA_HOME") + File.separator + "bin" + File.separator + "java";
             return new String[] { java, "-jar", externalToolPath };
         }
-
         return new String[] { externalToolPath };
     }
 

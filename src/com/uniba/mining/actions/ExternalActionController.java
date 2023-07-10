@@ -24,14 +24,16 @@ public class ExternalActionController implements VPActionController {
         String externalToolPath = Config.getExternalToolPath(externalTool);
         String[] command = ExternalTool.getExecutionCommand(externalToolPath);
         ProcessBuilder processBuilder = new ProcessBuilder(command);
-        Thread mainThread = Thread.currentThread();
 
         try {
             File externalToolDirectory = Path.of(externalToolPath).getParent().toFile();
             Path externalToolLogPath = externalToolDirectory.toPath().resolve("ext.log");
             File externalToolLog = Files.exists(externalToolLogPath) ? externalToolLogPath.toFile()
                     : Files.createFile(externalToolLogPath).toFile();
-            String javaPath = System.getenv("JAVA_HOME") + File.separator + "bin";
+            String bundledJavaHome = ExternalTool.getBundledJavaHome(externalToolDirectory.toString());
+            String javaHome = Files.isDirectory(Path.of(bundledJavaHome)) ? bundledJavaHome
+                    : System.getenv("JAVA_HOME");
+            String javaPath = javaHome + File.separator + "bin";
 
             processBuilder.directory(externalToolDirectory);
             processBuilder.redirectErrorStream(true);

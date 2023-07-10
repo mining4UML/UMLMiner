@@ -1,9 +1,13 @@
 package com.uniba.mining.plugin;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.lang.SystemUtils;
 
 public enum ExternalTool {
     RUM("RuM"),
@@ -29,13 +33,31 @@ public enum ExternalTool {
         throw new UnsupportedOperationException("External tool " + name + " not found");
     }
 
+    public static String getBundledJavaHome(String externalToolDirectory) {
+        String javaFolderName = "";
+        if (SystemUtils.IS_OS_WINDOWS)
+            javaFolderName = "windows";
+        else if (SystemUtils.IS_OS_MAC)
+            javaFolderName = "osx";
+        else if (SystemUtils.IS_OS_UNIX)
+            javaFolderName = "linux";
+
+        return Path.of(externalToolDirectory, "jre", javaFolderName,
+                SystemUtils.IS_OS_MAC ? "Contents" : "",
+                SystemUtils.IS_OS_MAC ? "Home" : "").toString();
+    }
+
     public static String[] getExecutionCommand(String externalToolPath) {
         if (externalToolPath.endsWith(EXECUTABLE_EXTENSION))
             return new String[] { "start", externalToolPath };
         if (externalToolPath.endsWith(BASH_EXTENSION))
             return new String[] { "bash", externalToolPath };
         if (externalToolPath.endsWith(JAR_EXTENSION)) {
-            String java = System.getenv("JAVA_HOME") + File.separator + "bin" + File.separator + "java";
+            String externalToolDirectoryPath = Path.of(externalToolPath).getParent().toString();
+            String bundledJavaHome = getBundledJavaHome(externalToolDirectoryPath);
+            String javaHome = Files.isDirectory(Path.of(bundledJavaHome)) ? bundledJavaHome
+                    : System.getenv("JAVA_HOME");
+            String java = javaHome + File.separator + "bin" + File.separator + "java";
             return new String[] { java, "-jar", externalToolPath };
         }
         return new String[] { externalToolPath };

@@ -34,6 +34,9 @@ public class RumDialogHandler implements IDialogHandler {
 		Process proc;
 		try {
 			proc = run.exec("java -jar " + command);
+			System.out.println("Command: " + proc.toHandle().info().command());
+			System.out.println("Arguments: " + proc.toHandle().info().arguments());
+			System.out.println("CommandLine: " + proc.toHandle().info().commandLine());
 			proc.waitFor(); // attende che RuM sia chiuso
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();

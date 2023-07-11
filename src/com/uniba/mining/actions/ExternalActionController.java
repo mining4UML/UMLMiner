@@ -6,6 +6,8 @@ import java.lang.ProcessHandle.Info;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import javax.swing.JFrame;
+
 import com.uniba.mining.plugin.Config;
 import com.uniba.mining.plugin.ExternalTool;
 import com.uniba.mining.utils.Application;
@@ -19,11 +21,13 @@ public class ExternalActionController implements VPActionController {
 
     @Override
     public void performAction(VPAction vpAction) {
-        vpAction.setEnabled(false);
+        JFrame frame = (JFrame) viewManager.getRootFrame();
         ExternalTool externalTool = ExternalTool.getExternalTool(vpAction.getActionId());
         String externalToolPath = Config.getExternalToolPath(externalTool);
         String[] command = ExternalTool.getExecutionCommand(externalToolPath);
         ProcessBuilder processBuilder = new ProcessBuilder(command);
+
+        frame.setVisible(false);
 
         try {
             File externalToolDirectory = Path.of(externalToolPath).getParent().toFile();
@@ -53,6 +57,8 @@ public class ExternalActionController implements VPActionController {
             e.printStackTrace();
             Thread.currentThread().interrupt();
         }
+
+        frame.setVisible(true);
     }
 
     @Override

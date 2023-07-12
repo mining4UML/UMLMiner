@@ -3,16 +3,22 @@ package com.uniba.mining.dialogs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.event.HyperlinkEvent;
 
 import com.uniba.mining.actions.AboutActionController;
 import com.uniba.mining.plugin.Config;
@@ -27,6 +33,27 @@ public class AboutDialogHandler implements IDialogHandler {
         JPanel headerPanel = new JPanel();
 
         return headerPanel;
+    }
+
+    private Component getInfoPanel() {
+        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JEditorPane infoEditorPane = new JEditorPane("text/html; charset=UTF-8", Config.PLUGIN_DESCRIPTION);
+        Dimension infoTextAreaDimension = new Dimension(640, 100);
+
+        infoEditorPane.setPreferredSize(infoTextAreaDimension);
+        infoEditorPane.setOpaque(false);
+        infoEditorPane.setEditable(false);
+        infoEditorPane.addHyperlinkListener(e -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+                try {
+                    Desktop.getDesktop().browse(e.getURL().toURI());
+                } catch (IOException | URISyntaxException exception) {
+                    exception.printStackTrace();
+                }
+        });
+
+        GUI.addAll(infoPanel, infoEditorPane);
+        return infoPanel;
     }
 
     private Component getContactPanel() {
@@ -52,7 +79,7 @@ public class AboutDialogHandler implements IDialogHandler {
         logoLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
         logoLabel.setForeground(Color.BLUE);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
-        GUI.addAll(contentPanel, GUI.DEFAULT_PADDING, logoLabel, getContactPanel());
+        GUI.addAll(contentPanel, GUI.DEFAULT_PADDING, logoLabel, getInfoPanel(), getContactPanel());
         return contentPanel;
     }
 

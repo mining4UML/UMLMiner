@@ -58,6 +58,8 @@ public enum ExternalTool {
             String javaHome = Files.isDirectory(Path.of(bundledJavaHome)) ? bundledJavaHome
                     : System.getenv("JAVA_HOME");
             String java = javaHome + File.separator + "bin" + File.separator + "java";
+            if (!new File(java).setExecutable(true))
+                System.err.println("Error to set executable permission on: " + java);
             return new String[] { java, "-jar", externalToolPath };
         }
         return new String[] { externalToolPath };

@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.lang.ProcessHandle.Info;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import javax.swing.JFrame;
 
+import com.uniba.mining.logging.LogStreamer;
 import com.uniba.mining.plugin.Config;
 import com.uniba.mining.plugin.ExternalTool;
 import com.uniba.mining.utils.Application;
@@ -42,8 +44,12 @@ public class ExternalActionController implements VPActionController {
             processBuilder.directory(externalToolDirectory);
             processBuilder.redirectErrorStream(true);
             processBuilder.redirectOutput(externalToolLog);
-            processBuilder.environment().put("Path", javaPath);
-            processBuilder.environment().put("PATH", javaPath);
+
+            Map<String, String> environmentVariables = processBuilder.environment();
+            environmentVariables.put("Path", javaPath);
+            environmentVariables.put("PATH", javaPath);
+            environmentVariables.put("LOGS_PATH", LogStreamer.getLogsDirectory().toString());
+            environmentVariables.put("MODELS_PATH", LogStreamer.getModelsDirectory().toString());
 
             Process process = processBuilder.start();
             Info processInfo = process.toHandle().info();

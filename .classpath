@@ -8,10 +8,9 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="openapi.jar">
 		<attributes>
-			<attribute name="javadoc_location"
-				value="jar:platform:/resource/visual-paradigm-mining-plugin/docs/vp-plugin-javadoc.zip!/" />
+			<attribute name="javadoc_location" value="jar:platform:/resource/uml-miner/docs/vp-plugin-javadoc.zip!/" />
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/rum-0.6.10-minified.jar" />
+	<classpathentry kind="lib" path="lib/rum-0.6.10-lib.jar" />
 	<classpathentry kind="output" path="classes" />
 </classpath>

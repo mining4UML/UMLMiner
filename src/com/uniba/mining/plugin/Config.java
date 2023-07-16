@@ -22,13 +22,12 @@ public class Config {
     private static final Properties pluginProperties = new Properties();
     private static final Properties extProperties = new Properties();
     static {
-        try (InputStream pluginPropertiesInputStream = new FileInputStream(CONFIG_PATH);
-                InputStream extPropertiesInputStream = new FileInputStream(EXT_CONFIG_PATH);) {
+        try (InputStream pluginPropertiesInputStream = new FileInputStream(CONFIG_PATH);) {
             Path extPath = Path.of(EXT_CONFIG_PATH);
             pluginProperties.load(pluginPropertiesInputStream);
             if (Files.notExists(extPath))
                 Files.createFile(extPath);
-            extProperties.load(extPropertiesInputStream);
+            extProperties.load(new FileInputStream(EXT_CONFIG_PATH));
         } catch (IOException e) {
             e.printStackTrace();
         }

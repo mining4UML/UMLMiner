@@ -239,7 +239,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 						discoverTimeConditionsButton.doClick();
 					discoverDataConditionsComboBox.setSelectedIndex(2);
 				}
-				pruningTypeLabel.setText(String.format("Pruning Type (%s)",
+				pruningTypeLabel.setText(String.format("Pruning Type (%s):",
 						isDeclareMiner ? "Declare" : "MINERful"));
 				pruningTypeComboBox.setMaximumSize(pruningTypeComboBox.getPreferredSize());
 				vacuousAsViolatedButton.setEnabled(isDeclareMiner);
@@ -249,6 +249,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 		discoveryMethodLabel.setLabelFor(discoveryMethodComboBox);
 		GUI.addAll(discoveryMethodPanel, discoveryMethodLabel, discoveryMethodComboBox);
+		discoveryMethodPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return discoveryMethodPanel;
 	}
 
@@ -274,6 +275,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		GUI.addAll(templatesPanel, templatesLabel, unaryCheckBox, binaryPositiveCheckBox,
 				binaryNegativeCheckBox,
 				choiceCheckBox);
+		templatesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return templatesPanel;
 	}
 
@@ -283,12 +285,12 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 
 	private Component getGeneralParametersPanel() {
 		JPanel generalParametersPanel = new JPanel();
-		JLabel constraintSupportLabel = new JLabel("Constraint Support");
-		pruningTypeLabel = new JLabel("Pruning Type (Declare)");
-		JLabel vacuousAsViolatedLabel = new JLabel("Vacuous as Violated");
-		JLabel considerLifecycleLabel = new JLabel("Consider Lifecycle");
-		JLabel discoverTimeConditionsLabel = new JLabel("Discover Time Conditions");
-		JLabel discoverDataConditionsLabel = new JLabel("Discover Data Conditions");
+		JLabel constraintSupportLabel = new JLabel("Constraint Support:");
+		pruningTypeLabel = new JLabel("Pruning Type (Declare):");
+		JLabel vacuousAsViolatedLabel = new JLabel("Vacuous as Violated:");
+		JLabel considerLifecycleLabel = new JLabel("Consider Lifecycle:");
+		JLabel discoverTimeConditionsLabel = new JLabel("Discover Time Conditions:");
+		JLabel discoverDataConditionsLabel = new JLabel("Discover Data Conditions:");
 		constraintSupportSlider = new JSlider(0, 100, 90);
 		pruningTypeComboBox = new JComboBox<>(pruningTypeDeclareMinerItems);
 		vacuousAsViolatedButton = new JToggleButton("Enabled");
@@ -303,7 +305,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		Box considerLifecycleBox = new Box(BoxLayout.LINE_AXIS);
 		Box discoverTimeConditionsBox = new Box(BoxLayout.LINE_AXIS);
 		Box discoverDataConditionsBox = new Box(BoxLayout.LINE_AXIS);
-		Dimension labelDimension = new Dimension(150, 20);
+		Dimension labelDimension = new Dimension(180, 20);
 
 		constraintSupportLabel.setPreferredSize(labelDimension);
 		constraintSupportLabel.setMaximumSize(labelDimension);
@@ -388,6 +390,7 @@ public class ProcessDiscoveryDialogHandler implements IDialogHandler {
 		considerLifecycleBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 		discoverTimeConditionsBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 		discoverDataConditionsBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+		generalParametersPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return generalParametersPanel;
 	}
 

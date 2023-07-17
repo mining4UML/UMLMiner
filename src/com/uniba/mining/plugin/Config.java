@@ -38,6 +38,7 @@ public class Config {
     public static final String PLUGIN_VERSION = pluginProperties.getProperty("plugin.version");
     public static final String PLUGIN_PROVIDER = pluginProperties.getProperty("plugin.provider");
     public static final String PLUGIN_HOMEPAGE = pluginProperties.getProperty("plugin.homepage");
+    public static final String PLUGIN_LICENSEFILE = pluginProperties.getProperty("plugin.license");
 
     public static String getExternalToolPath(ExternalTool externalTool) {
         return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

@@ -99,7 +99,7 @@ public class AboutDialogHandler implements IDialogHandler {
 
 
 	private Component getLicensePanel() {
-		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		JPanel licensePanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
 		try {
 
@@ -110,14 +110,16 @@ public class AboutDialogHandler implements IDialogHandler {
 			infoEditorPane.setPage(resource);
 
 			JScrollPane editorScrollPane = new JScrollPane(infoEditorPane);
-			editorScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+			editorScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
 			JScrollPane scroolPane =new JScrollPane(infoEditorPane);
+			
+			scroolPane.setVisible(true);
 
-			infoPanel.add(scroolPane, BorderLayout.CENTER);
+			licensePanel.add(scroolPane, BorderLayout.CENTER);
 
 
-			Dimension infoTextAreaDimension = new Dimension(640, 300);
+			Dimension infoTextAreaDimension = new Dimension(640, 550);
 
 
 			infoEditorPane.setPreferredSize(infoTextAreaDimension);
@@ -132,8 +134,8 @@ public class AboutDialogHandler implements IDialogHandler {
 					}
 			});
 
-			infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
-			GUI.addAll(infoPanel, GUI.DEFAULT_PADDING, scroolPane, 
+			licensePanel.setLayout(new BoxLayout(licensePanel, BoxLayout.PAGE_AXIS));
+			GUI.addAll(licensePanel, GUI.DEFAULT_PADDING, scroolPane, 
 					getContactPanel(),getActionsPanel());
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
@@ -141,7 +143,7 @@ public class AboutDialogHandler implements IDialogHandler {
 			e1.printStackTrace();
 		}
 
-		return infoPanel;
+		return licensePanel;
 	}
 
 

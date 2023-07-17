@@ -33,11 +33,11 @@ import com.vp.plugin.view.IDialogHandler;
 public class AboutDialogHandler implements IDialogHandler {
 	private JTabbedPane rootPanel;
 
-//	private Component getHeaderPanel() {
-//		JPanel headerPanel = new JPanel();
-//
-//		return headerPanel;
-//	}
+	//	private Component getHeaderPanel() {
+	//		JPanel headerPanel = new JPanel();
+	//
+	//		return headerPanel;
+	//	}
 
 	private Component getInfoPanel() {
 		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
@@ -88,6 +88,47 @@ public class AboutDialogHandler implements IDialogHandler {
 		return contentPanel;
 	}
 
+
+	private Component getTeamPanel() {
+		
+		JPanel teamPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+
+		try {
+			ClassLoader classLoader = getClass().getClassLoader();	    
+			URL resource = classLoader.getResource(Config.PLUGIN_TEAM);
+
+			JEditorPane infoTeamPane= new JEditorPane();
+
+			infoTeamPane.setPage(resource);
+
+			//JPanel teamPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+			//JEditorPane infoTeamPane = new JEditorPane("text/html; charset=UTF-8", Config.PLUGIN_TEAM);
+			
+			teamPanel.add(infoTeamPane, BorderLayout.CENTER);
+			
+			Dimension infoTextAreaDimension = new Dimension(640, 300);
+
+			infoTeamPane.setPreferredSize(infoTextAreaDimension);
+			infoTeamPane.setOpaque(false);
+			infoTeamPane.setEditable(false);
+			infoTeamPane.addHyperlinkListener(e -> {
+				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+					try {
+						Desktop.getDesktop().browse(e.getURL().toURI());
+					} catch (IOException | URISyntaxException exception) {
+						exception.printStackTrace();
+					}
+			});
+
+			teamPanel.setLayout(new BoxLayout(teamPanel, BoxLayout.PAGE_AXIS));
+			GUI.addAll(teamPanel, GUI.DEFAULT_PADDING, 
+					getContactPanel(),getActionsPanel());
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		return teamPanel;
+	}
+
 	private Component getActionsPanel() {
 		JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 		JButton newsButton = GUI.createLinkButton("Check out the latest information of UML Miner",
@@ -103,9 +144,9 @@ public class AboutDialogHandler implements IDialogHandler {
 
 		try {
 
-		    ClassLoader classLoader = getClass().getClassLoader();	    
-		    URL resource = classLoader.getResource(Config.PLUGIN_LICENSEFILE);
-			
+			ClassLoader classLoader = getClass().getClassLoader();	    
+			URL resource = classLoader.getResource(Config.PLUGIN_LICENSEFILE);
+
 			JEditorPane infoEditorPane= new JEditorPane();
 			infoEditorPane.setPage(resource);
 
@@ -113,7 +154,7 @@ public class AboutDialogHandler implements IDialogHandler {
 			editorScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
 			JScrollPane scroolPane =new JScrollPane(infoEditorPane);
-			
+
 			scroolPane.setVisible(true);
 
 			licensePanel.add(scroolPane, BorderLayout.CENTER);
@@ -158,7 +199,8 @@ public class AboutDialogHandler implements IDialogHandler {
 
 		rootPanel.addTab("About", getContentPanel());
 		rootPanel.addTab("License", getLicensePanel());
-		
+		rootPanel.addTab("Team", getTeamPanel());
+
 		return rootPanel;
 	}
 

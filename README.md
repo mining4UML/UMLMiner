@@ -22,11 +22,6 @@ Modeling events captured are related to:
 ## Installation
 UML Miner comes as a zip file. To install it in Visual Paradigm it only necessary to select  "Help > Install Plugin" from the application toolbar. 
 
-## UML Video
-
-[![IMAGE ALT TEXT](https://github.com/mining4UML/UMLMiner/blob/main/assets/images/logo.jpg)](https://www.youtube.com/watch?v=DcTD-etHUIg "UML Miner")
-
-
 ## Development
 The development of UML Miner has been started by Ardimento Pasquale and was later continued by Pasquale Ardimento and Vito Alessandro Carella.
 First release is going to be published (28th June 2023).

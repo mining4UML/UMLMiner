@@ -23,11 +23,8 @@ Modeling events captured are related to:
 UML Miner comes as a zip file. To install it in Visual Paradigm it only necessary to select  "Help > Install Plugin" from the application toolbar. 
 
 ## UML Video
-https://www.youtube.com/watch?v=DcTD-etHUIg
 
-[![IMAGE ALT TEXT](https://github.com/mining4UML/UMLMiner/blob/main/assets/images/whiteLogo.png)](https://www.youtube.com/watch?v=DcTD-etHUIg "UML Miner")
-
-[<img src="https://github.com/mining4UML/UMLMiner/blob/main/assets/images/whiteLogo.png" width="50%">][https://www.youtube.com/watch?v=DcTD-etHUIg ](https://www.youtube.com/watch?v=DcTD-etHUIg)
+[![IMAGE ALT TEXT](https://www.youtube.com/watch?v=DcTD-etHUIg/0.jpg)](https://www.youtube.com/watch?v=DcTD-etHUIg "UML Miner")
 
 
 ## Development

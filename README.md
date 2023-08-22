@@ -25,6 +25,9 @@ UML Miner comes as a zip file. To install it in Visual Paradigm it only necessar
 ## UML Video
 https://www.youtube.com/watch?v=DcTD-etHUIg
 
+[<img src="https://i.ytimg.com/vi/Hc79sDi3f0U/maxresdefault.jpg" width="50%">](https://www.youtube.com/watch?v=DcTD-etHUIg "Now in Android: 55")
+
+
 ## Development
 The development of UML Miner has been started by Ardimento Pasquale and was later continued by Pasquale Ardimento and Vito Alessandro Carella.
 First release is going to be published (28th June 2023).

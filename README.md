@@ -25,7 +25,7 @@ UML Miner comes as a zip file. To install it in Visual Paradigm it only necessar
 ## UML Video
 https://www.youtube.com/watch?v=DcTD-etHUIg
 
-[<img src="https://i.ytimg.com/vi/Hc79sDi3f0U/maxresdefault.jpg" width="50%">](https://www.youtube.com/watch?v=DcTD-etHUIg "Now in Android: 55")
+[<img src="https://github.com/mining4UML/UMLMiner/edit/main/README.md#:~:text=logo.-,jpg,-logoNoText.jpg" width="50%">][https://www.youtube.com/watch?v=DcTD-etHUIg ](https://www.youtube.com/watch?v=DcTD-etHUIg)
 
 
 ## Development

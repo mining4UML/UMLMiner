@@ -134,8 +134,11 @@ public class LogStreamer {
     }
 
     public static int countLogs() {
-        return logsDirectory.toFile().listFiles(LogStreamer::isLogFile).length;
-    }
+        if (logsDirectory != null && logsDirectory.toFile().exists()) {
+			return logsDirectory.toFile().listFiles(LogStreamer::isLogFile).length;
+		} 
+        else return 0;
+	}
 
     public static void exportZip(Path filePath, File... files) {
         try (OutputStream outputStream = new FileOutputStream(Files.createFile(filePath).toFile());

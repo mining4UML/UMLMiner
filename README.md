@@ -22,6 +22,9 @@ Modeling events captured are related to:
 ## Installation
 UML Miner comes as a zip file. To install it in Visual Paradigm it only necessary to select  "Help > Install Plugin" from the application toolbar. 
 
+## Debugging configuration
+Information on how to debug UML Miner in Eclipse IDE are available at https://knowhow.visual-paradigm.com/openapi/debug-plugins-eclipse/
+
 ## Development
 The development of UML Miner has been started by Ardimento Pasquale and was later continued by Pasquale Ardimento and Vito Alessandro Carella.
 First release is going to be published (28th June 2023).

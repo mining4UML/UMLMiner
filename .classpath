@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Java SE 11.0.12 [11.0.12]">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
@@ -11,6 +11,24 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/uml-miner/docs/vp-plugin-javadoc.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/rum-0.6.10-lib.jar"/>
+	<classpathentry kind="lib" path="/Users/pasqualeardimento/Desktop/visual-paradigm-mining-plugin/lib/rum-0.6.10-lib.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/ant.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/derby.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/jniwrap.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/lib01.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/lib02.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/lib03.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/lib04.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/lib05.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/lib06.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/lib07.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/lib09.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/platforminstaller.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/startsde.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/vpplatform.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/vpserver.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/vpserverres.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/winpack.jar"/>
+	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/ormlib/orm.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

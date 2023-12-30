@@ -47,9 +47,19 @@
 				ribbonPath="Toolbar/ConformanceChecking">
 				<actionController class="com.uniba.mining.actions.ExportLogsActionController" />
 			</action>
+			<action
+				id="ExportInfo"
+				actionType="generalAction"
+				label="%actions.ExportInfo.label"
+				tooltip="%actions.ExportInfo.label"
+				icon="assets/icons/icon.png"
+				style="normal"
+				ribbonPath="Toolbar/ExportLogs">
+				<actionController class="com.uniba.mining.actions.ExportInfoActionControl" />
+			</action>
 			<separator
 				id="Separator1"
-				ribbonPath="Toolbar/ExportLogs" />
+				ribbonPath="Toolbar/ExportInfo" />
 			<action
 				id="ReloadPlugin"
 				actionType="generalAction"

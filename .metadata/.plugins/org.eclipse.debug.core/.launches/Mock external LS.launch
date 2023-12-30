@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.ui.externaltools.ProgramLaunchConfigurationType">
+    <booleanAttribute key="org.eclipse.debug.core.capture_output" value="true"/>
+    <booleanAttribute key="org.eclipse.debug.ui.ATTR_LAUNCH_IN_BACKGROUND" value="true"/>
+    <booleanAttribute key="org.eclipse.ui.externaltools.ATTR_BUILDER_ENABLED" value="false"/>
+    <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE" value="${none}"/>
+    <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="/Users/pasqualeardimento/.p2/pool/plugins/org.eclipse.justj.openjdk.hotspot.jre.full.macosx.x86_64_15.0.2.v20210201-0955/jre/bin/java"/>
+    <booleanAttribute key="org.eclipse.ui.externaltools.ATTR_SHOW_CONSOLE" value="false"/>
+    <stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-cp /Users/pasqualeardimento/eclipse/jee-2020-12/Eclipse.app/Contents/Eclipse/../../../../../.p2/pool/plugins/org.eclipse.xtext.xbase.lib_2.29.0.v20221121-0915.jar:/Users/pasqualeardimento/eclipse/jee-2020-12/Eclipse.app/Contents/Eclipse/../../../../../.p2/pool/plugins/org.eclipse.lsp4j.jsonrpc_0.15.0.v20220805-0131.jar:/Users/pasqualeardimento/eclipse/jee-2020-12/Eclipse.app/Contents/Eclipse/../../../../../.p2/pool/plugins/com.google.gson_2.9.1.jar:/Users/pasqualeardimento/eclipse/jee-2020-12/Eclipse.app/Contents/Eclipse/../../../../../.p2/pool/plugins/org.eclipse.lsp4e.tests.mock_0.15.0.202208222116.jar:/Users/pasqualeardimento/eclipse/jee-2020-12/Eclipse.app/Contents/Eclipse/../../../../../.p2/pool/plugins/org.eclipse.lsp4j_0.15.0.v20220805-0131.jar:/Users/pasqualeardimento/eclipse/jee-2020-12/Eclipse.app/Contents/Eclipse/../../../../../.p2/pool/plugins/com.google.guava_30.1.0.v20221112-0806.jar org.eclipse.lsp4e.tests.mock.MockLanguageServer"/>
+</launchConfiguration>

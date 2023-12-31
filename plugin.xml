@@ -62,7 +62,7 @@
 				actionType="generalAction"
 				label="%actions.Violations.label"
 				tooltip="%actions.Violations.label"
-				icon="assets/icons/violation.jpg"
+				icon="assets/icons/violation.png"
 				style="normal"
 				ribbonPath="Toolbar/ExportInfo">
 				<actionController class="com.uniba.mining.actions.ExportViolationsController" />

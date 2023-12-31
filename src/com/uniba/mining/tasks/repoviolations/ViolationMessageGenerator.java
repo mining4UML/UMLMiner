@@ -69,18 +69,21 @@ public class ViolationMessageGenerator {
 
 	private static String generateExclusiveChoiceMessage(String activityA, String activityB, String[] fields) {
 		return generateCommonMessage("Exclusive Choice", fields) +
+				"Violation description: "+
 				activityA + " and " + (activityB != null ? activityB : "") +
 				" must occur at least once and they exclude each other\n" ;
 	}
 
 	private static String generateNotChaineMessage(String activityA, String activityB, String[] fields) {
 		return generateCommonMessage("Not Chain Succession", fields) +
+				"Violation description: "+
 				activityA + " and " + (activityB != null ? activityB : "") +
 				" occur together if and only if the latter does not immediately follow the former\n" ;
 	}
 
 	private static String generateResponseMessage(String activityA, String activityB, String[] fields) {
 		return generateCommonMessage("Response", fields) +
+				"Violation description: "+
 				"if "+ activityA + " occurs then" + (activityB != null ? activityB : "") +
 				" occurs after "+ activityA + "\n" ;
 	}

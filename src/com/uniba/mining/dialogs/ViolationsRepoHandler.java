@@ -59,21 +59,6 @@ public class ViolationsRepoHandler extends JFrame {
 		});
 
 
-//		browseButton.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				JFileChooser fileChooser = new JFileChooser();
-//				int result = fileChooser.showOpenDialog(ViolationsRepoHandler.this);
-//
-//				if (result == JFileChooser.APPROVE_OPTION) {
-//					String filePath = fileChooser.getSelectedFile().getAbsolutePath();
-//					isCSVProcessed= ViolationMessageGenerator.processCSV(filePath, resultTextArea);
-//					updateSaveButtonState();
-//				}
-//			}
-//		});
-
-
 		// Aggiungi un ActionListener per il pulsante Salva
 		saveButton.addActionListener(new ActionListener() {
 			@Override

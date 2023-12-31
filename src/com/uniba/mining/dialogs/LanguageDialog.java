@@ -113,15 +113,6 @@ public class LanguageDialog {
 			return DiagramType.values()[diagramTypeIndex];
 		}
 		
-//		private void setLanguageIndex() {
-//	     
-//	        // Ottieni il codice lingua dalla mappa
-//            String languageCode = languageCodeMap.get(languageIndex);
-//            
-//	        // Puoi anche chiamare il metodo setLanguage della classe Language per impostare la lingua
-//	         Language.setLanguage(languageCode);
-//			
-//		}
 	}
 
 	//	// Enum per rappresentare i tipi di diagramma

@@ -12,7 +12,7 @@ import com.vp.plugin.model.*;
 import java.io.File;
 import java.util.ResourceBundle;
 
-public class ExportInfoActionControl implements VPActionController {
+public class ExportInfoActionController implements VPActionController {
 
 	private ResourceBundle messages;
 

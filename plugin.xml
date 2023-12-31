@@ -55,11 +55,21 @@
 				icon="assets/icons/icon.png"
 				style="normal"
 				ribbonPath="Toolbar/ExportLogs">
-				<actionController class="com.uniba.mining.actions.ExportInfoActionControl" />
+				<actionController class="com.uniba.mining.actions.ExportInfoActionController" />
+			</action>
+			<action
+				id="Violations"
+				actionType="generalAction"
+				label="%actions.Violations.label"
+				tooltip="%actions.Violations.label"
+				icon="assets/icons/violation.jpg"
+				style="normal"
+				ribbonPath="Toolbar/ExportInfo">
+				<actionController class="com.uniba.mining.actions.ExportViolationsController" />
 			</action>
 			<separator
 				id="Separator1"
-				ribbonPath="Toolbar/ExportInfo" />
+				ribbonPath="Toolbar/Violations" />
 			<action
 				id="ReloadPlugin"
 				actionType="generalAction"

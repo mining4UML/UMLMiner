@@ -61,8 +61,10 @@ public class LogExtractor {
     }
 
     public static String extractStringValue(Object value) {
-        if (value instanceof IModelElement)
-            return ((IModelElement) value).getId();
+        if (value instanceof IModelElement) {
+            //return ((IModelElement) value).getId();
+        	 return ((IModelElement) value).getName();
+        }
         if (value instanceof IModelElement[])
             return Arrays.toString(Arrays.stream(((IModelElement[]) value)).map(IModelElement::getName)
                     .toArray(String[]::new));

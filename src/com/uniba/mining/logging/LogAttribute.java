@@ -48,8 +48,10 @@ enum LogAttribute {
     /* Extra event attributes */
     UML_ELEMENT_CHILDREN("UMLElementChildren", Type.LITERAL, "UML Element Children"),
     PARAMETERS("Parameters", Type.LITERAL, "Parameters"),
-    RELATIONSHIP_FROM_END("RelationshipFromEnd", Type.LITERAL, "Relationship From End"),
-    RELATIONSHIP_TO_END("RelationshipToEnd", Type.LITERAL, "Relationship To End");
+    RELATIONSHIP_FROM_END("RelationshipFrom", Type.LITERAL, "Relationship From"),
+    RELATIONSHIP_TO_END("RelationshipTo", Type.LITERAL, "Relationship To"),
+    RELATIONSHIP_FROM_END_ID("RelationshipFromId", Type.LITERAL, "Relationship From Id"),
+    RELATIONSHIP_TO_END_ID("RelationshipToId", Type.LITERAL, "Relationship To Id");
 
     enum Type {
         LITERAL(String.class) {

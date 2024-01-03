@@ -75,17 +75,35 @@ public class Logger {
                 String relationshipToEnd = association.getToEnd().getModelElement() != null
                         ? association.getToEnd().getModelElement().getId()
                         : LogExtractor.DEFAULT_VALUE;
+                
+                String relationshipFromEndValue = association.getFromEnd().getModelElement() != null
+                        ? association.getFromEnd().getModelElement().getName()
+                        : LogExtractor.DEFAULT_VALUE;
+                String relationshipToEndValue = association.getToEnd().getModelElement() != null
+                        ? association.getToEnd().getModelElement().getName()
+                        : LogExtractor.DEFAULT_VALUE;
 
-                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
-                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEndValue);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEndValue);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END_ID, relationshipFromEnd);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END_ID, relationshipToEnd);
             } else {
                 String relationshipFromEnd = relationship.getFrom() != null ? relationship.getFrom().getId()
                         : LogExtractor.DEFAULT_VALUE;
                 String relationshipToEnd = relationship.getTo() != null ? relationship.getTo().getId()
                         : LogExtractor.DEFAULT_VALUE;
+                
+                String relationshipFromEndValue = relationship.getFrom() != null ? relationship.getFrom().getName()
+                        : LogExtractor.DEFAULT_VALUE;
+                String relationshipToEndValue = relationship.getTo() != null ? relationship.getTo().getName()
+                        : LogExtractor.DEFAULT_VALUE;
+                
 
-                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEnd);
-                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEnd);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEndValue);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEndValue);
+                
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END_ID, relationshipFromEnd);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END_ID, relationshipToEnd);
             }
         }
     }

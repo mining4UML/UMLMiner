@@ -76,15 +76,15 @@ public class Logger {
                         ? association.getToEnd().getModelElement().getId()
                         : LogExtractor.DEFAULT_VALUE;
                 
-                String relationshipFromEndValue = association.getFromEnd().getModelElement() != null
+                String relationshipFromEndName = association.getFromEnd().getModelElement() != null
                         ? association.getFromEnd().getModelElement().getName()
                         : LogExtractor.DEFAULT_VALUE;
-                String relationshipToEndValue = association.getToEnd().getModelElement() != null
+                String relationshipToEndName = association.getToEnd().getModelElement() != null
                         ? association.getToEnd().getModelElement().getName()
                         : LogExtractor.DEFAULT_VALUE;
 
-                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEndValue);
-                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEndValue);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END_NAME, relationshipFromEndName);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END_NAME, relationshipToEndName);
                 addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END_ID, relationshipFromEnd);
                 addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END_ID, relationshipToEnd);
             } else {
@@ -93,14 +93,14 @@ public class Logger {
                 String relationshipToEnd = relationship.getTo() != null ? relationship.getTo().getId()
                         : LogExtractor.DEFAULT_VALUE;
                 
-                String relationshipFromEndValue = relationship.getFrom() != null ? relationship.getFrom().getName()
+                String relationshipFromEndName = relationship.getFrom() != null ? relationship.getFrom().getName()
                         : LogExtractor.DEFAULT_VALUE;
-                String relationshipToEndValue = relationship.getTo() != null ? relationship.getTo().getName()
+                String relationshipToEndName = relationship.getTo() != null ? relationship.getTo().getName()
                         : LogExtractor.DEFAULT_VALUE;
                 
 
-                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END, relationshipFromEndValue);
-                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END, relationshipToEndValue);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END_NAME, relationshipFromEndName);
+                addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END_NAME, relationshipToEndName);
                 
                 addAttribute(attributes, LogAttribute.RELATIONSHIP_FROM_END_ID, relationshipFromEnd);
                 addAttribute(attributes, LogAttribute.RELATIONSHIP_TO_END_ID, relationshipToEnd);

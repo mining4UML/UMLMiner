@@ -22,14 +22,17 @@ public class ViolationMessageGenerator {
 					String umlElementName = getField(fields, 9);
 					String propertyName = getField(fields, 10);
 					String propertyValue = getField(fields, 11);
+					String RelationshipFrom = getField(fields, 12);
+					String RelationshipTo = getField(fields, 13);
 
 					String constraint = getField(fields, 1);
 
 					String message = generateMessage(constraint, activities, 
-							activityName, diagramName, umlElementType, umlElementName, propertyName, propertyValue);
+							activityName, diagramName, umlElementType, umlElementName, propertyName, 
+							propertyValue, RelationshipFrom, RelationshipTo);
 					System.out.println(message);
 					resultTextArea.append(message + "\n");
-					atLeastOneRow= true;
+					atLeastOneRow= true;					
 				}
 			}
 		} catch (IOException e) {
@@ -316,7 +319,8 @@ public class ViolationMessageGenerator {
 
 	private static String generateCommonMessage(String violationType, String... fields) {
 		StringBuilder message = new StringBuilder("Violation Type: " + violationType + "\n");
-		String[] labels = {"Activity Name","Diagram Name", "UML Element Type", "UML Element Name", "Property Name", "Property Value"};
+		String[] labels = {"Activity Name","Diagram Name", "UML Element Type", "UML Element Name", 
+				"Property Name", "Property Value", "RelationShip From", "RelationShip To"};
 
 		for (int i = 0; i < labels.length; i++) {
 			String fieldValue = getField(fields, i + 1);

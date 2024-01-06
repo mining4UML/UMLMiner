@@ -5,7 +5,9 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.uniba.mining.plugin.Config;
 import com.uniba.mining.tasks.repoviolations.ViolationMessageGenerator;
+import com.uniba.mining.utils.GUI;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,8 +53,11 @@ public class ViolationsRepoHandler extends JFrame {
 					updateSaveButtonState();
 					if (!isCSVProcessed) {
 						// Visualizza la finestra di dialogo nel caso in cui il file CSV non sia conforme
-						JOptionPane.showMessageDialog(ViolationsRepoHandler.this,
-								"The selected CSV file is not compliant.", "Error", JOptionPane.ERROR_MESSAGE);
+						GUI.showErrorMessageDialog(ViolationsRepoHandler.this, 
+								Config.EXPORT_VIOLATIONS_ACTION, Config.EXPORT_VIOLATIONS_INPUT_ERROR);
+						// Visualizza la finestra di dialogo nel caso in cui il file CSV non sia conforme
+						//JOptionPane.showMessageDialog(ViolationsRepoHandler.this,
+						//		"The selected CSV file is not compliant.", "Error", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
@@ -71,8 +76,9 @@ public class ViolationsRepoHandler extends JFrame {
 		getContentPane().add(browseButton);
 		getContentPane().add(scrollPane);
 		getContentPane().add(saveButton); // Aggiungi il pulsante Salva
+		String title =Config.PLUGIN_NAME+Config.PLUGIN_WINDOWS_SEPARATOR+Config.EXPORT_VIOLATIONS_ACTION;
 
-		setTitle("Violations Report");
+		setTitle(title);
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
@@ -109,7 +115,10 @@ public class ViolationsRepoHandler extends JFrame {
 				writer.write(resultTextArea.getText());
 				writer.close();
 
-				JOptionPane.showMessageDialog(this, "Report successfully saved!", "Save", JOptionPane.INFORMATION_MESSAGE);
+				GUI.showInformationMessageDialog(this, Config.EXPORT_INFO_ACTION, 
+						Config.EXPORT_VIOLATIONS_OK);
+
+				//JOptionPane.showMessageDialog(this, "Report successfully saved!", "Save", JOptionPane.INFORMATION_MESSAGE);
 				// Chiudi la finestra corrente dopo aver salvato
 				dispose();
 			} catch (IOException ex) {

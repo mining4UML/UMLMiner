@@ -248,11 +248,26 @@ public class GUI {
 
     public static void showInformationMessageDialog(Component component, String title, String msg) {
         viewManager.showMessageDialog(component, msg, String.join(" - ", Config.PLUGIN_NAME, title),
-                JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.INFORMATION_MESSAGE, getImageIcon());
     }
 
     public static void showWarningMessageDialog(Component component, String title, String msg) {
         viewManager.showMessageDialog(component, msg, String.join(" - ", Config.PLUGIN_NAME, title),
-                JOptionPane.WARNING_MESSAGE);
+                JOptionPane.WARNING_MESSAGE, getImageIcon());
     }
+    
+    public static void showErrorMessageDialog(Component component, String title, String msg) {
+        viewManager.showMessageDialog(component, msg, String.join(" - ", Config.PLUGIN_NAME, title),
+                JOptionPane.ERROR_MESSAGE, getImageIcon());
+      
+    }
+    
+    private static ImageIcon getImageIcon() {
+        String discoverImagePath = String.join("/", Config.ICONS_PATH, "spaceman.png");
+ 		ImageIcon discoverImage = GUI.loadImage(discoverImagePath, "Process discovery icon", 0.5f); 
+    	return discoverImage;
+    }
+    
+    
+    
 }

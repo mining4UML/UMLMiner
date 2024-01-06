@@ -1,20 +1,27 @@
 package com.uniba.mining.actions;
 
 import com.vp.plugin.ApplicationManager;
+import com.vp.plugin.ViewManager;
 import com.vp.plugin.action.VPAction;
 import com.vp.plugin.action.VPActionController;
 import com.uniba.mining.dialogs.ExportDialog;
 import com.uniba.mining.dialogs.LanguageDialog;
 import com.uniba.mining.dialogs.LanguageDialog.LanguageDiagramSelectionResult;
 import com.uniba.mining.tasks.exportdiag.Language;
+import com.uniba.mining.utils.Application;
+import com.uniba.mining.utils.GUI;
 import com.vp.plugin.model.*;
+import com.uniba.mining.plugin.Config;
 
 import java.io.File;
 import java.util.ResourceBundle;
 
+
 public class ExportInfoActionController implements VPActionController {
 
 	private ResourceBundle messages;
+	
+    private static final ViewManager viewManager = Application.getViewManager();
 
 	public void performAction(VPAction arg0) {
 
@@ -52,7 +59,10 @@ public class ExportInfoActionController implements VPActionController {
 			// Print a message in Message Pane to tell the user the export was completed.
 			ApplicationManager.instance().getViewManager().showMessage(messages.getString("plugin.output.export")
 					+ selectedFile.getAbsolutePath());
+			GUI.showInformationMessageDialog(viewManager.getRootFrame(), Config.EXPORT_INFO_ACTION, 
+					Config.EXPORT_INFO_OK);
 		}
+		
 	}
 
 

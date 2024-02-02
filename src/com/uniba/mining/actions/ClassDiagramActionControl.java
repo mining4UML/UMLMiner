@@ -63,8 +63,6 @@ public class ClassDiagramActionControl implements VPActionController {
 		int numClasses = 3 + random.nextInt(5); // Genera tra 3 e 7 classi
 		IClass[] classes = new IClass[numClasses];
 		
-		ClassGenerator classGenerator = new ClassGenerator();
-		
 		for (int i = 0; i < numClasses; i++) {
 			IClass newClass = IModelElementFactory.instance().createClass();
 			newClass.setName("Class" + i);
@@ -123,7 +121,6 @@ public class ClassDiagramActionControl implements VPActionController {
 			classShape.fitSize();
 
 			classes[i] = newClass;
-			//classes[i] = classGenerator.generateClass("Class" + i);
 		}
 
 		// Aggiungi relazioni casuali tra le classi

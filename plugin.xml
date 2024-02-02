@@ -80,9 +80,21 @@
 				ribbonPath="Toolbar/Separator1">
 				<actionController class="com.uniba.mining.actions.ReloadPluginActionController" />
 			</action>
+			
+			<action
+					id="ClassDiagramActionControl"
+					actionType="generalAction"
+					label="Create Class Diagram"
+					tooltip="Create Class Diagram via Open API"
+					style="normal"
+					icon="assets/icons/class.png"
+					ribbonPath="Toolbar/ReloadPlugin">
+				<actionController class="com.uniba.mining.actions.ClassDiagramActionControl"/>
+			</action>
+			
 			<separator
 				id="Separator2"
-				ribbonPath="Toolbar/ReloadPlugin" />
+				ribbonPath="Toolbar/ClassDiagramActionControl" />
 			<action
 				id="About"
 				actionType="generalAction"

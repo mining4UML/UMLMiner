@@ -1,0 +1,213 @@
+{"classi": [
+  {
+    "sottoclassi": [],
+    "attributi": [
+      {
+        "tipo": "boolean",
+        "nome": "Attribute41"
+      },
+      {
+        "tipo": "int",
+        "nome": "Attribute70"
+      }
+    ],
+    "aggregazione": {
+      "molteplicita": "1..*",
+      "nome": "Aggregation13",
+      "destinazione": "DestinationClass9"
+    },
+    "nome": "Class69",
+    "operazioni": [
+      {
+        "nome": "Operation35",
+        "tipoRitorno": "int",
+        "parametri": [{
+          "tipo": "int",
+          "nome": "Parameter8"
+        }]
+      },
+      {
+        "nome": "Operation82",
+        "tipoRitorno": "string",
+        "parametri": [{
+          "tipo": "int",
+          "nome": "Parameter4"
+        }]
+      }
+    ],
+    "associazione": [{
+      "molteplicita": "1..*",
+      "nome": "Association54",
+      "destinazione": "DestinationClass7"
+    }]
+  },
+  {
+    "generalizzazione": "SuperClass3",
+    "sottoclassi": [],
+    "attributi": [
+      {
+        "tipo": "boolean",
+        "nome": "Attribute82"
+      },
+      {
+        "tipo": "boolean",
+        "nome": "Attribute92"
+      }
+    ],
+    "nome": "Class76",
+    "operazioni": [
+      {
+        "nome": "Operation86",
+        "tipoRitorno": "string",
+        "parametri": [{
+          "tipo": "boolean",
+          "nome": "Parameter2"
+        }]
+      },
+      {
+        "nome": "Operation97",
+        "tipoRitorno": "int",
+        "parametri": [{
+          "tipo": "string",
+          "nome": "Parameter6"
+        }]
+      },
+      {
+        "nome": "Operation45",
+        "tipoRitorno": "int",
+        "parametri": [{
+          "tipo": "int",
+          "nome": "Parameter9"
+        }]
+      }
+    ],
+    "associazione": [{
+      "molteplicita": "1..*",
+      "nome": "Association92",
+      "destinazione": "DestinationClass8"
+    }]
+  },
+  {
+    "generalizzazione": "SuperClass5",
+    "sottoclassi": [],
+    "attributi": [{
+      "tipo": "boolean",
+      "nome": "Attribute58"
+    }],
+    "aggregazione": {
+      "molteplicita": "1..*",
+      "nome": "Aggregation86",
+      "destinazione": "DestinationClass6"
+    },
+    "nome": "Class5",
+    "operazioni": [
+      {
+        "nome": "Operation25",
+        "tipoRitorno": "boolean",
+        "parametri": [
+          {
+            "tipo": "boolean",
+            "nome": "Parameter4"
+          },
+          {
+            "tipo": "int",
+            "nome": "Parameter7"
+          }
+        ]
+      },
+      {
+        "nome": "Operation91",
+        "tipoRitorno": "boolean",
+        "parametri": [{
+          "tipo": "string",
+          "nome": "Parameter1"
+        }]
+      }
+    ],
+    "associazione": [{
+      "molteplicita": "0..1",
+      "nome": "Association26",
+      "destinazione": "DestinationClass9"
+    }]
+  },
+  {
+    "sottoclassi": [],
+    "attributi": [
+      {
+        "tipo": "int",
+        "nome": "Attribute62"
+      },
+      {
+        "tipo": "int",
+        "nome": "Attribute43"
+      }
+    ],
+    "aggregazione": {
+      "molteplicita": "1..*",
+      "nome": "Aggregation94",
+      "destinazione": "DestinationClass6"
+    },
+    "nome": "Class83",
+    "operazioni": [{
+      "nome": "Operation18",
+      "tipoRitorno": "boolean",
+      "parametri": [
+        {
+          "tipo": "int",
+          "nome": "Parameter8"
+        },
+        {
+          "tipo": "string",
+          "nome": "Parameter8"
+        }
+      ]
+    }],
+    "associazione": [{
+      "molteplicita": "1..*",
+      "nome": "Association56",
+      "destinazione": "DestinationClass9"
+    }]
+  },
+  {
+    "generalizzazione": "SuperClass10",
+    "sottoclassi": [],
+    "attributi": [
+      {
+        "tipo": "boolean",
+        "nome": "Attribute50"
+      },
+      {
+        "tipo": "int",
+        "nome": "Attribute12"
+      },
+      {
+        "tipo": "string",
+        "nome": "Attribute39"
+      },
+      {
+        "tipo": "boolean",
+        "nome": "Attribute74"
+      },
+      {
+        "tipo": "string",
+        "nome": "Attribute45"
+      }
+    ],
+    "nome": "Class16",
+    "operazioni": [{
+      "nome": "Operation21",
+      "tipoRitorno": "int",
+      "parametri": [
+        {
+          "tipo": "int",
+          "nome": "Parameter9"
+        },
+        {
+          "tipo": "boolean",
+          "nome": "Parameter10"
+        }
+      ]
+    }],
+    "associazione": []
+  }
+]}

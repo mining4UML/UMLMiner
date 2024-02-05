@@ -5,6 +5,10 @@ import java.lang.reflect.Method;
 
 import com.vp.plugin.model.IProject;
 
+/**
+ * 
+ * pasqualeardimento
+ */
 public enum DiagramType {
 	CLASS_DIAGRAM(ClassInfo.class),
 	USECASE_DIAGRAM(UseCaseInfo.class);
@@ -19,7 +23,7 @@ public enum DiagramType {
 	}
 
 	// Metodo di istanza per esportare le informazioni del diagramma
-	public void exportInformation(IProject project, File selectedFile) {
+	public boolean exportInfo(IProject project, File selectedFile) {
 		try {
 			// Creazione di un'istanza della classe associata al tipo di diagramma
 			Object diagramInstance = diagramType.getDeclaredConstructor().newInstance();
@@ -31,6 +35,8 @@ public enum DiagramType {
 			exportMethod.invoke(diagramInstance, project, selectedFile);
 		} catch (Exception e) {
 			e.printStackTrace(); // Gestisci l'eccezione in modo appropriato
+			return false;
 		}
+		return true;
 	}
 }

@@ -10,6 +10,10 @@ import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IUseCase;
 import com.vp.plugin.model.factory.IModelElementFactory;
 
+/**
+ * 
+ * pasqualeardimento
+ */
 public class UseCaseInfo {
 
 	private static ResourceBundle messages;

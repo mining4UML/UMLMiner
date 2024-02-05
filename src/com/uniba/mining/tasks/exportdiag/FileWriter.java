@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * 
+ * pasqualeardimento
+ */
 public class FileWriter {
 	
 	public static void writeToFile(StringBuffer content, File outputFile) {

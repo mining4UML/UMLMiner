@@ -20,8 +20,8 @@ import java.util.ResourceBundle;
 public class ExportInfoActionController implements VPActionController {
 
 	private ResourceBundle messages;
-	
-    private static final ViewManager viewManager = Application.getViewManager();
+
+	private static final ViewManager viewManager = Application.getViewManager();
 
 	public void performAction(VPAction arg0) {
 
@@ -30,7 +30,7 @@ public class ExportInfoActionController implements VPActionController {
 
 		LanguageDiagramSelectionResult selectionResult = new LanguageDialog(messages).showLanguageSelectionDialog();
 
-		
+
 		// If the user cancels the operation, return
 		if (!selectionResult.isSelectionConfirmed()) {
 			return;
@@ -54,15 +54,20 @@ public class ExportInfoActionController implements VPActionController {
 			}
 
 			// Export information based on the user's choice
-			selectionResult.getDiagramType().exportInformation(project, selectedFile);
+			if(selectionResult.getDiagramType().exportInfo(project, selectedFile)) {
 
-			// Print a message in Message Pane to tell the user the export was completed.
-			ApplicationManager.instance().getViewManager().showMessage(messages.getString("plugin.output.export")
-					+ selectedFile.getAbsolutePath());
-			GUI.showInformationMessageDialog(viewManager.getRootFrame(), Config.EXPORT_INFO_ACTION, 
-					Config.EXPORT_INFO_OK);
+				// Print a message in Message Pane to tell the user the export was completed.
+				ApplicationManager.instance().getViewManager().showMessage(messages.getString("plugin.output.export")
+						+ selectedFile.getAbsolutePath());
+				GUI.showInformationMessageDialog(viewManager.getRootFrame(), Config.EXPORT_INFO_ACTION, 
+						Config.EXPORT_INFO_OK);
+			}
+			else
+				GUI.showInformationMessageDialog(viewManager.getRootFrame(), Config.EXPORT_INFO_ACTION, 
+						Config.EXPORT_INFO_ERROR);
+				
 		}
-		
+
 	}
 
 

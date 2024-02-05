@@ -1,6 +1,11 @@
 package com.uniba.mining.tasks.generator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.vp.plugin.DiagramManager;
 import com.vp.plugin.diagram.IClassDiagramUIModel;
@@ -17,17 +22,18 @@ import com.vp.plugin.model.factory.IModelElementFactory;
 
 public class RelationshipGenerator {
 	private static Random random = new Random();
-	
+	private static String RELNOAGGIUNTA="relazione non aggiunta perchè classe opzionale non selezionata";
+
 	// Aggiungi un'enumerazione per i tipi di relazione
 	public enum RelationshipType {
-	    GENERALIZATION, ASSOCIATION, AGGREGATION, REALIZATION
+		GENERALIZATION, ASSOCIATION, AGGREGATION, REALIZATION
 	}
 
 	public RelationshipGenerator() {
 		this.random = new Random();
 	}
 
-	public static void addRandomRelations(DiagramManager diagramManager, IClassDiagramUIModel diagram,
+	/*public static void addRandomRelations(DiagramManager diagramManager, IClassDiagramUIModel diagram,
 			IPackageUIModel basePackageShape, IClass[] classes) {
 		for (IClass currentClass : classes) {
 			RelationshipType relationshipType = getRandomRelationshipType();
@@ -50,33 +56,146 @@ public class RelationshipGenerator {
 				break;
 			}
 		}
+	}*/
+
+
+	public static void addRelationsFromJson(DiagramManager diagramManager, IClassDiagramUIModel diagram,
+			IPackageUIModel basePackageShape, List<IClass> classes, JSONObject jsonDiagram, IClass currentClass) {
+		// Check if the class has defined generalization in the JSON
+		String className = currentClass.getName();
+		JSONObject jsonClass = findJsonClass(jsonDiagram, className);
+
+		if (jsonClass != null) {
+			if (jsonClass.has("generalizzazione") && !jsonClass.isNull("generalizzazione")) {
+				String generalizationName = jsonClass.getString("generalizzazione");
+				if (!generalizationName.isEmpty()) {
+					// Find the superclass in the list of classes
+					IClass superClass = getClassByName(classes, generalizationName);
+
+					if (superClass != null) {
+						// Get the subclass
+						IClass subClass = getClassByName(classes, jsonClass.getString("nome"));
+
+						// Create generalization
+						createGeneralization(diagramManager, diagram, basePackageShape, superClass, subClass, generalizationName);
+					}
+				}
+			}
+
+			// Check if the class has defined associations in the JSON
+			if (jsonClass.has("associazione") && !jsonClass.isNull("associazione") ) {
+				JSONArray jsonAssociations = jsonClass.getJSONArray("associazione");
+				for (int i = 0; i < jsonAssociations.length(); i++) {
+					JSONObject jsonAssociation = jsonAssociations.getJSONObject(i);
+					String associationName = jsonAssociation.getString("nome");
+					String targetClassName = jsonAssociation.getString("destinazione");
+					String multiplicity = jsonAssociation.getString("molteplicita");
+
+					IClass targetClass = getClassByName(classes, targetClassName);
+					IClass sourceClass = getClassByName(classes, className);
+
+					if (targetClass != null && sourceClass != null)// Create association
+						createAssociation(diagramManager, diagram, basePackageShape, sourceClass, targetClass, associationName, multiplicity);
+				}
+			}
+
+			if (jsonClass.has("aggregazione") && !jsonClass.isNull("aggregazione")) {
+				JSONArray jsonAggregations = jsonClass.getJSONArray("aggregazione");
+				for (int i = 0; i < jsonAggregations.length(); i++) {
+					JSONObject jsonAggregation = jsonAggregations.getJSONObject(i);
+					String aggregationName = jsonAggregation.getString("nome");
+					String targetClassName = jsonAggregation.getString("destinazione");
+					String multiplicity = jsonAggregation.getString("molteplicita");
+
+					IClass targetClass = getClassByName(classes, targetClassName);
+					IClass sourceClass = getClassByName(classes, className);
+
+					// Create aggregation
+					if (targetClass != null && sourceClass != null)
+					createAggregation(diagramManager, diagram, basePackageShape, sourceClass, targetClass, aggregationName, multiplicity);
+				}
+			}
+
+			// Implement similar logic for other relationship types if needed
+		}
 	}
-	
+
+	private static JSONObject findJsonClass(JSONObject jsonDiagram, String className) {
+		JSONArray jsonClasses = jsonDiagram.getJSONArray("classi");
+		for (int i = 0; i < jsonClasses.length(); i++) {
+			JSONObject jsonClass = jsonClasses.getJSONObject(i);
+			if (jsonClass.getString("nome").equals(className)) {
+				return jsonClass;
+			}
+		}
+		return null;
+	}
+
+
+	private static IClass getClassByName(List<IClass> classes, String className) {
+		for (IClass clazz : classes) {
+			if (clazz.getName().equals(className)) {
+				return clazz;
+			}
+		}
+		return null;
+	}
+
+	public static void addRandomRelations(DiagramManager diagramManager, IClassDiagramUIModel diagram,
+			IPackageUIModel basePackageShape, ArrayList<IClass> classes, JSONObject jsonClass) {
+		for (IClass currentClass : classes) {
+			// Call the modified method to add relations from JSON for the current class
+			addRelationsFromJson(diagramManager, diagram, basePackageShape, classes, jsonClass, currentClass);
+		}
+	}
+
+
 	private static void createGeneralization(DiagramManager diagramManager, IClassDiagramUIModel diagram,
-			IPackageUIModel basePackageShape, IClass superClass, IClass subClass) {
-		IGeneralization generalizationModel = IModelElementFactory.instance().createGeneralization();
-		generalizationModel.setFrom(superClass);
-		generalizationModel.setTo(subClass);
-		IClassUIModel superClassShape = findClassShape(basePackageShape, superClass);
-		IClassUIModel subClassShape = findClassShape(basePackageShape, subClass);
-		diagramManager.createConnector(diagram, generalizationModel, superClassShape, subClassShape, null);
+			IPackageUIModel basePackageShape, IClass superClass, IClass subClass,
+			String generalizationName) {
+		if (superClass != null && subClass != null) {
+			IGeneralization generalizationModel = IModelElementFactory.instance().createGeneralization();
+			generalizationModel.setFrom(superClass);
+			generalizationModel.setTo(subClass);
+			generalizationModel.setName(generalizationName);
+			IClassUIModel superClassShape = findClassShape(basePackageShape, superClass);
+			IClassUIModel subClassShape = findClassShape(basePackageShape, subClass);
+			if(superClassShape!= null &&  subClassShape!=null)
+				diagramManager.createConnector(diagram, generalizationModel, superClassShape, subClassShape, null);
+		}
+		else
+			System.out.println(RELNOAGGIUNTA);
 	}
 
 
 	private static void createAssociation(DiagramManager diagramManager, IClassDiagramUIModel diagram,
-			IPackageUIModel basePackageShape, IClass sourceClass, IClass targetClass) {
-		IAssociation associationModel = IModelElementFactory.instance().createAssociation();
-		associationModel.setFrom(sourceClass);
-		associationModel.setTo(targetClass);
-		IAssociationEnd associationFromEnd = (IAssociationEnd) associationModel.getFromEnd();
-		associationFromEnd.setMultiplicity("*");
-		IAssociationEnd associationToEnd = (IAssociationEnd) associationModel.getToEnd();
-		associationToEnd.setMultiplicity("*");
-		IClassUIModel sourceClassShape = findClassShape(basePackageShape, sourceClass);
-		IClassUIModel targetClassShape = findClassShape(basePackageShape, targetClass);
-		IAssociationUIModel associationConnector = (IAssociationUIModel) diagramManager.createConnector(diagram,
-				associationModel, sourceClassShape, targetClassShape, null);
-		associationConnector.setRequestResetCaption(true);
+			IPackageUIModel basePackageShape, IClass sourceClass, IClass targetClass,
+			String associationName, String multiplicity) {
+
+		if (sourceClass != null && targetClass != null) {
+
+			IAssociation associationModel = IModelElementFactory.instance().createAssociation();
+			associationModel.setFrom(sourceClass);
+			associationModel.setTo(targetClass);
+			associationModel.setName(associationName);
+
+
+			IAssociationEnd associationFromEnd = (IAssociationEnd) associationModel.getFromEnd();
+			associationFromEnd.setMultiplicity("*");
+			IAssociationEnd associationToEnd = (IAssociationEnd) associationModel.getToEnd();
+			associationToEnd.setMultiplicity(multiplicity);
+			IClassUIModel sourceClassShape = findClassShape(basePackageShape, sourceClass);
+			IClassUIModel targetClassShape = findClassShape(basePackageShape, targetClass);
+			if (sourceClassShape != null && targetClassShape != null) {
+				IAssociationUIModel associationConnector = (IAssociationUIModel) diagramManager.createConnector(diagram,
+						associationModel, sourceClassShape, targetClassShape, null);
+				associationConnector.setRequestResetCaption(true);
+			}
+		}
+		else {
+			System.out.println(RELNOAGGIUNTA);
+		}
+
 	}
 
 	// create aggregation association between subclass and AggregationClass
@@ -95,51 +214,67 @@ public class RelationshipGenerator {
 
 
 	private static void createAggregation(DiagramManager diagramManager, IClassDiagramUIModel diagram,
-			IPackageUIModel basePackageShape, IClass sourceClass, IClass targetClass) {
+			IPackageUIModel basePackageShape, IClass sourceClass, IClass targetClass,
+			String aggregationName, String multiplicity) {
 		IAssociation aggregationModel = IModelElementFactory.instance().createAssociation();
-		aggregationModel.setFrom(sourceClass);
-		aggregationModel.setTo(targetClass);
+		if (sourceClass != null && targetClass != null) {
 
-		IAssociationEnd aggregationFromEnd = (IAssociationEnd) aggregationModel.getFromEnd();
-		aggregationFromEnd.setMultiplicity("*");
+			aggregationModel.setFrom(sourceClass);
+			aggregationModel.setTo(targetClass);
+			aggregationModel.setName(aggregationName);
 
-		IAssociationEnd aggregationToEnd = (IAssociationEnd) aggregationModel.getToEnd();
-		aggregationToEnd.setMultiplicity("*");
+			IAssociationEnd aggregationFromEnd = (IAssociationEnd) aggregationModel.getFromEnd();
+			aggregationFromEnd.setMultiplicity("*");
 
-		Random random = new Random();
-		int tipoAggr = 1 + random.nextInt(2); // Genera un numero compreso tra 1 e 2
+			IAssociationEnd aggregationToEnd = (IAssociationEnd) aggregationModel.getToEnd();
+			aggregationToEnd.setMultiplicity(multiplicity);
 
-		switch(tipoAggr) {
-		case 1:
-			aggregationToEnd.setAggregationKind(IAssociationEnd.AGGREGATION_KIND_AGGREGATION);
-			aggregationToEnd.setName("aggregation");
-			break;
-		case 2:
-			aggregationToEnd.setAggregationKind(IAssociationEnd.AGGREGATION_KIND_COMPOSITED);
-			aggregationToEnd.setName("composition");
-			break;
+			Random random = new Random();
+			int tipoAggr = 1 + random.nextInt(2); // Genera un numero compreso tra 1 e 2
+
+			switch(tipoAggr) {
+			case 1:
+				aggregationToEnd.setAggregationKind(IAssociationEnd.AGGREGATION_KIND_AGGREGATION);
+				aggregationToEnd.setName("aggregation");
+				break;
+			case 2:
+				aggregationToEnd.setAggregationKind(IAssociationEnd.AGGREGATION_KIND_COMPOSITED);
+				aggregationToEnd.setName("composition");
+				break;
+			}
+
+			IClassUIModel sourceClassShape = findClassShape(basePackageShape, sourceClass);
+			IClassUIModel targetClassShape = findClassShape(basePackageShape, targetClass);
+			if (sourceClassShape != null && targetClassShape != null) {
+				IAssociationUIModel associationConnector = (IAssociationUIModel) diagramManager.createConnector(diagram,
+						aggregationModel, sourceClassShape, targetClassShape, null);
+				associationConnector.setRequestResetCaption(true);
+			}
 		}
-
-		IClassUIModel sourceClassShape = findClassShape(basePackageShape, sourceClass);
-		IClassUIModel targetClassShape = findClassShape(basePackageShape, targetClass);
-		IAssociationUIModel associationConnector = (IAssociationUIModel) diagramManager.createConnector(diagram,
-				aggregationModel, sourceClassShape, targetClassShape, null);
-		associationConnector.setRequestResetCaption(true);
+		else
+			System.out.println(RELNOAGGIUNTA);
 	}
 
 
 
 	private static void createRealization(DiagramManager diagramManager, IClassDiagramUIModel diagram,
 			IPackageUIModel basePackageShape, IClass interfaceClass, IClass subClass) {
-		IRealization realizationModel = IModelElementFactory.instance().createRealization();
-		realizationModel.setFrom(interfaceClass);
-		realizationModel.setTo(subClass);
-		IClassUIModel interfaceClassShape = findClassShape(basePackageShape, interfaceClass);
-		IClassUIModel subClassShape = findClassShape(basePackageShape, subClass);
-		diagramManager.createConnector(diagram, realizationModel, interfaceClassShape, subClassShape, null);
+
+		if (interfaceClass != null && subClass != null) {
+
+			IRealization realizationModel = IModelElementFactory.instance().createRealization();
+			realizationModel.setFrom(interfaceClass);
+			realizationModel.setTo(subClass);
+			IClassUIModel interfaceClassShape = findClassShape(basePackageShape, interfaceClass);
+			IClassUIModel subClassShape = findClassShape(basePackageShape, subClass);
+			if (interfaceClassShape != null && subClassShape != null)
+				diagramManager.createConnector(diagram, realizationModel, interfaceClassShape, subClassShape, null);
+		}
+		else
+			System.out.println(RELNOAGGIUNTA);
 	}
 
-	
+
 	private static IClassUIModel findClassShape(IPackageUIModel packageShape, IClass targetClass) {
 		for (int i = 0; i < packageShape.childrenCount(); i++) {
 			IModelElement child = packageShape.getChildAt(i).getModelElement();
@@ -150,7 +285,7 @@ public class RelationshipGenerator {
 		return null;
 	}
 
-	
+
 
 	private static RelationshipType getRandomRelationshipType() {
 		int typeIndex = random.nextInt(RelationshipType.values().length);

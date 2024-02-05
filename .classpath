@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/winpack.jar"/>
 	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/jniwrap.jar"/>
 	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/openapi.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/pasqualeardimento/Downloads/json-20231013.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

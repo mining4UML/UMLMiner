@@ -3,14 +3,18 @@ package com.uniba.mining.tasks.exportdiag;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
+import com.uniba.mining.logging.LogExtractor;
 import com.vp.plugin.ApplicationManager;
+import com.vp.plugin.diagram.IClassDiagramUIModel;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IAssociation;
@@ -23,6 +27,11 @@ import com.vp.plugin.model.IParameter;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IRelationship;
 import com.vp.plugin.model.IRelationshipEnd;
+
+/**
+ * 
+ * pasqualeardimento
+ */
 
 public class ClassInfo {
 
@@ -37,8 +46,8 @@ public class ClassInfo {
 
 	public static void exportInformation(IProject project, File outputFile) {
 
-
-		new ClassInfo();
+		//new ClassInfo();
+		messages = Language.getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 
 		// Crea una stringa per memorizzare l'output
@@ -50,13 +59,23 @@ public class ClassInfo {
 		}
 		else {
 
+			System.out.println("numero diagrammi:"+diagrams.length);
+			printInfoProject(project, diagrams, output);
+			output.append(String.format(messages.getString("rows.separator")));
+
 			for (IDiagramUIModel diagram : diagrams) {
 
 				if (diagram.getType().equals("ClassDiagram")) {
 					// Ora puoi accedere alle informazioni del diagramma
+
 					String diagramName = diagram.getName();
 					String diagramType = diagram.getType();
 
+					//if (diagram instanceof IClassDiagramUIModel) {
+					IClassDiagramUIModel classInfo =  (IClassDiagramUIModel) diagram;
+					System.out.println(classInfo.getDefaultPackage().getName());
+
+					//}
 					// Informazioni del diagramma
 					System.out.println("Diagramma: " + diagramName + " - Tipo: " + diagramType);
 
@@ -74,16 +93,22 @@ public class ClassInfo {
 								messages.getString("class.diagram.contains")));
 					}
 
-					IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
 
+
+					IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
 					for (IDiagramElement diagramElement : diagramElements) {
 						IModelElement modelElement = diagramElement.getModelElement();
 
 						if (modelElement instanceof IClass) {
 							IClass classe = (IClass) modelElement;
 
-							output.append(String.format("- %s%n", 
+							output.append(String.format("- %s", 
 									classe.getName()!=null ? classe.getName() : "---" ));
+							IModelElement parent = classe.getParent();
+							output.append(String.format("  %s", 
+									parent.getName()!=null ? " whose package is "+parent.getName() : "---" ));
+							output.append(String.format(" and default package: %s",classInfo.getDefaultPackage().getName()));
+							output.append(String.format("%n"));
 						}
 					}
 
@@ -99,6 +124,20 @@ public class ClassInfo {
 
 						if (modelElement instanceof IClass) {
 							IClass classe = (IClass) modelElement;
+
+							if (classe.getParent() != null && classe.getParent().getParent() != null) {
+								System.out.println(
+										classe.getParent().getParent().getName() != null ?
+												classe.getParent().getParent().getName() :
+													"non c'è parent model"
+										);
+							} else {
+								System.out.println("Parent o Parent Model è null");
+							}
+
+							if(classe.getMasterView().getModelElement().getName()!=null)
+								System.out.println("*********"+classe.getMasterView().getModelElement().getName());
+
 
 							System.out.println("Classe: " + classe.getName());
 
@@ -165,7 +204,14 @@ public class ClassInfo {
 								output.append(assRel.toString());
 							}
 
+							// info sul fatto che la classe sia in una view master o auxiliary
+							output.append(!diagramElement.isMasterView() ? "\nClass "
+									+ classe.getName() +" is an auxiliary view. Master view is in "+ 
+									modelElement.getMasterView().getDiagramUIModel().getName()
+									+" diagram" :"");	
+
 						}
+
 						// Vai a capo tra le classi
 						output.append("\n");
 					}
@@ -176,13 +222,40 @@ public class ClassInfo {
 					}
 
 					// Write the StringBuilder content to the file
+					// add two separation rows
+					output.append(String.format(messages.getString("rows.separator")));
 					FileWriter.writeToFile(output, outputFile);
-				} 
-			}
-		}
+					output.setLength(0);
+				} // chiusura if
+			}  // chisurua iterazione sui diagrammi
+		}  // chiusura else quando ci sono diagrammi
 	}
 
 
+
+	private static void printInfoProject(IProject project,IDiagramUIModel[] diagrams,
+			StringBuilder output) {
+		String projectName = project.getName();
+		output.append(String.format("%s %s",
+				messages.getString("project.info"),
+				projectName));
+		int counterDiagrammi= 0;
+		Set<IClassDiagramUIModel> diagrammiClassi = new HashSet<IClassDiagramUIModel>();
+		for (IDiagramUIModel diagram : diagrams) {
+			if (diagram.getType().equals("ClassDiagram")) {
+				++counterDiagrammi;	
+				diagrammiClassi.add((IClassDiagramUIModel) diagram);
+			}
+		}
+		output.append(String.format(" %s %s %s %s", 
+				messages.getString("diagrams.contains"),
+				counterDiagrammi,
+				messages.getString("diagrams.info"),
+				messages.getString("diagrams.infoListing")));
+		for(IClassDiagramUIModel classe: diagrammiClassi) {
+			output.append(String.format(" %s ",classe.getName()));
+		}
+	}
 
 	private static StringBuilder getInfoAttributes(IClass classe) {
 
@@ -203,11 +276,14 @@ public class ClassInfo {
 				output.append(String.format("%n- %s ", attributo.getName()));
 
 				// Aggiungi informazioni sulla visibilità e il tipo dell'attributo
-				output.append(String.format(" %s %s, %s %s", 
+				output.append(String.format(" %s %s, %s %s %s %s", 
 						messages.getString("class.attributes.visibility"),
 						attributo.getVisibility(), 
 						messages.getString("class.attributes.type"),
-						attributo.getType()));
+						LogExtractor.extractStringValue(attributo.getType()),
+						messages.getString("class.attributes.scope"), 
+						attributo.getScope()));
+				//attributo.getType()));
 
 				// Aggiungi informazioni sul valore di default dell'attributo                            
 				String valoreDefault = attributo.getInitialValue();
@@ -283,6 +359,15 @@ public class ClassInfo {
 		Collection lCollection = new ArrayList(); // <IRelationship>
 		StringBuilder out = new StringBuilder();
 
+		if (_base.getParent() != null && _base.getParent().getParent() != null) {
+			System.out.println(
+					_base.getParent().getParent().getName() != null ?
+							_base.getParent().getParent().getName() :
+								"nome non presente nel definire a chi appartiene"
+					);
+		} else {
+			System.out.println("Parent o Parent Model è null");
+		}
 
 		{
 			// from base TO opposite
@@ -311,79 +396,86 @@ public class ClassInfo {
 
 		for(IRelationship relazione: lRelationships) {
 
-			// relazioni di generalizzazione ed altre di dipendenza
-			if (! (relazione instanceof IAssociationEnd)) {
+			if(relazione.getMasterView().getDiagramUIModel().getName().equals( 
+					_base.getMasterView().getDiagramUIModel().getName())) {
 
-				//out.append(String.format("%n- %s", relazione.getModelType()));
-				out.append(String.format("%n- "));
-				// Se è definito un nome per la relazione lo aggiunge
-				String lName = relazione.getNickname();
-				//out.append( (lName != null) ? " con nome della relazione'"+lName+"'": "");
+				// relazioni di generalizzazione ed altre di dipendenza
+				if (! (relazione instanceof IAssociationEnd)) {
 
-				//out.append(" Direzione della relazione: ");
-				if (_base.equals(relazione.getFrom())) {
-					if (_base.equals(relazione.getTo())) {
-						out.append(String.format(" %s",messages.getString("class.association.reflective")));
+					//out.append(String.format("%n- %s", relazione.getModelType()));
+					out.append(String.format("%n- "));
+					// Se è definito un nome per la relazione lo aggiunge
+					String lName = relazione.getNickname();
+					//out.append( (lName != null) ? " con nome della relazione'"+lName+"'": "");
+
+					//out.append(" Direzione della relazione: ");
+					if (_base.equals(relazione.getFrom())) {
+						if (_base.equals(relazione.getTo())) {
+							out.append(String.format(" %s",messages.getString("class.association.reflective")));
+						}
+						else {
+							if (relazione.getModelType().equals("Generalization")) {
+								//out.append("from To "); // from base TO opposite model
+								//out.append(String.format(" from %s To %s",_base.getNickname(),relazione.getTo().getNickname() ));
+								out.append(String.format(" %s is a generalization of %s in %s",_base.getNickname(),
+										relazione.getTo().getNickname(), _base.getParent().getParent().getName()));
+
+							}
+							else
+								out.append(String.format(" %s is in relation of %s with %s",
+										_base.getNickname(),
+										relazione.getModelType(),
+										relazione.getTo().getNickname() ));
+
+
+						}
 					}
 					else {
-						if (relazione.getModelType().equals("Generalization"))
-							//out.append("from To "); // from base TO opposite model
-							//out.append(String.format(" from %s To %s",_base.getNickname(),relazione.getTo().getNickname() ));
-							out.append(String.format(" %s is a generalization of %s",_base.getNickname(),relazione.getTo().getNickname() ));
-						else
-							out.append(String.format(" %s is in relation of %s with %s",
-									_base.getNickname(),
-									relazione.getModelType(),
-									relazione.getTo().getNickname() ));
+						//out.append(" From  "); // FROM opposite model to base
 
+						if(relazione.getModelType().equals("Generalization")) {
 
-					}
-				}
-				else {
-					//out.append(" From  "); // FROM opposite model to base
+							if (_base.equals(relazione.getTo())) {
+								//out.append(relazione.getFrom().getName() + " To "+ _base.getNickname());
+								out.append(String.format(" %s is a specialization of %s",_base.getNickname(), relazione.getFrom().getName() ));
 
-					if(relazione.getModelType().equals("Generalization")) {
+							}
+							else {
+								//out.append(relazione.getTo().getName()+ " To "+ _base.getNickname());
+								out.append(String.format(" %s is a generalization of %s",relazione.getTo().getName(),_base.getNickname() ));
 
-						if (_base.equals(relazione.getTo())) {
-							//out.append(relazione.getFrom().getName() + " To "+ _base.getNickname());
-							out.append(String.format(" %s is a specialization of %s",_base.getNickname(), relazione.getFrom().getName() ));
+							}
 
 						}
 						else {
-							//out.append(relazione.getTo().getName()+ " To "+ _base.getNickname());
-							out.append(String.format(" %s is a generalization of %s",relazione.getTo().getName(),_base.getNickname() ));
+							if (_base.equals(relazione.getTo())) {
+								//out.append(relazione.getFrom().getName() + " To "+ _base.getNickname());
+								out.append(String.format(" %s is in relation of %s with %s",
+										_base.getNickname(), 
+										relazione.getModelType(),
+										relazione.getFrom().getName() ));
+
+							}
+							else {
+								//out.append(relazione.getTo().getName()+ " To "+ _base.getNickname());
+								out.append(String.format(" %s 3-is in relation of %s with %s",
+										relazione.getTo().getName(),
+										relazione.getModelType(),
+										_base.getNickname() ));
+
+							}
 
 						}
-
 					}
-					else {
-						if (_base.equals(relazione.getTo())) {
-							//out.append(relazione.getFrom().getName() + " To "+ _base.getNickname());
-							out.append(String.format(" %s is in relation of %s with %s",
-									_base.getNickname(), 
-									relazione.getModelType(),
-									relazione.getFrom().getName() ));
-
-						}
-						else {
-							//out.append(relazione.getTo().getName()+ " To "+ _base.getNickname());
-							out.append(String.format(" %s 3-is in relation of %s with %s",
-									relazione.getTo().getName(),
-									relazione.getModelType(),
-									_base.getNickname() ));
-
-						}
-
-					}
+					out.append( (lName != null) ? " con nome della relazione'"+lName+"'": "");
 				}
-				out.append( (lName != null) ? " con nome della relazione'"+lName+"'": "");
 			}
 		}
 		return out;
 	}
 
 	private static StringBuilder fromEndRelationships(IModelElement _base) {
-		Collection<IRelationship> lCollection = new ArrayList(); // <IRelationship>
+		Collection<IRelationship> lCollection = new ArrayList<IRelationship>(); // <IRelationship>
 		StringBuilder out = new StringBuilder();
 		{
 			// from base TO opposite
@@ -414,10 +506,15 @@ public class ClassInfo {
 
 		for(IRelationship relazione: lRelationships) {
 			System.out.println(relazione.getModelType());
-			if (relazione.getModelType().equals("Association")) {
-				out.append(handleAssociationRelationship(_base, relazione));
-			} else if (!relazione.getModelType().equals("Association")) {
-				out.append(handleNonAssociationRelationship(relazione, _base));
+
+			if(relazione.getMasterView().getDiagramUIModel().getName().equals( 
+					_base.getMasterView().getDiagramUIModel().getName())) {
+
+				if (relazione.getModelType().equals("Association")) {
+					out.append(handleAssociationRelationship(_base, relazione));
+				} else if (!relazione.getModelType().equals("Association")) {
+					out.append(handleNonAssociationRelationship(relazione, _base));
+				}
 			}
 		}
 
@@ -431,7 +528,11 @@ public class ClassInfo {
 		StringBuilder out = new StringBuilder();
 		IAssociation model = (IAssociation) relazione;
 
+
+
+
 		IRelationshipEnd end = model.getToEnd();
+
 
 		if (end instanceof IAssociationEnd) {
 			IAssociationEnd association = (IAssociationEnd) end;
@@ -442,28 +543,30 @@ public class ClassInfo {
 
 			if (association != null && association instanceof IAssociationEnd) {
 
+				if(relazione.getMasterView().getDiagramUIModel().getName().equals( 
+						_base.getMasterView().getDiagramUIModel().getName())) {
 
-				//System.out.println(_base+" TTTTTTTTT "+ association.getAggregationKind());
-				out.append("\n- ")
-				.append(association.getAggregationKind() == "none" && association.getAggregationKind() != null ?
-						messages.getString("class.association.aggregationkind") : messages.getString("empty"));
+					//System.out.println(_base+" TTTTTTTTT "+ association.getAggregationKind());
+					out.append("\n- ")
+					.append(association.getAggregationKind() == "none" && association.getAggregationKind() != null ?
+							messages.getString("class.association.aggregationkind") : messages.getString("empty"));
 
 
+					out.append(DirectionRelationship(relazione,_base));
 
-				out.append(DirectionRelationship(relazione,_base));
-
-				out.append(" ")
-				.append(association.getModelElement().getName())
-				.append(" ")
-				.append(messages.getString("class.association.multiplicity"))
-				.append(" ")
-				.append(association.getMultiplicity())
-				.append(" e ")
-				.append(association.getOppositeEnd().getModelElement().getName())
-				.append(" ")
-				.append(messages.getString("class.association.multiplicity"))
-				.append(" ")
-				.append(((IAssociationEnd) association.getOppositeEnd()).getMultiplicity());
+					out.append(" ")
+					.append(association.getModelElement().getName())
+					.append(" ")
+					.append(messages.getString("class.association.multiplicity"))
+					.append(" ")
+					.append(association.getMultiplicity())
+					.append(" e ")
+					.append(association.getOppositeEnd().getModelElement().getName())
+					.append(" ")
+					.append(messages.getString("class.association.multiplicity"))
+					.append(" ")
+					.append(((IAssociationEnd) association.getOppositeEnd()).getMultiplicity());
+				}
 			}
 		}
 

@@ -43,7 +43,9 @@ public class Config {
 
 	public static final String EXPORT_INFO_ACTION = pluginProperties.getProperty("actions.ExportInfo.label");
 	public static final String EXPORT_INFO_OK = pluginProperties.getProperty("actions.export.infodiag.successfully");
+	public static final String EXPORT_INFO_ERROR = pluginProperties.getProperty("actions.export.infodiag.error");
 
+	
 	public static final String EXPORT_VIOLATIONS_ACTION = pluginProperties.getProperty("actions.Violations.label");
 	public static final String EXPORT_VIOLATIONS_OK = pluginProperties.getProperty("actions.export.violations.successfully");
 	public static final String EXPORT_VIOLATIONS_INPUT_ERROR = 

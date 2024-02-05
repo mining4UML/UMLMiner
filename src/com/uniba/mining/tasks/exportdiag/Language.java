@@ -1,8 +1,6 @@
 package com.uniba.mining.tasks.exportdiag;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 /**

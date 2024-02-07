@@ -1,0 +1,287 @@
+{
+	"id": "1",
+	"diagramName": "Corso di Studi",
+	"package": "com.uniba.mining.model",
+	"classi": [
+		{
+			"nome": "Esame",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "denominazione",
+					"tipo": "string"
+				},
+				{
+					"nome": "cfu",
+					"tipo": "int"
+				},
+				{
+					"nome": "anno",
+					"tipo": "int"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "sostenuto",
+					"destinazione": "Studente",
+					"molteplicita": "0..*"
+				},
+				{
+					"nome": "relativoA",
+					"destinazione": "Insegnamento",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "cfu",
+							"tipo": "int"
+						},
+						{
+							"nome": "anno",
+							"tipo": "int"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "getVotazione",
+					"tipoRitorno": "int",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "Esame2",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "denominazione",
+					"tipo": "string"
+				},
+				{
+					"nome": "cfu",
+					"tipo": "int"
+				},
+				{
+					"nome": "anno",
+					"tipo": "int"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "sostenuto",
+					"destinazione": "Studente",
+					"molteplicita": "0..*"
+				},
+				{
+					"nome": "relativoA",
+					"destinazione": "Insegnamento",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "cfu",
+							"tipo": "int"
+						},
+						{
+							"nome": "anno",
+							"tipo": "int"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "getVotazione",
+					"tipoRitorno": "int",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "Esame3",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "denominazione",
+					"tipo": "string"
+				},
+				{
+					"nome": "cfu",
+					"tipo": "int"
+				},
+				{
+					"nome": "anno",
+					"tipo": "int"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "sostenuto",
+					"destinazione": "Studente",
+					"molteplicita": "0..*"
+				},
+				{
+					"nome": "relativoA",
+					"destinazione": "Insegnamento",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "cfu",
+							"tipo": "int"
+						},
+						{
+							"nome": "anno",
+							"tipo": "int"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "getVotazione",
+					"tipoRitorno": "int",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "Esame4",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "denominazione",
+					"tipo": "string"
+				},
+				{
+					"nome": "cfu",
+					"tipo": "int"
+				},
+				{
+					"nome": "anno",
+					"tipo": "int"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "sostenuto",
+					"destinazione": "Studente",
+					"molteplicita": "0..*"
+				},
+				{
+					"nome": "relativoA",
+					"destinazione": "Insegnamento",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "cfu",
+							"tipo": "int"
+						},
+						{
+							"nome": "anno",
+							"tipo": "int"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "getVotazione",
+					"tipoRitorno": "int",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "Esame5",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "denominazione",
+					"tipo": "string"
+				},
+				{
+					"nome": "cfu",
+					"tipo": "int"
+				},
+				{
+					"nome": "anno",
+					"tipo": "int"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "sostenuto",
+					"destinazione": "Studente",
+					"molteplicita": "0..*"
+				},
+				{
+					"nome": "relativoA",
+					"destinazione": "Insegnamento",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "cfu",
+							"tipo": "int"
+						},
+						{
+							"nome": "anno",
+							"tipo": "int"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "getVotazione",
+					"tipoRitorno": "int",
+					"parametri": []
+				}
+			]
+		}
+	]
+}

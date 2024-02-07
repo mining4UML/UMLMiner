@@ -50,7 +50,7 @@ public class ClassDiagramActionControlBackup implements VPActionController {
 
 
 		// Extract JSON content
-		String jsonString = loadJsonFromFile("/Users/pasqualeardimento/Documents/GitHub/UMLMiner/assets/classi.json");
+		String jsonString = loadJsonFromFile("/Users/pasqualeardimento/Documents/GitHub/UMLMiner/assets/ddd.json");
 		JSONObject jsonDiagram = new JSONObject(jsonString);
 
 		// Estrai il nome del package dal JSON (se presente)

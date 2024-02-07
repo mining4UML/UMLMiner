@@ -28,11 +28,12 @@ import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IRelationship;
 import com.vp.plugin.model.IRelationshipEnd;
 
+
 /**
  * 
- * pasqualeardimento
+ * Author: pasquale ardimento
+ * Last version: 06 February 2024
  */
-
 public class ClassInfo {
 
 	private static ResourceBundle messages;
@@ -253,7 +254,7 @@ public class ClassInfo {
 				messages.getString("diagrams.info"),
 				messages.getString("diagrams.infoListing")));
 		for(IClassDiagramUIModel classe: diagrammiClassi) {
-			output.append(String.format(" %s ",classe.getName()));
+			output.append(String.format("%n -%s ",classe.getName()));
 		}
 	}
 
@@ -395,9 +396,11 @@ public class ClassInfo {
 		lCollection.toArray(lRelationships);
 
 		for(IRelationship relazione: lRelationships) {
+			
+			String masterRelazione = relazione.getMasterView().getDiagramUIModel().getName();
+			String masterBase = _base.getMasterView().getDiagramUIModel().getName();
 
-			if(relazione.getMasterView().getDiagramUIModel().getName().equals( 
-					_base.getMasterView().getDiagramUIModel().getName())) {
+			if(masterRelazione.equals(masterBase)) {
 
 				// relazioni di generalizzazione ed altre di dipendenza
 				if (! (relazione instanceof IAssociationEnd)) {
@@ -417,8 +420,11 @@ public class ClassInfo {
 							if (relazione.getModelType().equals("Generalization")) {
 								//out.append("from To "); // from base TO opposite model
 								//out.append(String.format(" from %s To %s",_base.getNickname(),relazione.getTo().getNickname() ));
-								out.append(String.format(" %s is a generalization of %s in %s",_base.getNickname(),
-										relazione.getTo().getNickname(), _base.getParent().getParent().getName()));
+								out.append(String.format(" %s %s %s",
+										_base.getNickname(),
+										messages.getString("class.relationship.generalization"),
+										relazione.getTo().getNickname(), 
+										_base.getParent().getParent().getName()));
 
 							}
 							else
@@ -436,13 +442,18 @@ public class ClassInfo {
 						if(relazione.getModelType().equals("Generalization")) {
 
 							if (_base.equals(relazione.getTo())) {
-								//out.append(relazione.getFrom().getName() + " To "+ _base.getNickname());
-								out.append(String.format(" %s is a specialization of %s",_base.getNickname(), relazione.getFrom().getName() ));
+								out.append(String.format("%s %s %s",
+										relazione.getTo().getName(),
+										messages.getString("class.relationship.specialization"),
+										_base.getNickname() ));
 
 							}
 							else {
-								//out.append(relazione.getTo().getName()+ " To "+ _base.getNickname());
-								out.append(String.format(" %s is a generalization of %s",relazione.getTo().getName(),_base.getNickname() ));
+								// generalization
+								out.append(String.format(" %s %s %s",
+										relazione.getTo().getName(),
+										messages.getString("class.relationship.generalization"),
+										_base.getNickname() ));
 
 							}
 
@@ -467,7 +478,10 @@ public class ClassInfo {
 
 						}
 					}
-					out.append( (lName != null) ? " con nome della relazione'"+lName+"'": "");
+					out.append( String.format(
+							(lName != null) 
+							? " "+messages.getString("class.relationship.name")+" '"+ lName+"'"
+							: ""));
 				}
 			}
 		}
@@ -560,7 +574,9 @@ public class ClassInfo {
 					.append(messages.getString("class.association.multiplicity"))
 					.append(" ")
 					.append(association.getMultiplicity())
-					.append(" e ")
+					.append(" ")
+					.append(messages.getString("conjunction.end"))
+					.append(" ")
 					.append(association.getOppositeEnd().getModelElement().getName())
 					.append(" ")
 					.append(messages.getString("class.association.multiplicity"))

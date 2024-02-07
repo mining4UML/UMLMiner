@@ -1,668 +1,691 @@
 {
-    "id": "1",
-    "diagramName": "Corso di Studi",
-    "package": "com.uniba.mining.model",
-    "classi": [
-        {
-            "nome": "Esame",
-            "optional": false,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "cfu",
-                    "tipo": "int"
-                }
-            ],
-            "associazione": [
-                {
-                    "nome": "frequenzaEsame",
-                    "destinazione": "Frequenza",
-                    "molteplicita": "0..*"
-                },
-                {
-                    "nome": "svoltoDa",
-                    "destinazione": "Insegnamento",
-                    "molteplicita": "1"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "cfu",
-                            "tipo": "int"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "calcolaPunteggio",
-                    "tipoRitorno": "double",
-                    "parametri": []
-                }
-            ]
-        },
-        {
-            "nome": "Frequenza",
-            "optional": false,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "data",
-                    "tipo": "string"
-                }
-            ],
-            "associazione": [
-                {
-                    "nome": "frequentaEsame",
-                    "destinazione": "Esame",
-                    "molteplicita": "1"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "data",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "registraFrequenza",
-                    "tipoRitorno": "void",
-                    "parametri": []
-                }
-            ]
-        },
-        {
-            "nome": "TecnicoLaboratorio",
-            "optional": true,
-            "selected": false,
-            "generalizzazione": "Tecnico",
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "competenze",
-                    "tipo": "string"
-                }
-            ],
-            "associazione": [
-                {
-                    "nome": "supervisionaEsame",
-                    "destinazione": "Esame",
-                    "molteplicita": "0..*"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "competenze",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "gestisciLaboratorio",
-                    "tipoRitorno": "void",
-                    "parametri": []
-                }
-            ],
-            "aggregazione": [
-                {
-                    "nome": "strumenti",
-                    "destinazione": "Strumento",
-                    "molteplicita": "1..*"
-                }
-            ]
-        },
-        {
-            "nome": "Strumento",
-            "optional": false,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "marca",
-                    "tipo": "string"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "marca",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "calibra",
-                    "tipoRitorno": "void",
-                    "parametri": []
-                }
-            ]
-        },
-        {
-            "nome": "TecnicoAmministrativo",
-            "optional": true,
-            "selected": false,
-            "generalizzazione": "Tecnico",
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "ruolo",
-                    "tipo": "string"
-                }
-            ],
-            "associazione": [
-                {
-                    "nome": "controllaFrequenza",
-                    "destinazione": "Frequenza",
-                    "molteplicita": "1"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "ruolo",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "autorizzaEsame",
-                    "tipoRitorno": "boolean",
-                    "parametri": [
-                        {
-                            "nome": "esame",
-                            "tipo": "Esame"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "nome": "Tecnico",
-            "optional": false,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                }
-            ],
-            "associazione": [
-                {
-                    "nome": "svolgeCompiti",
-                    "destinazione": "Esame",
-                    "molteplicita": "0..*"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "eseguiCompito",
-                    "tipoRitorno": "void",
-                    "parametri": []
-                }
-            ]
-        },
-        {
-            "nome": "Insegnamento",
-            "optional": false,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                }
-            ],
-            "associazione": [
-                {
-                    "nome": "comprendeEsami",
-                    "destinazione": "Esame",
-                    "molteplicita": "1..*"
-                },
-                {
-                    "nome": "assegnatoA",
-                    "destinazione": "Studente",
-                    "molteplicita": "0..*"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "assegnaEsame",
-                    "tipoRitorno": "void",
-                    "parametri": [
-                        {
-                            "nome": "esame",
-                            "tipo": "Esame"
-                        }
-                    ]
-                }
-            ],
-            "aggregazione": [
-                {
-                    "nome": "materialeDidattico",
-                    "destinazione": "Materiale",
-                    "molteplicita": "1..*"
-                }
-            ]
-        },
-        {
-            "nome": "Materiale",
-            "optional": false,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "titolo",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "autore",
-                    "tipo": "string"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "titolo",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "autore",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "visualizzaDettagli",
-                    "tipoRitorno": "string",
-                    "parametri": []
-                }
-            ]
-        },
-        {
-            "nome": "Studente",
-            "optional": false,
-            "selected": false,
-            "sottoclassi": [
-                "StudenteUniversitario"
-            ],
-            "attributi": [
-                {
-                    "nome": "matricola",
-                    "tipo": "int"
-                },
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "cognome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "indirizzo",
-                    "tipo": "string"
-                }
-            ],
-            "generalizzazione": "Persona",
-            "associazione": [
-                {
-                    "nome": "iscrizione",
-                    "destinazione": "CorsoLaurea",
-                    "molteplicita": "0..*"
-                },
-                {
-                    "nome": "frequenta",
-                    "destinazione": "Insegnamento",
-                    "molteplicita": "0..*"
-                }
-            ],
-            "aggregazione": [
-                {
-                    "nome": "partecipazione",
-                    "destinazione": "Progetto",
-                    "molteplicita": "1"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "matricola",
-                            "tipo": "int"
-                        },
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "iscriviCorsoLaurea",
-                    "tipoRitorno": "boolean",
-                    "parametri": []
-                },
-                {
-                    "nome": "visualizzaDettagli",
-                    "tipoRitorno": "string",
-                    "parametri": []
-                },
-                {
-                    "nome": "Studente",
-                    "tipoRitorno": "void",
-                    "parametri": [
-                        {
-                            "nome": "matricola",
-                            "tipo": "int"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "nome": "Persona",
-            "optional": false,
-            "selected": true,
-            "sottoclassi": [
-                "Professore"
-            ],
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "cognome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "indirizzo",
-                    "tipo": "string"
-                }
-            ],
-            "generalizzazione": null,
-            "associazione": null,
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "cognome",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "mostraDettagli",
-                    "tipoRitorno": "string",
-                    "parametri": []
-                }
-            ]
-        },
-        {
-            "nome": "CorsoLaurea",
-            "optional": false,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "codice",
-                    "tipo": "string"
-                }
-            ],
-            "associazione": [
-                {
-                    "nome": "seguito",
-                    "destinazione": "Studente",
-                    "molteplicita": "0..*"
-                }
-            ],
-            "aggregazione": [
-                {
-                    "nome": "progettoAssociato",
-                    "destinazione": "Progetto",
-                    "molteplicita": "1"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "codice",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "visualizzaInfo",
-                    "tipoRitorno": "string",
-                    "parametri": []
-                }
-            ]
-        },
-        {
-            "nome": "Progetto",
-            "optional": true,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "nome",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "codice",
-                    "tipo": "string"
-                }
-            ],
-            "associazione": [
-                {
-                    "nome": "partecipanti",
-                    "destinazione": "Studente",
-                    "molteplicita": "1..*"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "codice",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "visualizzaDettagliProgetto",
-                    "tipoRitorno": "string",
-                    "parametri": []
-                }
-            ],
-            "aggregazione": [
-                {
-                    "nome": "compiti",
-                    "destinazione": "Compito",
-                    "molteplicita": "0..*"
-                }
-            ]
-        },
-        {
-            "nome": "Compito",
-            "optional": false,
-            "selected": false,
-            "attributi": [
-                {
-                    "nome": "descrizione",
-                    "tipo": "string"
-                },
-                {
-                    "nome": "dataScadenza",
-                    "tipo": "string"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "descrizione",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "dataScadenza",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "completaCompito",
-                    "tipoRitorno": "boolean",
-                    "parametri": []
-                }
-            ]
-        },
-        {
-            "nome": "ProfessoreUniversitario",
-            "optional": true,
-            "selected": false,
-            "sottoclassi": [
-                "Professore"
-            ],
-            "attributi": [
-                {
-                    "nome": "grado",
-                    "tipo": "string"
-                }
-            ],
-            "generalizzazione": "Professore",
-            "associazione": [
-                {
-                    "nome": "insegnaMateriaAvanzata",
-                    "destinazione": "CorsoLaurea",
-                    "molteplicita": "1..*"
-                }
-            ],
-            "costruttori": [
-                {
-                    "parametri": [
-                        {
-                            "nome": "matricola",
-                            "tipo": "int"
-                        },
-                        {
-                            "nome": "nome",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "materia",
-                            "tipo": "string"
-                        },
-                        {
-                            "nome": "grado",
-                            "tipo": "string"
-                        }
-                    ]
-                }
-            ],
-            "operazioni": [
-                {
-                    "nome": "insegnaMateriaAvanzata",
-                    "tipoRitorno": "void",
-                    "parametri": [
-                        {
-                            "nome": "corsoLaurea",
-                            "tipo": "CorsoLaurea"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+	"id": "1",
+	"diagramName": "Corso di Studi",
+	"package": "com.uniba.mining.model",
+	"classi": [
+		{
+			"nome": "Esame",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "denominazione",
+					"tipo": "string"
+				},
+				{
+					"nome": "cfu",
+					"tipo": "int"
+				},
+				{
+					"nome": "anno",
+					"tipo": "int"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "sostenuto",
+					"destinazione": "Studente",
+					"molteplicita": "0..*"
+				},
+				{
+					"nome": "relativoA",
+					"destinazione": "Insegnamento",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "cfu",
+							"tipo": "int"
+						},
+						{
+							"nome": "anno",
+							"tipo": "int"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "getVotazione",
+					"tipoRitorno": "int",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "Frequenza",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "data",
+					"tipo": "string"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "frequentaEsame",
+					"destinazione": "Esame",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "data",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "registraFrequenza",
+					"tipoRitorno": "void",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "TecnicoLaboratorio",
+			"optional": true,
+			"selected": false,
+			"generalizzazione": "Tecnico",
+			"attributi": [
+				{
+					"nome": "nome",
+					"tipo": "string"
+				},
+				{
+					"nome": "competenze",
+					"tipo": "string"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "supervisionaEsame",
+					"destinazione": "Esame",
+					"molteplicita": "0..*"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "competenze",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "gestisciLaboratorio",
+					"tipoRitorno": "void",
+					"parametri": []
+				}
+			],
+			"aggregazione": [
+				{
+					"nome": "strumenti",
+					"destinazione": "Strumento",
+					"molteplicita": "1..*"
+				}
+			]
+		},
+		{
+			"nome": "Strumento",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "nome",
+					"tipo": "string"
+				},
+				{
+					"nome": "marca",
+					"tipo": "string"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "marca",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "calibra",
+					"tipoRitorno": "void",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "TecnicoAmministrativo",
+			"optional": true,
+			"selected": false,
+			"generalizzazione": "Tecnico",
+			"attributi": [
+				{
+					"nome": "nome",
+					"tipo": "string"
+				},
+				{
+					"nome": "ruolo",
+					"tipo": "string"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "controllaFrequenza",
+					"destinazione": "Frequenza",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "ruolo",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "autorizzaEsame",
+					"tipoRitorno": "boolean",
+					"parametri": [
+						{
+							"nome": "esame",
+							"tipo": "Esame"
+						}
+					]
+				}
+			]
+		},
+		{
+			"nome": "Tecnico",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "nome",
+					"tipo": "string"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "svolgeCompiti",
+					"destinazione": "Esame",
+					"molteplicita": "0..*"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "eseguiCompito",
+					"tipoRitorno": "void",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "Insegnamento",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "nome",
+					"tipo": "string"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "comprendeEsami",
+					"destinazione": "Esame",
+					"molteplicita": "1..*"
+				},
+				{
+					"nome": "assegnatoA",
+					"destinazione": "Docente",
+					"molteplicita": "0..*"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "assegnaEsame",
+					"tipoRitorno": "void",
+					"parametri": [
+						{
+							"nome": "esame",
+							"tipo": "Esame"
+						}
+					]
+				}
+			],
+			"aggregazione": [
+				{
+					"nome": "materialeDidattico",
+					"destinazione": "Materiale",
+					"molteplicita": "1..*"
+				}
+			]
+		},
+		{
+			"nome": "Materiale",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "titolo",
+					"tipo": "string"
+				},
+				{
+					"nome": "autore",
+					"tipo": "string"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "titolo",
+							"tipo": "string"
+						},
+						{
+							"nome": "autore",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "visualizzaDettagli",
+					"tipoRitorno": "string",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "Studente",
+			"optional": false,
+			"selected": false,
+			"sottoclassi": [
+				"StudenteUniversitario"
+			],
+			"attributi": [
+				{
+					"nome": "matricola",
+					"tipo": "int"
+				},
+				{
+					"nome": "nome",
+					"tipo": "string"
+				},
+				{
+					"nome": "cognome",
+					"tipo": "string"
+				},
+				{
+					"nome": "indirizzo",
+					"tipo": "string"
+				}
+			],
+			"generalizzazione": "Persona",
+			"associazione": [
+				{
+					"nome": "iscrizione",
+					"destinazione": "CorsoLaurea",
+					"molteplicita": "0..*"
+				},
+				{
+					"nome": "frequenta",
+					"destinazione": "Insegnamento",
+					"molteplicita": "0..*"
+				}
+			],
+			"aggregazione": [
+				{
+					"nome": "partecipazione",
+					"destinazione": "Progetto",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "matricola",
+							"tipo": "int"
+						},
+						{
+							"nome": "nome",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "iscriviCorsoLaurea",
+					"tipoRitorno": "boolean",
+					"parametri": []
+				},
+				{
+					"nome": "visualizzaDettagli",
+					"tipoRitorno": "string",
+					"parametri": []
+				},
+				{
+					"nome": "Studente",
+					"tipoRitorno": "void",
+					"parametri": [
+						{
+							"nome": "matricola",
+							"tipo": "int"
+						}
+					]
+				}
+			]
+		},
+		{
+			"nome": "Persona",
+			"optional": false,
+			"selected": true,
+			"sottoclassi": [
+				"Professore"
+			],
+			"attributi": [
+				{
+					"nome": "nome",
+					"tipo": "string"
+				},
+				{
+					"nome": "cognome",
+					"tipo": "string"
+				},
+				{
+					"nome": "codiceFiscale",
+					"tipo": "string"
+				}
+			],
+			"generalizzazione": null,
+			"associazione": null,
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "cognome",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "mostraDettagli",
+					"tipoRitorno": "string",
+					"parametri": []
+				},
+				{
+					"nome": "setCodiceFiscale",
+					"tipoRitorno": "void",
+					"parametri": [
+						{
+							"nome": "codiceFiscale",
+							"tipo": "string"
+						}
+					]
+				},
+				{
+					"nome": "getCognome",
+					"tipoRitorno": "String",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "CorsoLaurea",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "nome",
+					"tipo": "string"
+				},
+				{
+					"nome": "codice",
+					"tipo": "string"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "seguito",
+					"destinazione": "Studente",
+					"molteplicita": "0..*"
+				}
+			],
+			"aggregazione": [
+				{
+					"nome": "progettoAssociato",
+					"destinazione": "Progetto",
+					"molteplicita": "1"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "codice",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "visualizzaInfo",
+					"tipoRitorno": "string",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "Progetto",
+			"optional": true,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "nome",
+					"tipo": "string"
+				},
+				{
+					"nome": "codice",
+					"tipo": "string"
+				}
+			],
+			"associazione": [
+				{
+					"nome": "realizzatoDa",
+					"destinazione": "Studente",
+					"molteplicita": "1..*"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "codice",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "visualizzaDettagliProgetto",
+					"tipoRitorno": "string",
+					"parametri": []
+				}
+			],
+			"aggregazione": [
+				{
+					"nome": "compiti",
+					"destinazione": "Compito",
+					"molteplicita": "1..*"
+				}
+			]
+		},
+		{
+			"nome": "Compito",
+			"optional": false,
+			"selected": false,
+			"attributi": [
+				{
+					"nome": "descrizione",
+					"tipo": "string"
+				},
+				{
+					"nome": "dataScadenza",
+					"tipo": "string"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "descrizione",
+							"tipo": "string"
+						},
+						{
+							"nome": "dataScadenza",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "completaCompito",
+					"tipoRitorno": "boolean",
+					"parametri": []
+				}
+			]
+		},
+		{
+			"nome": "ProfessoreUniversitario",
+			"optional": true,
+			"selected": false,
+			"sottoclassi": [
+				"Professore"
+			],
+			"attributi": [
+				{
+					"nome": "grado",
+					"tipo": "string"
+				}
+			],
+			"generalizzazione": "Professore",
+			"associazione": [
+				{
+					"nome": "insegnaMateriaAvanzata",
+					"destinazione": "CorsoLaurea",
+					"molteplicita": "1..*"
+				}
+			],
+			"costruttori": [
+				{
+					"parametri": [
+						{
+							"nome": "matricola",
+							"tipo": "int"
+						},
+						{
+							"nome": "nome",
+							"tipo": "string"
+						},
+						{
+							"nome": "materia",
+							"tipo": "string"
+						},
+						{
+							"nome": "grado",
+							"tipo": "string"
+						}
+					]
+				}
+			],
+			"operazioni": [
+				{
+					"nome": "insegnaMateriaAvanzata",
+					"tipoRitorno": "void",
+					"parametri": [
+						{
+							"nome": "corsoLaurea",
+							"tipo": "CorsoLaurea"
+						}
+					]
+				}
+			]
+		}
+	]
 }

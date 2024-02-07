@@ -25,6 +25,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -258,11 +259,14 @@ public class GUI {
     
     public static void showErrorMessageDialog(Component component, String title, String msg) {
         viewManager.showMessageDialog(component, msg, String.join(" - ", Config.PLUGIN_NAME, title),
-                JOptionPane.ERROR_MESSAGE, getImageIcon());
-      
+                JOptionPane.ERROR_MESSAGE, getImageIcon());      
     }
+   
+   
+      
     
-    private static ImageIcon getImageIcon() {
+    
+    public static ImageIcon getImageIcon() {
         String discoverImagePath = String.join("/", Config.ICONS_PATH, "spaceman.png");
  		ImageIcon discoverImage = GUI.loadImage(discoverImagePath, "Process discovery icon", 0.5f); 
     	return discoverImage;

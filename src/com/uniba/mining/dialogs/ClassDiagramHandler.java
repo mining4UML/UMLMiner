@@ -1,6 +1,5 @@
 package com.uniba.mining.dialogs;
 
-import java.awt.Image;
 import java.nio.file.Path;
 
 import javax.swing.JDialog;

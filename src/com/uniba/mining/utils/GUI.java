@@ -259,12 +259,8 @@ public class GUI {
     
     public static void showErrorMessageDialog(Component component, String title, String msg) {
         viewManager.showMessageDialog(component, msg, String.join(" - ", Config.PLUGIN_NAME, title),
-                JOptionPane.ERROR_MESSAGE, getImageIcon());      
+                JOptionPane.ERROR_MESSAGE, getImageIcon());   
     }
-   
-   
-      
-    
     
     public static ImageIcon getImageIcon() {
         String discoverImagePath = String.join("/", Config.ICONS_PATH, "spaceman.png");

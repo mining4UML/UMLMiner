@@ -31,22 +31,22 @@ import com.vp.plugin.model.factory.IModelElementFactory;
  */
 
 public class DiagramCombinations {
-	
+
 	private String file;
-//	private IDataType typeInt = null;
-//	private IDataType typeString = null;
-//	private IDataType typeBoolean = null;
+	//	private IDataType typeInt = null;
+	//	private IDataType typeString = null;
+	//	private IDataType typeBoolean = null;
 	private IDataType typeVoid = null;
-	
-	
+
+
 	public DiagramCombinations(String file) {
 		this.file= file;
-		
+
 	}
-	
+
 	public boolean generateAllDiagramCombinations() {
 		boolean generated = false;
-		
+
 		// Carica il tuo file JSON
 		String jsonString = loadJsonFromFile(file);
 		JSONObject jsonDiagram = new JSONObject(jsonString);
@@ -359,12 +359,20 @@ public class DiagramCombinations {
 		// ottengo il riferimento all'elemento package
 		IModelElement outerPackageElement = (IModelElement) outerPackage;
 		// assegno il nome all'elemento di modello
-		
-		String diagramPackageName = packageName.substring(0, packageName.lastIndexOf('.'))+"pasquale"+index;
+
+		String diagramPackageName = packageName.lastIndexOf('.') != -1 ?
+				packageName.substring(0, packageName.lastIndexOf('.'))+index : packageName+index;
+
+		// non va bene se la sintassi del package non presenta il punto
+		//String diagramPackageName = packageName.substring(0, packageName.lastIndexOf('.'))+"pasquale"+index;
 		outerPackageElement.setName(diagramPackageName);
 
 
-		String basePackageName = packageName.substring(packageName.lastIndexOf('.'))+index;
+		String basePackageName = packageName.lastIndexOf('.')!=-1 ?
+				packageName.substring(packageName.lastIndexOf('.'))+index:
+					packageName+index;
+		
+		//String basePackageName = packageName.substring(packageName.lastIndexOf('.'))+index;
 
 		// definisco il nome del package
 		basePackage.setName(basePackageName!="" ? basePackageName :"noname");
@@ -398,10 +406,6 @@ public class DiagramCombinations {
 			classShape.setRequestResetCaption(true);
 			classShape.fitSize();
 		}
-
-
-
-
 
 
 		// Cicla attraverso le classi per aggiungere relazioni definite nel JSON
@@ -453,18 +457,30 @@ public class DiagramCombinations {
 		String name = jsonClass.getString("nome").isEmpty() ? "nomeClasse" : jsonClass.getString("nome");
 		newClass.setName(name);
 
-		// Extract attributes from JSON
-		JSONArray jsonAttributes = jsonClass.getJSONArray("attributi");
-		for (int j = 0; j < jsonAttributes.length(); j++) {
-			JSONObject jsonAttribute = jsonAttributes.getJSONObject(j);
-			//IAttribute attribute = IModelElementFactory.instance().createAttribute();
-			IAttribute attribute = newClass.createAttribute();
-			attribute.setName(jsonAttribute.getString("nome"));
-			attribute.setType(jsonAttribute.getString("tipo"));
-			attribute.setVisibility(IAttribute.VISIBILITY_PRIVATE);
-			// aggiunge come figlio
-			newClass.addAttribute(attribute);
+		System.out.println("\n*****\n*****\n");
+
+		if (jsonClass.has("attributi")) {
+			Object attributiObj = jsonClass.get("attributi");
+			if (attributiObj instanceof JSONArray) {
+				JSONArray jsonAttributes = (JSONArray) attributiObj;
+				if (!jsonAttributes.isEmpty()) {
+					for (int j = 0; j < jsonAttributes.length(); j++) {
+						JSONObject jsonAttribute = jsonAttributes.optJSONObject(j);
+						if (jsonAttribute != null) {
+							IAttribute attribute = newClass.createAttribute();
+							attribute.setName(jsonAttribute.getString("nome"));
+							attribute.setType(jsonAttribute.getString("tipo"));
+							attribute.setVisibility(IAttribute.VISIBILITY_PRIVATE);
+							// aggiunge come figlio
+							newClass.addAttribute(attribute);
+						}
+					}
+				}
+			}
 		}
+
+
+
 
 		// Extract operations from JSON
 		if (jsonClass.has("operazioni")) {

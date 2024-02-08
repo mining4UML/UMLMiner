@@ -85,7 +85,7 @@
 					id="ClassDiagramActionControl"
 					actionType="generalAction"
 					label="Create Class Diagram"
-					tooltip="Create Class Diagram via Open API"
+					tooltip="Create Class Diagrams via JSON file"
 					style="normal"
 					icon="assets/icons/class.png"
 					ribbonPath="Toolbar/ReloadPlugin">

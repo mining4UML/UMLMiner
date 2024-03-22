@@ -52,6 +52,7 @@ public class Config {
 			pluginProperties.getProperty("actions.export.violations.inputerror");
 	
 	public static final String PLUGIN_WINDOWS_SEPARATOR=" - ";
+	
 
 
 	public static String getExternalToolPath(ExternalTool externalTool) {

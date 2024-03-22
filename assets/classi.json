@@ -25,7 +25,8 @@
 				{
 					"nome": "sostenuto",
 					"destinazione": "Studente",
-					"molteplicita": "0..*"
+					"molteplicita": "0..*",
+					"molteplicitaDestinazione": "0..*"
 				},
 				{
 					"nome": "relativoA",
@@ -71,9 +72,10 @@
 			],
 			"associazione": [
 				{
-					"nome": "frequentaEsame",
+					"nome": "frequenzaEsame",
 					"destinazione": "Esame",
-					"molteplicita": "1"
+					"molteplicita": "1",
+					"molteplicitaDestinazione": "0..*"
 				}
 			],
 			"costruttori": [
@@ -96,7 +98,7 @@
 		},
 		{
 			"nome": "TecnicoLaboratorio",
-			"optional": true,
+			"optional": false,
 			"selected": false,
 			"generalizzazione": "Tecnico",
 			"attributi": [
@@ -113,7 +115,14 @@
 				{
 					"nome": "supervisionaEsame",
 					"destinazione": "Esame",
-					"molteplicita": "0..*"
+					"molteplicita": "0..*",
+					"molteplicitaDestinazione": "0..*"
+				},
+				{
+					"nome": "utilizza",
+					"destinazione": "Strumento",
+					"molteplicita": "1..*",
+					"molteplicitaDestinazione": "0..*"
 				}
 			],
 			"costruttori": [
@@ -137,17 +146,11 @@
 					"parametri": []
 				}
 			],
-			"aggregazione": [
-				{
-					"nome": "strumenti",
-					"destinazione": "Strumento",
-					"molteplicita": "1..*"
-				}
-			]
+			"aggregazione": null
 		},
 		{
 			"nome": "Strumento",
-			"optional": false,
+			"optional": true,
 			"selected": false,
 			"attributi": [
 				{
@@ -200,7 +203,8 @@
 				{
 					"nome": "controllaFrequenza",
 					"destinazione": "Frequenza",
-					"molteplicita": "1"
+					"molteplicita": "1..*",
+					"molteplicitaDestinazione": "0..*"
 				}
 			],
 			"costruttori": [
@@ -234,17 +238,13 @@
 			"nome": "Tecnico",
 			"optional": false,
 			"selected": false,
+			"sottoclassi": [
+				"TecnicoLaboratorio,TecnicoAmministrativo"
+			],
 			"attributi": [
 				{
 					"nome": "nome",
 					"tipo": "string"
-				}
-			],
-			"associazione": [
-				{
-					"nome": "svolgeCompiti",
-					"destinazione": "Esame",
-					"molteplicita": "0..*"
 				}
 			],
 			"costruttori": [
@@ -277,14 +277,10 @@
 			],
 			"associazione": [
 				{
-					"nome": "comprendeEsami",
-					"destinazione": "Esame",
-					"molteplicita": "1..*"
-				},
-				{
 					"nome": "assegnatoA",
 					"destinazione": "Docente",
-					"molteplicita": "0..*"
+					"molteplicita": "1..*",
+					"molteplicitaDestinazione": "0..*"
 				}
 			],
 			"costruttori": [
@@ -311,15 +307,16 @@
 			],
 			"aggregazione": [
 				{
-					"nome": "materialeDidattico",
+					"nome": "prevede",
 					"destinazione": "Materiale",
-					"molteplicita": "1..*"
+					"molteplicita": "1..*",
+					"molteplicitaDestinazione": "0..*"
 				}
 			]
 		},
 		{
 			"nome": "Materiale",
-			"optional": false,
+			"optional": true,
 			"selected": false,
 			"attributi": [
 				{
@@ -381,23 +378,24 @@
 			"generalizzazione": "Persona",
 			"associazione": [
 				{
-					"nome": "iscrizione",
+					"nome": "iscrive",
 					"destinazione": "CorsoLaurea",
-					"molteplicita": "0..*"
+					"molteplicita": "0..1",
+					"molteplicitaDestinazione": "0..*"
 				},
 				{
 					"nome": "frequenta",
 					"destinazione": "Insegnamento",
 					"molteplicita": "0..*"
-				}
-			],
-			"aggregazione": [
+				},
 				{
-					"nome": "partecipazione",
+					"nome": "partecipa",
 					"destinazione": "Progetto",
-					"molteplicita": "1"
+					"molteplicita": "0..*",
+					"molteplicitaDestinazione": "1..*"
 				}
 			],
+			"aggregazione": null,
 			"costruttori": [
 				{
 					"parametri": [
@@ -513,14 +511,8 @@
 				{
 					"nome": "seguito",
 					"destinazione": "Studente",
-					"molteplicita": "0..*"
-				}
-			],
-			"aggregazione": [
-				{
-					"nome": "progettoAssociato",
-					"destinazione": "Progetto",
-					"molteplicita": "1"
+					"molteplicita": "0..*",
+					"molteplicitaDestinazione": "1"
 				}
 			],
 			"costruttori": [
@@ -563,7 +555,8 @@
 				{
 					"nome": "realizzatoDa",
 					"destinazione": "Studente",
-					"molteplicita": "1..*"
+					"molteplicita": "1..*",
+					"molteplicitaDestinazione": "0..*"
 				}
 			],
 			"costruttori": [
@@ -589,14 +582,15 @@
 			],
 			"aggregazione": [
 				{
-					"nome": "compiti",
-					"destinazione": "Compito",
-					"molteplicita": "1..*"
+					"nome": "prevede",
+					"destinazione": "Attivita",
+					"molteplicita": "1",
+					"molteplicitaDestinazione": "0..*"
 				}
 			]
 		},
 		{
-			"nome": "Compito",
+			"nome": "Attivita",
 			"optional": false,
 			"selected": false,
 			"attributi": [
@@ -625,7 +619,7 @@
 			],
 			"operazioni": [
 				{
-					"nome": "completaCompito",
+					"nome": "isCompletaAttivita",
 					"tipoRitorno": "boolean",
 					"parametri": []
 				}
@@ -647,9 +641,10 @@
 			"generalizzazione": "Professore",
 			"associazione": [
 				{
-					"nome": "insegnaMateriaAvanzata",
+					"nome": "insegnaPresso",
 					"destinazione": "CorsoLaurea",
-					"molteplicita": "1..*"
+					"molteplicita": "1..*",
+					"molteplicitaDestinazione": "0..*"
 				}
 			],
 			"costruttori": [

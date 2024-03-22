@@ -10,9 +10,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.lang.SystemUtils;
 
 public enum ExternalTool {
-    RUM("RuM"),
-    DISCO("Disco"),
-    PROM("ProM");
+	RUM("RuM");
+    //RUM("RuM");
+    //,
+    //DISCO("Disco"),
+    //PROM("ProM");
 
     private static final String EXECUTABLE_EXTENSION = "exe";
     private static final String BASH_EXTENSION = "sh";

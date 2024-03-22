@@ -24,6 +24,7 @@ public class RelationshipGenerator {
 	private static Random random = new Random();
 	private static String RELNOAGGIUNTA="relazione non aggiunta perchè classe opzionale non selezionata";
 
+	private static String DEFAULT_MOLTEPLICITY ="*";
 	// Aggiungi un'enumerazione per i tipi di relazione
 	public enum RelationshipType {
 		GENERALIZATION, ASSOCIATION, AGGREGATION, REALIZATION
@@ -90,12 +91,17 @@ public class RelationshipGenerator {
 					String associationName = jsonAssociation.getString("nome");
 					String targetClassName = jsonAssociation.getString("destinazione");
 					String multiplicity = jsonAssociation.getString("molteplicita");
+					String multiplicityDestination = DEFAULT_MOLTEPLICITY;
+
+					if (jsonAssociation.has("molteplicitaDestinazione"))
+						multiplicityDestination = jsonAssociation.getString("molteplicitaDestinazione");
 
 					IClass targetClass = getClassByName(classes, targetClassName);
 					IClass sourceClass = getClassByName(classes, className);
 
 					if (targetClass != null && sourceClass != null)// Create association
-						createAssociation(diagramManager, diagram, basePackageShape, sourceClass, targetClass, associationName, multiplicity);
+						createAssociation(diagramManager, diagram, basePackageShape, 
+								sourceClass, targetClass, associationName, multiplicity,multiplicityDestination );
 				}
 			}
 
@@ -106,13 +112,17 @@ public class RelationshipGenerator {
 					String aggregationName = jsonAggregation.getString("nome");
 					String targetClassName = jsonAggregation.getString("destinazione");
 					String multiplicity = jsonAggregation.getString("molteplicita");
+					String multiplicityDestination = DEFAULT_MOLTEPLICITY;
+					if(jsonAggregation.has("molteplicitaDestinazione"))
+						multiplicityDestination = jsonAggregation.getString("molteplicitaDestinazione");
 
 					IClass targetClass = getClassByName(classes, targetClassName);
 					IClass sourceClass = getClassByName(classes, className);
 
 					// Create aggregation
 					if (targetClass != null && sourceClass != null)
-					createAggregation(diagramManager, diagram, basePackageShape, sourceClass, targetClass, aggregationName, multiplicity);
+						createAggregation(diagramManager, diagram, basePackageShape, 
+								sourceClass, targetClass, aggregationName, multiplicity, multiplicityDestination);
 				}
 			}
 
@@ -170,18 +180,18 @@ public class RelationshipGenerator {
 
 	private static void createAssociation(DiagramManager diagramManager, IClassDiagramUIModel diagram,
 			IPackageUIModel basePackageShape, IClass sourceClass, IClass targetClass,
-			String associationName, String multiplicity) {
+			String associationName, String multiplicity, String multiplicityDestination) {
 
 		if (sourceClass != null && targetClass != null) {
 
 			IAssociation associationModel = IModelElementFactory.instance().createAssociation();
-			associationModel.setFrom(sourceClass);
-			associationModel.setTo(targetClass);
+			associationModel.setTo(sourceClass);
+			associationModel.setFrom(targetClass);
 			associationModel.setName(associationName);
 
 
 			IAssociationEnd associationFromEnd = (IAssociationEnd) associationModel.getFromEnd();
-			associationFromEnd.setMultiplicity("*");
+			associationFromEnd.setMultiplicity(multiplicityDestination);
 			IAssociationEnd associationToEnd = (IAssociationEnd) associationModel.getToEnd();
 			associationToEnd.setMultiplicity(multiplicity);
 			IClassUIModel sourceClassShape = findClassShape(basePackageShape, sourceClass);
@@ -215,7 +225,7 @@ public class RelationshipGenerator {
 
 	private static void createAggregation(DiagramManager diagramManager, IClassDiagramUIModel diagram,
 			IPackageUIModel basePackageShape, IClass sourceClass, IClass targetClass,
-			String aggregationName, String multiplicity) {
+			String aggregationName, String multiplicity, String multiplicityDestinatation) {
 		IAssociation aggregationModel = IModelElementFactory.instance().createAssociation();
 		if (sourceClass != null && targetClass != null) {
 
@@ -224,7 +234,7 @@ public class RelationshipGenerator {
 			aggregationModel.setName(aggregationName);
 
 			IAssociationEnd aggregationFromEnd = (IAssociationEnd) aggregationModel.getFromEnd();
-			aggregationFromEnd.setMultiplicity("*");
+			aggregationFromEnd.setMultiplicity(multiplicityDestinatation);
 
 			IAssociationEnd aggregationToEnd = (IAssociationEnd) aggregationModel.getToEnd();
 			aggregationToEnd.setMultiplicity(multiplicity);

@@ -16,7 +16,7 @@
 				label="%actions.toolbar.label"
 				ribbonPath="Help"
 			/>
-			<action
+			<!--<action
 				id="ProcessDiscovery"
 				actionType="generalAction"
 				label="%actions.ProcessDiscovery.label"
@@ -36,7 +36,7 @@
 				ribbonPath="Toolbar/Discovery">
 				<actionController
 					class="com.uniba.mining.actions.ConformanceCheckingActionController" />
-			</action>
+			</action>-->
 			<action
 				id="ExportLogs"
 				actionType="generalAction"
@@ -44,7 +44,7 @@
 				tooltip="%actions.ExportLogs.label"
 				icon="assets/icons/book.png"
 				style="normal"
-				ribbonPath="Toolbar/ConformanceChecking">
+				ribbonPath="Toolbar/#">
 				<actionController class="com.uniba.mining.actions.ExportLogsActionController" />
 			</action>
 			<action
@@ -67,20 +67,36 @@
 				ribbonPath="Toolbar/ExportInfo">
 				<actionController class="com.uniba.mining.actions.ExportViolationsController" />
 			</action>
-			<separator
-				id="Separator1"
-				ribbonPath="Toolbar/Violations" />
+			<!-- creazione di un sottomenu -->
+			<menu
+				id="External"
+				label="%actions.External.miner"
+				ribbonPath="Toolbar/Violations"
+				icon="assets/icons/spaceman.png"
+			/>
 			<action
-				id="ReloadPlugin"
+				id="RuM"
 				actionType="generalAction"
-				label="%actions.ReloadPlugin.label"
-				tooltip="%actions.ReloadPlugin.label"
-				icon="assets/icons/reload.png"
+				label="%actions.External.RuM.label"
+				tooltip="%actions.External.RuM.label"
+				icon="assets/icons/rum.png"
 				style="normal"
-				ribbonPath="Toolbar/Separator1">
-				<actionController class="com.uniba.mining.actions.ReloadPluginActionController" />
+				ribbonPath="Toolbar/External/#">
+				<actionController class="com.uniba.mining.actions.ExternalActionController" />
 			</action>
-			
+			<separator
+				id="ExternalSeparator"
+				ribbonPath="Toolbar/External/ProM" />
+			<action
+				id="ConfigureExternal"
+				actionType="generalAction"
+				label="%actions.External.ConfigureExternal.label"
+				tooltip="%actions.External.ConfigureExternal.label"
+				icon="assets/icons/settings.png"
+				style="normal"
+				ribbonPath="Toolbar/External/ExternalSeparator">
+				<actionController class="com.uniba.mining.actions.ConfigureExternalActionController" />
+			</action>			
 			<action
 					id="ClassDiagramActionControl"
 					actionType="generalAction"
@@ -88,13 +104,22 @@
 					tooltip="Create Class Diagrams via JSON file"
 					style="normal"
 					icon="assets/icons/class.png"
-					ribbonPath="Toolbar/ReloadPlugin">
+					ribbonPath="Toolbar/ConfigureExternal">
 				<actionController class="com.uniba.mining.actions.ClassDiagramActionControl"/>
 			</action>
-			
 			<separator
 				id="Separator2"
 				ribbonPath="Toolbar/ClassDiagramActionControl" />
+			<action
+				id="ReloadPlugin"
+				actionType="generalAction"
+				label="%actions.ReloadPlugin.label"
+				tooltip="%actions.ReloadPlugin.label"
+				icon="assets/icons/reload.png"
+				style="normal"
+				ribbonPath="Toolbar/Separator2">
+				<actionController class="com.uniba.mining.actions.ReloadPluginActionController" />
+			</action>
 			<action
 				id="About"
 				actionType="generalAction"
@@ -102,16 +127,16 @@
 				tooltip="%actions.About.label"
 				icon="assets/icons/question.png"
 				style="normal"
-				ribbonPath="Toolbar/Separator2">
+				ribbonPath="Toolbar/ReloadPlugin">
 				<actionController class="com.uniba.mining.actions.AboutActionController" />
 			</action>
-			<menu
+			<!--<menu
 				id="External"
 				label="%actions.External.label"
 				ribbonPath="Toolbar/Separator2"
 				icon="assets/icons/external.png"
-			/>
-			<action
+			/>-->
+			<!--<action
 				id="RuM"
 				actionType="generalAction"
 				label="%actions.External.RuM.label"
@@ -140,20 +165,8 @@
 				style="normal"
 				ribbonPath="Toolbar/External/Disco">
 				<actionController class="com.uniba.mining.actions.ExternalActionController" />
-			</action>
-			<separator
-				id="ExternalSeparator"
-				ribbonPath="Toolbar/External/ProM" />
-			<action
-				id="ConfigureExternal"
-				actionType="generalAction"
-				label="%actions.External.ConfigureExternal.label"
-				tooltip="%actions.External.ConfigureExternal.label"
-				icon="assets/icons/settings.png"
-				style="normal"
-				ribbonPath="Toolbar/External/ExternalSeparator">
-				<actionController class="com.uniba.mining.actions.ConfigureExternalActionController" />
-			</action>
+			</action>-->
+
 		</actionSet>
 	</actionSets>
 

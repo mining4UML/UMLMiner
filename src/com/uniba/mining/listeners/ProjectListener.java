@@ -1,5 +1,6 @@
 package com.uniba.mining.listeners;
 
+import com.uniba.mining.dialogs.FeedbackHandler;
 import com.uniba.mining.listeners.property.PropertyChangeListenerFactory;
 import com.uniba.mining.logging.LogActivity;
 import com.uniba.mining.logging.Logger;
@@ -17,6 +18,7 @@ public class ProjectListener implements IProjectListener {
 		Logger.createTrace(project);
 		project.addProjectDiagramListener(projectDiagramListener);
 		project.addProjectModelListener(projectModelListener);
+		FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
 	}
 
 	public ProjectListener(IProject project) {
@@ -42,6 +44,7 @@ public class ProjectListener implements IProjectListener {
 		logger.info("Project \"%s\" opened", project.getName());
 		init(project);
 		Logger.createEvent(LogActivity.ADD_PROJECT, project);
+		//FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
 	}
 
 	@Override

@@ -262,6 +262,10 @@ public class GUI {
                 JOptionPane.ERROR_MESSAGE, getImageIcon());   
     }
     
+    /**
+     * 
+     * @return The default image icon
+     */
     public static ImageIcon getImageIcon() {
         String discoverImagePath = String.join("/", Config.ICONS_PATH, "spaceman.png");
  		ImageIcon discoverImage = GUI.loadImage(discoverImagePath, "Process discovery icon", 0.5f); 

@@ -96,7 +96,18 @@
 				style="normal"
 				ribbonPath="Toolbar/External/ExternalSeparator">
 				<actionController class="com.uniba.mining.actions.ConfigureExternalActionController" />
-			</action>			
+			</action>
+			<action
+					id="ClassFeedbackActionControl"
+					actionType="generalAction"
+					label="Feedback"
+					tooltip="Get Feedback on Diagrams"
+					style="normal"
+					icon="assets/icons/feedback.png"
+					ribbonPath="Toolbar/ConfigureExternal">
+				<actionController class="com.uniba.mining.actions.FeedbackActionController"/>
+			</action>
+						
 			<action
 					id="ClassDiagramActionControl"
 					actionType="generalAction"
@@ -104,7 +115,7 @@
 					tooltip="Create Class Diagrams via JSON file"
 					style="normal"
 					icon="assets/icons/class.png"
-					ribbonPath="Toolbar/ConfigureExternal">
+					ribbonPath="Toolbar/ClassFeedbackActionControl">
 				<actionController class="com.uniba.mining.actions.ClassDiagramActionControl"/>
 			</action>
 			<separator

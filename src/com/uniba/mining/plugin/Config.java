@@ -51,6 +51,8 @@ public class Config {
 	public static final String EXPORT_VIOLATIONS_INPUT_ERROR = 
 			pluginProperties.getProperty("actions.export.violations.inputerror");
 	
+	public static final String DIALOG_FEEDBACK_MESSAGE = pluginProperties.getProperty("dialogs.feedback.placeholder"); 
+	
 	public static final String PLUGIN_WINDOWS_SEPARATOR=" - ";
 	
 

@@ -7,39 +7,55 @@ import javax.swing.text.*;
 
 import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.utils.Application;
+import com.uniba.mining.utils.GUI;
 
 import java.awt.*;
 import java.awt.event.*;
 
 import com.uniba.mining.feedback.ConversationListCellRenderer;
+import com.uniba.mining.plugin.Config;
 
 public class FeedbackHandler {
-	private final static String DIALOG_FEEDBACK_MESSAGE = "Message here...";
+	private static final String id = "feedbackPanel";
+	private static final String title = "UML Miner - Feedback";
 	private JTextField inputField;
 	private JTextPane outputPane;
 	private StyledDocument document;
 	private DefaultListModel<Conversation> conversationListModel;
 	private JList<Conversation> conversationList;
-	private JButton newChatButton; // Dichiarare il pulsante come campo della classe
+	private JButton newChatButton;
+	private JTextField conversationTitleField;
+	// dialogs.feedback.placeholder in plugin.properties
+	private static final String DIALOG_FEEDBACK_MESSAGE = "Type your question here...";
 
 	private static FeedbackHandler instance;
 
+	private static JPanel panel;
+
 	private FeedbackHandler() {
 		inputField = new JTextField(DIALOG_FEEDBACK_MESSAGE);
+
 		outputPane = new JTextPane();
 		outputPane.setEditable(false);
 		outputPane.setPreferredSize(new Dimension(400, 200));
 		document = outputPane.getStyledDocument();
+
 		conversationListModel = new DefaultListModel<>();
 		conversationList = new JList<>(conversationListModel);
-		newChatButton = new JButton("New Chat"); // Inizializzare il pulsante
+
+		conversationTitleField = new JTextField();
+		conversationTitleField.setEditable(false);
+		// Imposta il colore di sfondo della casella di testo a grigio chiaro
+		conversationTitleField.setBackground(Color.LIGHT_GRAY);
+
+		newChatButton = new JButton("New Chat");
 
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
 
 		inputField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				if (inputField.getText().equals(DIALOG_FEEDBACK_MESSAGE)) {
+				if (inputField.getText().equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 					inputField.setText("");
 				}
 			}
@@ -47,17 +63,10 @@ public class FeedbackHandler {
 			@Override
 			public void focusLost(FocusEvent e) {
 				if (inputField.getText().isEmpty()) {
-					inputField.setText(DIALOG_FEEDBACK_MESSAGE);
+					inputField.setText(Config.DIALOG_FEEDBACK_MESSAGE);
 				}
 			}
 		});
-
-		/*
-		 * inputField.addActionListener(e -> { String inputText = inputField.getText();
-		 * appendToPane("You: " + inputText + "\n", Color.BLUE);
-		 * appendToPane("Message: " + inputText.toUpperCase() + "\n", Color.BLACK);
-		 * inputField.setText(""); });
-		 */
 
 		inputField.addActionListener(new ActionListener() {
 			@Override
@@ -99,6 +108,10 @@ public class FeedbackHandler {
 						// Aggiorna il modello della lista delle conversazioni per riflettere le
 						// modifiche
 						conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
+
+						// aggiorna il titolo della casella del titolo
+						conversationTitleField.setText(currentConversation.getTitle());
+
 					}
 
 					// Aggiorna la visualizzazione della GUI
@@ -127,13 +140,24 @@ public class FeedbackHandler {
 		});
 
 		// mouse listener per gestire il click destro sull'elemento della lista
+		/*
+		 * conversationList.addMouseListener(new MouseAdapter() {
+		 * 
+		 * @Override public void mouseReleased(MouseEvent e) { if
+		 * (SwingUtilities.isRightMouseButton(e)) { int index =
+		 * conversationList.locationToIndex(e.getPoint());
+		 * conversationList.setSelectedIndex(index); showPopupMenu(e); } } });
+		 */
+
 		conversationList.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseReleased(MouseEvent e) {
+			public void mouseClicked(MouseEvent e) {
 				if (SwingUtilities.isRightMouseButton(e)) {
 					int index = conversationList.locationToIndex(e.getPoint());
-					conversationList.setSelectedIndex(index);
-					showPopupMenu(e);
+					if (index > -1) {
+						conversationList.setSelectedIndex(index);
+						showPopupMenu(e);
+					}
 				}
 			}
 		});
@@ -160,11 +184,11 @@ public class FeedbackHandler {
 			}
 		});
 		deleteItem.addActionListener(new ActionListener() {
-	        @Override
-	        public void actionPerformed(ActionEvent e) {
-	            deleteConversation();
-	        }
-	    });
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				deleteConversation();
+			}
+		});
 		popupMenu.add(renameItem);
 		popupMenu.add(deleteItem);
 		popupMenu.show(conversationList, e.getX(), e.getY());
@@ -172,21 +196,40 @@ public class FeedbackHandler {
 
 	// Metodo per eliminare la conversazione selezionata
 	private void deleteConversation() {
-	    int selectedIndex = conversationList.getSelectedIndex();
-	    if (selectedIndex != -1) { // Verifica se è stata selezionata una conversazione
-	        Conversation selectedConversation = conversationList.getSelectedValue();
-	        conversationListModel.remove(selectedIndex); // Rimuovi la conversazione dal modello dei dati
-	    }
+		int selectedIndex = conversationList.getSelectedIndex();
+		if (selectedIndex != -1) { // Verifica se è stata selezionata una conversazione
+			// Conversation selectedConversation = conversationList.getSelectedValue();
+
+			int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the conversation?",
+					"Delete Conversation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, GUI.getImageIcon());
+
+			// Mostra una finestra di dialogo di conferma
+			/*
+			 * int choice = Application.getViewManager().showConfirmDialog(null,
+			 * "Are you sure you want to delete the conversation?", "Delete Conversation",
+			 * JOptionPane.YES_NO_OPTION);
+			 */
+
+			// Se l'utente conferma l'eliminazione, procedi con la cancellazione
+			if (choice == JOptionPane.YES_OPTION) {
+				conversationListModel.remove(selectedIndex); // Rimuovi la conversazione dal modello dei dati
+			}
+
+		}
 	}
-	
-	// Metodo per rinominare la conversazione
+
 	private void renameConversation() {
 		Conversation selectedConversation = conversationList.getSelectedValue();
 		if (selectedConversation != null) {
-			String newTitle = JOptionPane.showInputDialog(null, "Enter new conversation title:", "Conversation title",
-					JOptionPane.PLAIN_MESSAGE);
+
+			// Mostra una finestra di dialogo di input con un'icona personalizzata
+			String newTitle = (String) JOptionPane.showInputDialog(null, "Enter new conversation title:",
+					"Conversation title", JOptionPane.PLAIN_MESSAGE, GUI.getImageIcon(), null, null);
+
 			if (newTitle != null && !newTitle.isEmpty()) {
 				selectedConversation.setTitle(newTitle);
+				// Aggiorna il testo nella casella di testo del titolo della conversazione
+				conversationTitleField.setText(newTitle);
 				// Aggiorna la visualizzazione della lista delle conversazioni
 				conversationListModel.setElementAt(selectedConversation, conversationList.getSelectedIndex());
 			}
@@ -201,9 +244,10 @@ public class FeedbackHandler {
 	}
 
 	public void showFeedbackPanel() {
-		String id = "customPanel";
-		String title = "UML Miner - Feedback";
-		Application.getViewManager().showMessagePaneComponent(id, title, createPanel());
+
+		if (panel == null)
+			createPanel();
+		Application.getViewManager().showMessagePaneComponent(id, title, panel);
 	}
 
 	private void createNewChat() {
@@ -212,7 +256,7 @@ public class FeedbackHandler {
 
 		// Controlla se l'inputText non è vuoto o uguale al messaggio di feedback
 		// predefinito
-		if (!inputText.isEmpty() && !inputText.equals(DIALOG_FEEDBACK_MESSAGE)) {
+		if (!inputText.isEmpty() && !inputText.equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 			// Crea una nuova istanza di Conversation
 			Conversation newConversation = new Conversation();
 
@@ -236,7 +280,7 @@ public class FeedbackHandler {
 	}
 
 	private JPanel createPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
+		panel = new JPanel(new BorderLayout());
 
 		// Pannello principale diviso in due parti: sinistra e destra
 		JPanel mainPanel = new JPanel(new BorderLayout());
@@ -257,8 +301,10 @@ public class FeedbackHandler {
 
 		mainPanel.add(leftPanel, BorderLayout.WEST);
 
-		// Pannello destro contiene l'outputPane e l'inputField
+		// Pannello destro contiene il conversationTitleField, l'outputPane e
+		// l'inputField
 		JPanel rightPanel = new JPanel(new BorderLayout());
+		rightPanel.add(conversationTitleField, BorderLayout.NORTH); // Aggiungi questa linea
 		rightPanel.add(new JScrollPane(outputPane), BorderLayout.CENTER);
 		rightPanel.add(inputField, BorderLayout.SOUTH);
 
@@ -272,11 +318,13 @@ public class FeedbackHandler {
 			public void valueChanged(ListSelectionEvent e) {
 				Conversation selectedConversation = conversationList.getSelectedValue();
 
-				// Visualizza il testo della Conversation nella outputPane
+				// Imposta il titolo della conversazione nel conversationTitleField
 				if (selectedConversation != null) {
+					conversationTitleField.setText(selectedConversation.getTitle()); // Aggiorna il titolo
 					System.out.println(selectedConversation.getConversationContent());
 					outputPane.setText(selectedConversation.getConversationContent());
 				} else {
+					conversationTitleField.setText(""); // Pulisci il titolo se non c'è una selezione
 					outputPane.setText("");
 				}
 			}

@@ -8,13 +8,13 @@ import com.vp.plugin.action.VPActionController;
 
 public class ReloadPluginActionController implements VPActionController {
     public static final Logger logger = new Logger(ReloadPluginActionController.class);
-    private final FeedbackHandler feed = FeedbackHandler.getInstance();
+    //private final FeedbackHandler feed = FeedbackHandler.getInstance();
     
     @Override
     public void performAction(VPAction vpAction) {
         Application.reloadPlugin();
         logger.info("Plugin reloaded");
-        feed.showFeedbackPanel();
+        //feed.showFeedbackPanel();
     }
 
     @Override

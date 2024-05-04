@@ -11,8 +11,12 @@ import com.uniba.mining.utils.GUI;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 import com.uniba.mining.feedback.ConversationListCellRenderer;
+import com.uniba.mining.llm.ApiRequest;
+import com.uniba.mining.llm.ApiResponse;
+import com.uniba.mining.llm.RestClient;
 import com.uniba.mining.plugin.Config;
 
 public class FeedbackHandler {
@@ -68,60 +72,92 @@ public class FeedbackHandler {
 			}
 		});
 
+//		inputField.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//
+//				boolean conversationEmpty = false;
+//				// Ottieni il testo dall'inputField
+//				String inputText = inputField.getText();
+//
+//				String you = "You: " + inputText + "\n";
+//				
+//				// Creazione di un oggetto ApiRequest con i dati appropriati
+//		        ApiRequest request = new ApiRequest("s1", "p1", "q1", "Un diagramma descritto come testo.", inputText);
+//		        // Creazione di un oggetto RestClient
+//		        RestClient client = new RestClient();
+//		        
+//		        String message="Answer: ";
+//
+//		        try {
+//		            // Invio della richiesta al server e ottenimento della risposta
+//		            ApiResponse response = client.sendRequest(request);
+//
+//		            // Stampare la risposta ottenuta
+//		            System.out.println("Answer: " + response.getAnswer());
+//		            System.out.println("Project Id: " + response.getProjectId());
+//		            System.out.println("Timestamp: " + response.getTimestamp());
+//		            System.out.println("ResponseId: " + response.getResponseId());
+//					 message = response.getAnswer();
+//		        } catch (IOException ex) {
+//		            ex.printStackTrace();
+//		        }
+//		    
+//
+//			
+//				
+//				//String message = "Answer: " + inputText.toUpperCase() + "\n";
+//
+//				// Aggiungi il testo alla JTextPane formattandolo come "You" e "Message"
+//				appendToPane(you, Color.BLUE);
+//				appendToPane(message, Color.BLACK);
+//
+//				// Aggiungi il testo alla conversazione corrente solo se non è vuoto
+//				if (!inputText.isEmpty()) {
+//					if (conversationListModel.isEmpty()) { // Controlla se la lista delle conversazioni è vuota
+//						conversationEmpty = true;
+//						// Crea una nuova istanza di Conversation
+//						Conversation newConversation = new Conversation();
+//						newConversation.appendMessage(outputPane.getText());
+//						// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
+//						conversationListModel.addElement(newConversation);
+//						// Imposta la nuova istanza di Conversation come selezionata nella lista delle
+//						// conversazioni
+//						conversationList.setSelectedValue(newConversation, true);
+//					}
+//
+//					// Seleziona la conversazione corrente dalla lista delle conversazioni
+//					Conversation currentConversation = conversationList.getSelectedValue();
+//
+//					// Aggiungi il testo all'attuale conversazione
+//					if (currentConversation != null) {
+//						if (!conversationEmpty)
+//							currentConversation.appendMessage(you + message);
+//
+//						// Aggiorna il modello della lista delle conversazioni per riflettere le
+//						// modifiche
+//						conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
+//
+//						// aggiorna il titolo della casella del titolo
+//						conversationTitleField.setText(currentConversation.getTitle());
+//
+//					}
+//
+//					// Aggiorna la visualizzazione della GUI
+//					conversationList.revalidate();
+//					conversationList.repaint();
+//
+//					// Azzera il campo di input
+//					inputField.setText("");
+//				}
+//			}
+//		});
+		
 		inputField.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				boolean conversationEmpty = false;
-				// Ottieni il testo dall'inputField
-				String inputText = inputField.getText();
-
-				String you = "You: " + inputText + "\n";
-				String message = "Message: " + inputText.toUpperCase() + "\n";
-
-				// Aggiungi il testo alla JTextPane formattandolo come "You" e "Message"
-				appendToPane(you, Color.BLUE);
-				appendToPane(message, Color.BLACK);
-
-				// Aggiungi il testo alla conversazione corrente solo se non è vuoto
-				if (!inputText.isEmpty()) {
-					if (conversationListModel.isEmpty()) { // Controlla se la lista delle conversazioni è vuota
-						conversationEmpty = true;
-						// Crea una nuova istanza di Conversation
-						Conversation newConversation = new Conversation();
-						newConversation.appendMessage(outputPane.getText());
-						// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
-						conversationListModel.addElement(newConversation);
-						// Imposta la nuova istanza di Conversation come selezionata nella lista delle
-						// conversazioni
-						conversationList.setSelectedValue(newConversation, true);
-					}
-
-					// Seleziona la conversazione corrente dalla lista delle conversazioni
-					Conversation currentConversation = conversationList.getSelectedValue();
-
-					// Aggiungi il testo all'attuale conversazione
-					if (currentConversation != null) {
-						if (!conversationEmpty)
-							currentConversation.appendMessage(you + message);
-
-						// Aggiorna il modello della lista delle conversazioni per riflettere le
-						// modifiche
-						conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-
-						// aggiorna il titolo della casella del titolo
-						conversationTitleField.setText(currentConversation.getTitle());
-
-					}
-
-					// Aggiorna la visualizzazione della GUI
-					conversationList.revalidate();
-					conversationList.repaint();
-
-					// Azzera il campo di input
-					inputField.setText("");
-				}
-			}
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        processUserInput();
+		    }
 		});
 
 		newChatButton.addActionListener(new ActionListener() {
@@ -170,6 +206,63 @@ public class FeedbackHandler {
 		popupMenu.add(copyItem);
 		// popupMenu.add(clearItem);
 		outputPane.setComponentPopupMenu(popupMenu);
+	}
+	
+	
+	private void processUserInput() {
+	    // Ottieni il testo dall'inputField
+	    String inputText = inputField.getText();
+	    String you = "You: " + inputText + "\n";
+	    String message = sendRequestAndGetResponse(inputText);
+	    appendToPane(you, Color.BLUE);
+	    appendToPane(message, Color.BLACK);
+	    updateConversation(inputText, message);
+	    inputField.setText("");
+	}
+	
+	private String sendRequestAndGetResponse(String inputText) {
+	    try {
+	        // Creazione di un oggetto ApiRequest con i dati appropriati
+	        ApiRequest request = new ApiRequest("s1", "p1", "q1", "Un diagramma descritto come testo.", inputText);
+	        // Creazione di un oggetto RestClient
+	        RestClient client = new RestClient();
+
+	        // Invio della richiesta al server e ottenimento della risposta
+	        ApiResponse response = client.sendRequest(request);
+
+	        // Restituisci il messaggio della risposta
+	        return response.getAnswer();
+	    } catch (IOException ex) {
+	        ex.printStackTrace();
+	        return "Error: Unable to get response";
+	    }
+	}
+
+	private void updateConversation(String inputText, String message) {
+	    if (!inputText.isEmpty()) {
+	        // Aggiungi il testo alla conversazione corrente solo se non è vuoto
+	        if (conversationListModel.isEmpty()) {
+	            Conversation newConversation = createNewConversation();
+	            conversationListModel.addElement(newConversation);
+	            conversationList.setSelectedValue(newConversation, true);
+	        }
+
+	        Conversation currentConversation = conversationList.getSelectedValue();
+	        if (currentConversation != null) {
+	            currentConversation.appendMessage("You: " + inputText + "\n" + message);
+	            conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
+	            conversationTitleField.setText(currentConversation.getTitle());
+	        }
+
+	        conversationList.revalidate();
+	        conversationList.repaint();
+	    }
+	}
+	
+	private Conversation createNewConversation() {
+	    Conversation newConversation = new Conversation();
+	    newConversation.appendMessage(outputPane.getText());
+	    return newConversation;
 	}
 
 	// Metodo per visualizzare il menu a comparsa

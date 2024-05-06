@@ -4,6 +4,7 @@ import com.uniba.mining.dialogs.FeedbackHandler;
 import com.uniba.mining.listeners.property.PropertyChangeListenerFactory;
 import com.uniba.mining.logging.LogActivity;
 import com.uniba.mining.logging.Logger;
+import com.uniba.mining.utils.Application;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectListener;
 
@@ -17,26 +18,28 @@ public class ProjectListener implements IProjectListener {
 		Logger.loadLog();
 		Logger.createTrace(project);
 		project.addProjectDiagramListener(projectDiagramListener);
-		project.addProjectModelListener(projectModelListener);
-		FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
-	}
+		project.addProjectModelListener(projectModelListener);	}
 
 	public ProjectListener(IProject project) {
 		if (project.getProjectFile() == null) {
-			logger.info("Temp project \"%s\" opened", project.getName());
+			logger.info("Temp project \"%s\" opened", project.getName() + " id:" +project.getId());
 			init(project);
 		}
 	}
 
 	@Override
 	public void projectAfterOpened(IProject project) {
-		logger.info("Project \"%s\" after opened", project.getName());
+		logger.info("Project \"%s\" after opened", project.getName()+ " id:" + project.getId());
+		// se apro un progetto esistente
+		FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
+		
 	}
 
 	@Override
 	public void projectNewed(IProject project) {
-		logger.info("New project \"%s\" created", project.getName());
+		logger.info("New project \"%s\" created", project.getName()+ " id new project:"+project.getId());
 		init(project);
+		FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
 	}
 
 	@Override
@@ -44,7 +47,6 @@ public class ProjectListener implements IProjectListener {
 		logger.info("Project \"%s\" opened", project.getName());
 		init(project);
 		Logger.createEvent(LogActivity.ADD_PROJECT, project);
-		//FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
 	}
 
 	@Override
@@ -56,6 +58,8 @@ public class ProjectListener implements IProjectListener {
 	public void projectRenamed(IProject project) {
 		logger.info("Project is renamed to \"%s\"", project.getName());
 		Logger.createEvent(LogActivity.UPDATE_PROJECT, project, "name", project.getName());
+		// se creo un nuovo progetto e gli assegno un nome
+		FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
 	}
 
 	@Override

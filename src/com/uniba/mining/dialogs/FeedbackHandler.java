@@ -5,19 +5,25 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.*;
 
+//import com.google.api.client.util.ClassInfo;
 import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.utils.Application;
 import com.uniba.mining.utils.GUI;
+import com.uniba.mining.tasks.exportdiag.ClassInfo;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
 import com.uniba.mining.feedback.ConversationListCellRenderer;
+import com.uniba.mining.feedback.ConversationsSerializer;
 import com.uniba.mining.llm.ApiRequest;
 import com.uniba.mining.llm.ApiResponse;
 import com.uniba.mining.llm.RestClient;
 import com.uniba.mining.plugin.Config;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FeedbackHandler {
 	private static final String id = "feedbackPanel";
@@ -29,12 +35,24 @@ public class FeedbackHandler {
 	private JList<Conversation> conversationList;
 	private JButton newChatButton;
 	private JTextField conversationTitleField;
+	private String projectId;
+	// Contatore per tenere traccia del numero totale di conversazioni
+	private int conversationCounter = 0; 
 	// dialogs.feedback.placeholder in plugin.properties
 	private static final String DIALOG_FEEDBACK_MESSAGE = "Type your question here...";
 
 	private static FeedbackHandler instance;
 
 	private static JPanel panel;
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+
+	public void clearPanel() {
+		conversationListModel.removeAllElements();
+		conversationList.clearSelection();
+	}
 
 	private FeedbackHandler() {
 		inputField = new JTextField(DIALOG_FEEDBACK_MESSAGE);
@@ -71,119 +89,36 @@ public class FeedbackHandler {
 				}
 			}
 		});
-
+//
 //		inputField.addActionListener(new ActionListener() {
 //			@Override
 //			public void actionPerformed(ActionEvent e) {
-//
-//				boolean conversationEmpty = false;
-//				// Ottieni il testo dall'inputField
-//				String inputText = inputField.getText();
-//
-//				String you = "You: " + inputText + "\n";
-//				
-//				// Creazione di un oggetto ApiRequest con i dati appropriati
-//		        ApiRequest request = new ApiRequest("s1", "p1", "q1", "Un diagramma descritto come testo.", inputText);
-//		        // Creazione di un oggetto RestClient
-//		        RestClient client = new RestClient();
-//		        
-//		        String message="Answer: ";
-//
-//		        try {
-//		            // Invio della richiesta al server e ottenimento della risposta
-//		            ApiResponse response = client.sendRequest(request);
-//
-//		            // Stampare la risposta ottenuta
-//		            System.out.println("Answer: " + response.getAnswer());
-//		            System.out.println("Project Id: " + response.getProjectId());
-//		            System.out.println("Timestamp: " + response.getTimestamp());
-//		            System.out.println("ResponseId: " + response.getResponseId());
-//					 message = response.getAnswer();
-//		        } catch (IOException ex) {
-//		            ex.printStackTrace();
-//		        }
-//		    
-//
-//			
-//				
-//				//String message = "Answer: " + inputText.toUpperCase() + "\n";
-//
-//				// Aggiungi il testo alla JTextPane formattandolo come "You" e "Message"
-//				appendToPane(you, Color.BLUE);
-//				appendToPane(message, Color.BLACK);
-//
-//				// Aggiungi il testo alla conversazione corrente solo se non è vuoto
-//				if (!inputText.isEmpty()) {
-//					if (conversationListModel.isEmpty()) { // Controlla se la lista delle conversazioni è vuota
-//						conversationEmpty = true;
-//						// Crea una nuova istanza di Conversation
-//						Conversation newConversation = new Conversation();
-//						newConversation.appendMessage(outputPane.getText());
-//						// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
-//						conversationListModel.addElement(newConversation);
-//						// Imposta la nuova istanza di Conversation come selezionata nella lista delle
-//						// conversazioni
-//						conversationList.setSelectedValue(newConversation, true);
-//					}
-//
-//					// Seleziona la conversazione corrente dalla lista delle conversazioni
-//					Conversation currentConversation = conversationList.getSelectedValue();
-//
-//					// Aggiungi il testo all'attuale conversazione
-//					if (currentConversation != null) {
-//						if (!conversationEmpty)
-//							currentConversation.appendMessage(you + message);
-//
-//						// Aggiorna il modello della lista delle conversazioni per riflettere le
-//						// modifiche
-//						conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-//
-//						// aggiorna il titolo della casella del titolo
-//						conversationTitleField.setText(currentConversation.getTitle());
-//
-//					}
-//
-//					// Aggiorna la visualizzazione della GUI
-//					conversationList.revalidate();
-//					conversationList.repaint();
-//
-//					// Azzera il campo di input
-//					inputField.setText("");
-//				}
+//				processUserInput();
 //			}
 //		});
-		
+
+		// Modifica il listener dell'inputField
 		inputField.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-		        processUserInput();
-		    }
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!inputField.getText().isEmpty()) {
+					// Ottieni il session id dalla conversazione selezionata
+					Conversation selectedConversation = conversationList.getSelectedValue();
+					String sessionId = selectedConversation != null ? selectedConversation.getSessionId()
+							: generateSessionId();
+
+					// Chiama processUserInput() passando il session id
+					processUserInput(sessionId);
+				}
+			}
 		});
 
 		newChatButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				createNewChat();
-				/*
-				 * String inputText = inputField.getText(); if
-				 * (!inputText.equals(DIALOG_FEEDBACK_MESSAGE)) { Conversation newConversation =
-				 * new Conversation(); newConversation.appendMessage(inputText);
-				 * conversationListModel.addElement(newConversation);
-				 * inputField.setText(DIALOG_FEEDBACK_MESSAGE); outputPane.setText(""); //
-				 * Azzera il contenuto della JTextPane }
-				 */
 			}
 		});
-
-		// mouse listener per gestire il click destro sull'elemento della lista
-		/*
-		 * conversationList.addMouseListener(new MouseAdapter() {
-		 * 
-		 * @Override public void mouseReleased(MouseEvent e) { if
-		 * (SwingUtilities.isRightMouseButton(e)) { int index =
-		 * conversationList.locationToIndex(e.getPoint());
-		 * conversationList.setSelectedIndex(index); showPopupMenu(e); } } });
-		 */
 
 		conversationList.addMouseListener(new MouseAdapter() {
 			@Override
@@ -206,63 +141,95 @@ public class FeedbackHandler {
 		popupMenu.add(copyItem);
 		// popupMenu.add(clearItem);
 		outputPane.setComponentPopupMenu(popupMenu);
-	}
-	
-	
-	private void processUserInput() {
-	    // Ottieni il testo dall'inputField
-	    String inputText = inputField.getText();
-	    String you = "You: " + inputText + "\n";
-	    String message = sendRequestAndGetResponse(inputText);
-	    appendToPane(you, Color.BLUE);
-	    appendToPane(message, Color.BLACK);
-	    updateConversation(inputText, message);
-	    inputField.setText("");
-	}
-	
-	private String sendRequestAndGetResponse(String inputText) {
-	    try {
-	        // Creazione di un oggetto ApiRequest con i dati appropriati
-	        ApiRequest request = new ApiRequest("s1", "p1", "q1", "Un diagramma descritto come testo.", inputText);
-	        // Creazione di un oggetto RestClient
-	        RestClient client = new RestClient();
 
-	        // Invio della richiesta al server e ottenimento della risposta
-	        ApiResponse response = client.sendRequest(request);
-
-	        // Restituisci il messaggio della risposta
-	        return response.getAnswer();
-	    } catch (IOException ex) {
-	        ex.printStackTrace();
-	        return "Error: Unable to get response";
-	    }
 	}
 
-	private void updateConversation(String inputText, String message) {
-	    if (!inputText.isEmpty()) {
-	        // Aggiungi il testo alla conversazione corrente solo se non è vuoto
-	        if (conversationListModel.isEmpty()) {
-	            Conversation newConversation = createNewConversation();
-	            conversationListModel.addElement(newConversation);
-	            conversationList.setSelectedValue(newConversation, true);
-	        }
+	private void processUserInput(String sessionId) {
+		System.out.println("processUserInput()-processUserInput()-processUserInput()-processUserInput()-");
+		// Ottieni il testo dall'inputField
+		String inputText = inputField.getText();
+		String you = "You: " + inputText + "\n";
 
-	        Conversation currentConversation = conversationList.getSelectedValue();
-	        if (currentConversation != null) {
-	            currentConversation.appendMessage("You: " + inputText + "\n" + message);
-	            conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-	            conversationTitleField.setText(currentConversation.getTitle());
-	        }
-
-	        conversationList.revalidate();
-	        conversationList.repaint();
-	    }
+		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
+		String message = sendRequestAndGetResponse(inputText, diagramAsText, sessionId);
+		appendToPane(you, Color.BLUE);
+		appendToPane(message + "\n", Color.BLACK);
+		updateConversation(inputText, message, sessionId);
+		inputField.setText("");
+		System.out.println("processUserInput()-processUserInput()-processUserInput()-processUserInput()-");
 	}
-	
-	private Conversation createNewConversation() {
-	    Conversation newConversation = new Conversation();
-	    newConversation.appendMessage(outputPane.getText());
-	    return newConversation;
+
+	private String sendRequestAndGetResponse(String inputText, String diagramAsText, String session_id) {
+		try {
+			// Creazione di un oggetto ApiRequest con i dati appropriati
+			ApiRequest request = new ApiRequest(session_id, projectId, "q1", diagramAsText, inputText);
+			// Creazione di un oggetto RestClient
+			RestClient client = new RestClient();
+
+			// Invio della richiesta al server e ottenimento della risposta
+			ApiResponse response = client.sendRequest(request);
+
+			// Restituisci il messaggio della risposta
+			return response.getAnswer();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			return "Error: Unable to get response";
+		}
+	}
+
+	private void updateConversation(String inputText, String message, String sessionId) {
+		if (!inputText.isEmpty()) {
+			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
+			if (conversationListModel.isEmpty()) {
+				Conversation newConversation = createNewConversation(sessionId);
+				conversationListModel.addElement(newConversation);
+				conversationList.setSelectedValue(newConversation, true);
+			}
+
+			Conversation currentConversation = conversationList.getSelectedValue();
+			if (currentConversation != null) {
+				currentConversation.appendMessage("You: " + inputText + "\n" + message);
+				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
+				conversationTitleField.setText(currentConversation.getTitle());
+			}
+
+			serializeConversations();
+
+			conversationList.revalidate();
+			conversationList.repaint();
+		}
+	}
+
+	private String generateSessionId() {
+	    // Incrementa il contatore delle conversazioni di 1
+	    conversationCounter++;
+	    // Restituisci l'ID della sessione corrispondente al numero totale di conversazioni
+	    return String.valueOf(conversationCounter);
+	}
+
+	private void serializeConversations() {
+		List<Conversation> conversations = new ArrayList<>();
+		for (int i = 0; i < conversationListModel.size(); i++) {
+			conversations.add(conversationListModel.getElementAt(i));
+		}
+
+		// Serializza l'intera lista di conversazioni
+		ConversationsSerializer.serializeConversations(conversations, projectId);
+	}
+
+	private Conversation createNewConversation(String sessionId) {
+
+		
+		// Genera il query_id basato sul numero di conversazioni attuali
+		String query_id = "q1";
+		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
+		String query = "...";
+
+		// Utilizzo del costruttore con i parametri
+		Conversation newConversation = new Conversation(sessionId, projectId, query_id, diagramAsText, query);
+		newConversation.appendMessage(outputPane.getText());
+		System.out.println(newConversation.toString());
+		return newConversation;
 	}
 
 	// Metodo per visualizzare il menu a comparsa
@@ -306,6 +273,17 @@ public class FeedbackHandler {
 			// Se l'utente conferma l'eliminazione, procedi con la cancellazione
 			if (choice == JOptionPane.YES_OPTION) {
 				conversationListModel.remove(selectedIndex); // Rimuovi la conversazione dal modello dei dati
+				serializeConversations(); 
+				
+				// Seleziona un'altra conversazione dopo l'eliminazione
+	            int conversationCount = conversationListModel.getSize();
+	            if (conversationCount > 0) {
+	                // Seleziona la prima conversazione dopo l'eliminazione
+	                conversationList.setSelectedIndex(0);
+	            }
+				
+				conversationList.revalidate();
+				conversationList.repaint();
 			}
 
 		}
@@ -325,6 +303,7 @@ public class FeedbackHandler {
 				conversationTitleField.setText(newTitle);
 				// Aggiorna la visualizzazione della lista delle conversazioni
 				conversationListModel.setElementAt(selectedConversation, conversationList.getSelectedIndex());
+				serializeConversations();
 			}
 		}
 	}
@@ -337,21 +316,33 @@ public class FeedbackHandler {
 	}
 
 	public void showFeedbackPanel() {
+		projectId = Application.getProject().getId();
 
 		if (panel == null)
 			createPanel();
+		else {
+			// after opened
+			clearPanel();
+			loadSerializedConversations();
+		}
 		Application.getViewManager().showMessagePaneComponent(id, title, panel);
 	}
 
 	private void createNewChat() {
+		System.out.println("createNewChat()-createNewChat()-createNewChat()-createNewChat()-");
 		// Ottieni il testo dalla JTextPane
-		String inputText = outputPane.getText();
+		String query = outputPane.getText();
 
 		// Controlla se l'inputText non è vuoto o uguale al messaggio di feedback
 		// predefinito
-		if (!inputText.isEmpty() && !inputText.equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
+		if (!query.isEmpty() && !query.equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
+			// i valori sessionId, projectId, etc.
+			String sessionId = generateSessionId(); // Esempio, dovrai ottenere questi dati
+			// Genera il query_id basato sul numero di conversazioni attuali
+			String queryId = "q1";
+			String diagramAsText = ClassInfo.exportInformation(Application.getProject());
 			// Crea una nuova istanza di Conversation
-			Conversation newConversation = new Conversation();
+			Conversation newConversation = new Conversation(sessionId, projectId, queryId, diagramAsText, query);
 
 			// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
 			conversationListModel.addElement(newConversation);
@@ -405,6 +396,10 @@ public class FeedbackHandler {
 
 		panel.add(mainPanel, BorderLayout.CENTER);
 
+		projectId = Application.getProject().getId();
+		// Carica le conversazioni serializzate durante l'inizializzazione del pannello
+		loadSerializedConversations();
+
 		// Aggiungi il listener per conversationList
 		conversationList.addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -426,6 +421,39 @@ public class FeedbackHandler {
 		return panel;
 	}
 
+	// Metodo per caricare le conversazioni serializzate
+//	public void loadSerializedConversations() {
+//		if (projectId != null) {
+//			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(projectId);
+//			if (serializedConversations != null) {
+//				for (Conversation conversation : serializedConversations) {
+//					conversationListModel.addElement(conversation);
+//					System.out.println("*****-" + conversation.getSessionId() + "*****-");
+//				}
+//			}
+//		}
+//	}
+	public void loadSerializedConversations() {
+        if (projectId != null) {
+            List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(projectId);
+            if (serializedConversations != null) {
+                int maxSessionId = 0; // Inizializza il valore massimo dell'ID della sessione
+                for (Conversation conversation : serializedConversations) {
+                    conversationListModel.addElement(conversation);
+                    int sessionId = Integer.parseInt(conversation.getSessionId());
+                    // Trova il valore massimo dell'ID della sessione
+                    if (sessionId > maxSessionId) {
+                        maxSessionId = sessionId;
+                    }
+                    System.out.println("*****-" + conversation.getSessionId() + "*****-");
+                }
+                // Imposta il contatore delle conversazioni sul valore massimo trovato
+                conversationCounter = maxSessionId;
+            }
+        }
+    }
+
+
 	private void appendToPane(String text, Color color) {
 		Style style = document.addStyle("Style", null);
 		StyleConstants.setForeground(style, color);
@@ -435,4 +463,5 @@ public class FeedbackHandler {
 			e.printStackTrace();
 		}
 	}
+
 }

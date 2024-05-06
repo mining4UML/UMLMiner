@@ -1,28 +1,84 @@
 package com.uniba.mining.feedback;
 
-public class Conversation {
+import java.io.Serializable;
+
+public class Conversation implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private StringBuilder conversationContent;
 	private String title;
+	private String sessionId;
+	private String projectId;
+	private String queryId;
+	private String diagramAsText;
+	private String query;
 
-	public Conversation() {
-		conversationContent = new StringBuilder();
+	// Costruttore completo per inizializzare tutti i campi
+	public Conversation(String sessionId, String projectId, String queryId, String diagramAsText, String query) {
+		this.sessionId = sessionId;
+		this.projectId = projectId;
+		this.queryId = queryId;
+		this.diagramAsText = diagramAsText;
+		this.query = query;
+		this.conversationContent = new StringBuilder();
 	}
 
+	// Metodo per aggiungere messaggi al contenuto della conversazione
 	public void appendMessage(String message) {
-		conversationContent.append(message).append("\n");
+		if (conversationContent.length() > 0) {
+			conversationContent.append("\n");
+		}
+		conversationContent.append(message);
 	}
 
+	// Metodo per ottenere il contenuto della conversazione come stringa
 	public String getConversationContent() {
 		return conversationContent.toString();
 	}
 
-	public void clearConversation() {
-		conversationContent.setLength(0);
+	// Getter e setter per sessionId
+	public String getSessionId() {
+		return sessionId;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
 
+	// Getter e setter per projectId
+	public String getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+
+	// Getter e setter per queryId
+	public String getQueryId() {
+		return queryId;
+	}
+
+	public void setQueryId(String queryId) {
+		this.queryId = queryId;
+	}
+
+	// Getter e setter per diagramAsText
+	public String getDiagramAsText() {
+		return diagramAsText;
+	}
+
+	public void setDiagramAsText(String diagramAsText) {
+		this.diagramAsText = diagramAsText;
+	}
+
+	// Getter e setter per query
+	public String getQuery() {
+		return query;
+	}
+
+	public void setQuery(String query) {
+		this.query = query;
 	}
 
 	public String getTitle() {
@@ -38,5 +94,17 @@ public class Conversation {
 			// simile.
 			return "No Title";
 		}
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	// Metodo toString per rappresentare l'oggetto Conversation come stringa
+	@Override
+	public String toString() {
+		return "Conversation{" + "sessionId='" + sessionId + '\'' + ", projectId='" + projectId + '\'' + ", queryId='"
+				+ queryId + '\'' + ", diagramAsText='" + diagramAsText + '\'' + ", query='" + query + '\'' + ", title='"
+				+ title + '\'' + ", conversationContent='" + conversationContent + '\'' + '}';
 	}
 }

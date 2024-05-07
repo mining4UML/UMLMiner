@@ -217,7 +217,7 @@ public class ClassInfo {
 	}
 
 	public static String exportInformation(IProject project) {
-		
+
 		messages = Language.getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 
@@ -385,14 +385,13 @@ public class ClassInfo {
 					// add two separation rows
 					output.append(String.format(messages.getString("rows.separator")));
 
-					//output.setLength(0);
+					// output.setLength(0);
 				} // chiusura if
 			} // chiusura iterazione sui diagrammi
 		} // chiusura else quando ci sono diagrammi
-		  // Restituisci l'output sotto forma di stringa
-	    return output.toString();
+			// Restituisci l'output sotto forma di stringa
+		return output.toString();
 	}
-	
 
 	private static void printInfoProject(IProject project, IDiagramUIModel[] diagrams, StringBuilder output) {
 		String projectName = project.getName();
@@ -550,9 +549,17 @@ public class ClassInfo {
 								// out.append("from To "); // from base TO opposite model
 								// out.append(String.format(" from %s To
 								// %s",_base.getNickname(),relazione.getTo().getNickname() ));
-								out.append(String.format(" %s %s %s", _base.getNickname(),
-										messages.getString("class.relationship.generalization"),
-										relazione.getTo().getNickname(), _base.getParent().getParent().getName()));
+								System.out.println(_base.getNickname());
+								System.out.println(relazione.getTo().getNickname());
+								if (_base.getParent() != null) {
+									System.out.println(_base.getParent().getParent().getName());
+									out.append(String.format(" %s %s %s", _base.getNickname(),
+											messages.getString("class.relationship.generalization"),
+											relazione.getTo().getNickname(), _base.getParent().getParent().getName()));
+								} else
+									out.append(String.format(" %s %s %s", _base.getNickname(),
+											messages.getString("class.relationship.generalization"),
+											relazione.getTo().getNickname()));
 
 							} else
 								out.append(String.format(" %s is in relation of %s with %s", _base.getNickname(),

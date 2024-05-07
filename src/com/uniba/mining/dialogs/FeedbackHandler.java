@@ -37,7 +37,7 @@ public class FeedbackHandler {
 	private JTextField conversationTitleField;
 	private String projectId;
 	// Contatore per tenere traccia del numero totale di conversazioni
-	private int conversationCounter = 0; 
+	private int conversationCounter = 0;
 	// dialogs.feedback.placeholder in plugin.properties
 	private static final String DIALOG_FEEDBACK_MESSAGE = "Type your question here...";
 
@@ -89,13 +89,6 @@ public class FeedbackHandler {
 				}
 			}
 		});
-//
-//		inputField.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				processUserInput();
-//			}
-//		});
 
 		// Modifica il listener dell'inputField
 		inputField.addActionListener(new ActionListener() {
@@ -107,7 +100,7 @@ public class FeedbackHandler {
 					String sessionId = selectedConversation != null ? selectedConversation.getSessionId()
 							: generateSessionId();
 
-					// Chiama processUserInput() passando il session id
+					// Chiama processUserInput() passando session id
 					processUserInput(sessionId);
 				}
 			}
@@ -145,18 +138,16 @@ public class FeedbackHandler {
 	}
 
 	private void processUserInput(String sessionId) {
-		System.out.println("processUserInput()-processUserInput()-processUserInput()-processUserInput()-");
 		// Ottieni il testo dall'inputField
 		String inputText = inputField.getText();
-		String you = "You: " + inputText + "\n";
+		String you = "You: " + inputText;
 
 		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
 		String message = sendRequestAndGetResponse(inputText, diagramAsText, sessionId);
-		appendToPane(you, Color.BLUE);
-		appendToPane(message + "\n", Color.BLACK);
+		appendToPane(you);
+		appendToPane(message);
 		updateConversation(inputText, message, sessionId);
 		inputField.setText("");
-		System.out.println("processUserInput()-processUserInput()-processUserInput()-processUserInput()-");
 	}
 
 	private String sendRequestAndGetResponse(String inputText, String diagramAsText, String session_id) {
@@ -201,10 +192,11 @@ public class FeedbackHandler {
 	}
 
 	private String generateSessionId() {
-	    // Incrementa il contatore delle conversazioni di 1
-	    conversationCounter++;
-	    // Restituisci l'ID della sessione corrispondente al numero totale di conversazioni
-	    return String.valueOf(conversationCounter);
+		// Incrementa il contatore delle conversazioni di 1
+		conversationCounter++;
+		// Restituisci l'ID della sessione corrispondente al numero totale di
+		// conversazioni
+		return String.valueOf(conversationCounter);
 	}
 
 	private void serializeConversations() {
@@ -212,14 +204,12 @@ public class FeedbackHandler {
 		for (int i = 0; i < conversationListModel.size(); i++) {
 			conversations.add(conversationListModel.getElementAt(i));
 		}
-
 		// Serializza l'intera lista di conversazioni
 		ConversationsSerializer.serializeConversations(conversations, projectId);
 	}
 
 	private Conversation createNewConversation(String sessionId) {
 
-		
 		// Genera il query_id basato sul numero di conversazioni attuali
 		String query_id = "q1";
 		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
@@ -263,25 +253,18 @@ public class FeedbackHandler {
 			int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the conversation?",
 					"Delete Conversation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, GUI.getImageIcon());
 
-			// Mostra una finestra di dialogo di conferma
-			/*
-			 * int choice = Application.getViewManager().showConfirmDialog(null,
-			 * "Are you sure you want to delete the conversation?", "Delete Conversation",
-			 * JOptionPane.YES_NO_OPTION);
-			 */
-
 			// Se l'utente conferma l'eliminazione, procedi con la cancellazione
 			if (choice == JOptionPane.YES_OPTION) {
 				conversationListModel.remove(selectedIndex); // Rimuovi la conversazione dal modello dei dati
-				serializeConversations(); 
-				
+				serializeConversations();
+
 				// Seleziona un'altra conversazione dopo l'eliminazione
-	            int conversationCount = conversationListModel.getSize();
-	            if (conversationCount > 0) {
-	                // Seleziona la prima conversazione dopo l'eliminazione
-	                conversationList.setSelectedIndex(0);
-	            }
-				
+				int conversationCount = conversationListModel.getSize();
+				if (conversationCount > 0) {
+					// Seleziona la prima conversazione dopo l'eliminazione
+					conversationList.setSelectedIndex(0);
+				}
+
 				conversationList.revalidate();
 				conversationList.repaint();
 			}
@@ -329,7 +312,6 @@ public class FeedbackHandler {
 	}
 
 	private void createNewChat() {
-		System.out.println("createNewChat()-createNewChat()-createNewChat()-createNewChat()-");
 		// Ottieni il testo dalla JTextPane
 		String query = outputPane.getText();
 
@@ -400,7 +382,7 @@ public class FeedbackHandler {
 		// Carica le conversazioni serializzate durante l'inizializzazione del pannello
 		loadSerializedConversations();
 
-		// Aggiungi il listener per conversationList
+		// cattura l'evento di selezione di una conversazione nella list
 		conversationList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
@@ -409,11 +391,20 @@ public class FeedbackHandler {
 				// Imposta il titolo della conversazione nel conversationTitleField
 				if (selectedConversation != null) {
 					conversationTitleField.setText(selectedConversation.getTitle()); // Aggiorna il titolo
-					System.out.println(selectedConversation.getConversationContent());
-					outputPane.setText(selectedConversation.getConversationContent());
+					// Ottieni il testo della conversazione selezionata
+					String conversationContent = selectedConversation.getConversationContent();
+					// Rimuovi il testo precedente dall'outputPane
+					outputPane.setText("");
+					// Dividi il testo in righe
+					String[] lines = conversationContent.split("\n");
+					// Applica il colore appropriato a ciascuna riga
+					for (String line : lines) {
+						Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
+						appendToPane(line + "\n", textColor);
+					}
 				} else {
 					conversationTitleField.setText(""); // Pulisci il titolo se non c'è una selezione
-					outputPane.setText("");
+					outputPane.setText(""); // Pulisci l'outputPane se non c'è una selezione
 				}
 			}
 		});
@@ -421,47 +412,51 @@ public class FeedbackHandler {
 		return panel;
 	}
 
-	// Metodo per caricare le conversazioni serializzate
-//	public void loadSerializedConversations() {
-//		if (projectId != null) {
-//			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(projectId);
-//			if (serializedConversations != null) {
-//				for (Conversation conversation : serializedConversations) {
-//					conversationListModel.addElement(conversation);
-//					System.out.println("*****-" + conversation.getSessionId() + "*****-");
-//				}
-//			}
-//		}
-//	}
 	public void loadSerializedConversations() {
-        if (projectId != null) {
-            List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(projectId);
-            if (serializedConversations != null) {
-                int maxSessionId = 0; // Inizializza il valore massimo dell'ID della sessione
-                for (Conversation conversation : serializedConversations) {
-                    conversationListModel.addElement(conversation);
-                    int sessionId = Integer.parseInt(conversation.getSessionId());
-                    // Trova il valore massimo dell'ID della sessione
-                    if (sessionId > maxSessionId) {
-                        maxSessionId = sessionId;
-                    }
-                    System.out.println("*****-" + conversation.getSessionId() + "*****-");
-                }
-                // Imposta il contatore delle conversazioni sul valore massimo trovato
-                conversationCounter = maxSessionId;
-            }
-        }
-    }
+		if (projectId != null) {
+			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(projectId);
+			if (serializedConversations != null) {
+				int maxSessionId = 0; // Inizializza il valore massimo dell'ID della sessione
+				for (Conversation conversation : serializedConversations) {
+					conversationListModel.addElement(conversation);
+					int sessionId = Integer.parseInt(conversation.getSessionId());
+					// Trova il valore massimo dell'ID della sessione
+					if (sessionId > maxSessionId) {
+						maxSessionId = sessionId;
+					}
+					System.out.println("*****-" + conversation.getSessionId() + "*****-");
+				}
+				// Imposta il contatore delle conversazioni sul valore massimo trovato
+				conversationCounter = maxSessionId;
+			}
+		}
+	}
 
+	private void appendToPane(String text) {
+		// Verifica se il testo inizia con "You:" e termina con "\n"
+		if (text.startsWith("You:")) {
+			// Se sì, imposta il colore del testo su BLUE
+			appendToPane(text, Color.BLUE);
+		} else {
+			// Altrimenti, imposta il colore del testo su nero
+			appendToPane(text, Color.BLACK);
+		}
+	}
 
 	private void appendToPane(String text, Color color) {
 		Style style = document.addStyle("Style", null);
 		StyleConstants.setForeground(style, color);
 		try {
+			// Controlla se è necessario aggiungere una nuova linea prima del testo
+			if (document.getLength() > 0) { // verifica che ci sia del testo nel documento
+				String lastChar = document.getText(document.getLength() - 1, 1);
+				if (!lastChar.equals("\n")) { // verifica che l'ultimo carattere non sia una nuova linea
+					text = "\n" + text; // aggiungi una nuova linea prima del testo
+				}
+			}
 			document.insertString(document.getLength(), text, style);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
 	}
-
 }

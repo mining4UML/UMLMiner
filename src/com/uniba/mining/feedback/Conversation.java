@@ -26,6 +26,7 @@ public class Conversation implements Serializable {
 	// Metodo per aggiungere messaggi al contenuto della conversazione
 	public void appendMessage(String message) {
 		if (conversationContent.length() > 0) {
+			// aggiunta di una nuova riga per accodare su riga differente il nuovo messaggio
 			conversationContent.append("\n");
 		}
 		conversationContent.append(message);

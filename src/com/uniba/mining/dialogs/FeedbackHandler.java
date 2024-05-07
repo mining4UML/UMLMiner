@@ -5,8 +5,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.*;
 
-//import com.google.api.client.util.ClassInfo;
-import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.utils.Application;
 import com.uniba.mining.utils.GUI;
 import com.uniba.mining.tasks.exportdiag.ClassInfo;
@@ -15,6 +13,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
+import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.feedback.ConversationListCellRenderer;
 import com.uniba.mining.feedback.ConversationsSerializer;
 import com.uniba.mining.llm.ApiRequest;
@@ -27,6 +26,7 @@ import java.util.List;
 
 public class FeedbackHandler {
 	private static final String id = "feedbackPanel";
+	private static final String prefixAnswer = "You: ";
 	private static final String title = "UML Miner - Feedback";
 	private JTextField inputField;
 	private JTextPane outputPane;
@@ -140,20 +140,17 @@ public class FeedbackHandler {
 	private void processUserInput(String sessionId) {
 		// Ottieni il testo dall'inputField
 		String inputText = inputField.getText();
-		String you = "You: " + inputText;
+		//String you = "You: " + inputText;
 
-		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
-		String message = sendRequestAndGetResponse(inputText, diagramAsText, sessionId);
-		appendToPane(you);
-		appendToPane(message);
-		updateConversation(inputText, message, sessionId);
+		updateConversation(inputText, sessionId);
 		inputField.setText("");
 	}
 
-	private String sendRequestAndGetResponse(String inputText, String diagramAsText, String session_id) {
+	private String sendRequestAndGetResponse(Conversation conversation) {
 		try {
 			// Creazione di un oggetto ApiRequest con i dati appropriati
-			ApiRequest request = new ApiRequest(session_id, projectId, "q1", diagramAsText, inputText);
+			ApiRequest request = new ApiRequest(conversation.getSessionId(), 
+					projectId, conversation.getQueryId(), conversation.getDiagramAsText(), conversation.getQuery());
 			// Creazione di un oggetto RestClient
 			RestClient client = new RestClient();
 
@@ -168,18 +165,30 @@ public class FeedbackHandler {
 		}
 	}
 
-	private void updateConversation(String inputText, String message, String sessionId) {
+	private void updateConversation(String inputText, String sessionId) {
+		
+		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
+		
+
 		if (!inputText.isEmpty()) {
 			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
 			if (conversationListModel.isEmpty()) {
-				Conversation newConversation = createNewConversation(sessionId);
+				Conversation newConversation = createNewConversation(sessionId, inputText, diagramAsText);
 				conversationListModel.addElement(newConversation);
 				conversationList.setSelectedValue(newConversation, true);
 			}
 
 			Conversation currentConversation = conversationList.getSelectedValue();
+			
+			String response = sendRequestAndGetResponse(currentConversation);
+			String answer = prefixAnswer + inputText;
+			appendToPane(answer);
+			appendToPane(response);
+			
 			if (currentConversation != null) {
-				currentConversation.appendMessage("You: " + inputText + "\n" + message);
+				//currentConversation.appendMessage(answer + "\n" + response);
+				currentConversation.appendMessage(answer);
+				currentConversation.appendMessage(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
 				conversationTitleField.setText(currentConversation.getTitle());
 			}
@@ -208,15 +217,10 @@ public class FeedbackHandler {
 		ConversationsSerializer.serializeConversations(conversations, projectId);
 	}
 
-	private Conversation createNewConversation(String sessionId) {
-
-		// Genera il query_id basato sul numero di conversazioni attuali
-		String query_id = "q1";
-		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
-		String query = "...";
+	private Conversation createNewConversation(String sessionId, String query, String diagramAsText) {
 
 		// Utilizzo del costruttore con i parametri
-		Conversation newConversation = new Conversation(sessionId, projectId, query_id, diagramAsText, query);
+		Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query);
 		newConversation.appendMessage(outputPane.getText());
 		System.out.println(newConversation.toString());
 		return newConversation;
@@ -319,12 +323,10 @@ public class FeedbackHandler {
 		// predefinito
 		if (!query.isEmpty() && !query.equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 			// i valori sessionId, projectId, etc.
-			String sessionId = generateSessionId(); // Esempio, dovrai ottenere questi dati
-			// Genera il query_id basato sul numero di conversazioni attuali
-			String queryId = "q1";
+			String sessionId = generateSessionId();
 			String diagramAsText = ClassInfo.exportInformation(Application.getProject());
 			// Crea una nuova istanza di Conversation
-			Conversation newConversation = new Conversation(sessionId, projectId, queryId, diagramAsText, query);
+			Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query);
 
 			// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
 			conversationListModel.addElement(newConversation);
@@ -434,7 +436,7 @@ public class FeedbackHandler {
 
 	private void appendToPane(String text) {
 		// Verifica se il testo inizia con "You:" e termina con "\n"
-		if (text.startsWith("You:")) {
+		if (text.startsWith(prefixAnswer)) {
 			// Se sì, imposta il colore del testo su BLUE
 			appendToPane(text, Color.BLUE);
 		} else {

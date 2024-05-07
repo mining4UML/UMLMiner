@@ -1,27 +1,39 @@
 package com.uniba.mining.feedback;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Conversation implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private static final Map<String, AtomicInteger> queryIdCounters = new HashMap<>();
 
-	private StringBuilder conversationContent;
-	private String title;
-	private String sessionId;
-	private String projectId;
-	private String queryId;
-	private String diagramAsText;
-	private String query;
+    private StringBuilder conversationContent;
+    private String title;
+    private String sessionId;
+    private String projectId;
+    private int queryId;
+    private String diagramAsText;
+    private String query;
 
-	// Costruttore completo per inizializzare tutti i campi
-	public Conversation(String sessionId, String projectId, String queryId, String diagramAsText, String query) {
-		this.sessionId = sessionId;
-		this.projectId = projectId;
-		this.queryId = queryId;
-		this.diagramAsText = diagramAsText;
-		this.query = query;
-		this.conversationContent = new StringBuilder();
-	}
+    // Costruttore che genera automaticamente il query ID incrementale
+    public Conversation(String sessionId, String projectId, String diagramAsText, String query) {
+        this.sessionId = sessionId;
+        this.projectId = projectId;
+        
+        // Ottieni il contatore per questa coppia (sessionID, projectID)
+        AtomicInteger counter = queryIdCounters.getOrDefault(sessionId + "_" + projectId, new AtomicInteger(1));
+        // Genera il query ID come valore corrente del contatore
+        this.queryId = counter.getAndIncrement();
+        // Aggiorna il contatore nella mappa
+        queryIdCounters.put(sessionId + "_" + projectId, counter);
+        
+        this.diagramAsText = diagramAsText;
+        this.query = query;
+        this.conversationContent = new StringBuilder();
+    }
+
 
 	// Metodo per aggiungere messaggi al contenuto della conversazione
 	public void appendMessage(String message) {
@@ -57,12 +69,9 @@ public class Conversation implements Serializable {
 
 	// Getter e setter per queryId
 	public String getQueryId() {
-		return queryId;
+		return String.valueOf(queryId);
 	}
 
-	public void setQueryId(String queryId) {
-		this.queryId = queryId;
-	}
 
 	// Getter e setter per diagramAsText
 	public String getDiagramAsText() {
@@ -101,11 +110,11 @@ public class Conversation implements Serializable {
 		this.title = title;
 	}
 
-	// Metodo toString per rappresentare l'oggetto Conversation come stringa
-	@Override
-	public String toString() {
-		return "Conversation{" + "sessionId='" + sessionId + '\'' + ", projectId='" + projectId + '\'' + ", queryId='"
-				+ queryId + '\'' + ", diagramAsText='" + diagramAsText + '\'' + ", query='" + query + '\'' + ", title='"
-				+ title + '\'' + ", conversationContent='" + conversationContent + '\'' + '}';
-	}
+	 // Metodo toString per rappresentare l'oggetto Conversation come stringa
+    @Override
+    public String toString() {
+        return "Conversation{" + "sessionId='" + sessionId + '\'' + ", projectId='" + projectId + '\'' + ", queryId='"
+                + queryId + '\'' + ", diagramAsText='" + diagramAsText + '\'' + ", query='" + query + '\'' + ", title='"
+                + title + '\'' + ", conversationContent='" + conversationContent + '\'' + '}';
+    }
 }

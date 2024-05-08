@@ -12,6 +12,7 @@ import com.uniba.mining.tasks.exportdiag.ClassInfo;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.net.ConnectException;
 
 import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.feedback.ConversationListCellRenderer;
@@ -101,7 +102,12 @@ public class FeedbackHandler {
 							: generateSessionId();
 
 					// Chiama processUserInput() passando session id
-					processUserInput(sessionId);
+					try {
+						processUserInput(sessionId);
+					} catch (Exception e1) {
+						GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
+								e1.getMessage());
+					}
 				}
 			}
 		});
@@ -109,7 +115,12 @@ public class FeedbackHandler {
 		newChatButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				createNewChat();
+				try {
+					createNewChat();
+				} catch (Exception e1) {
+					GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
+							e1.getMessage());
+				}
 			}
 		});
 
@@ -137,38 +148,40 @@ public class FeedbackHandler {
 
 	}
 
-	private void processUserInput(String sessionId) {
-		// Ottieni il testo dall'inputField
+	private void processUserInput(String sessionId) throws ConnectException, IOException, Exception {
+		// Acquisisco il testo dall'inputField
 		String inputText = inputField.getText();
-		//String you = "You: " + inputText;
 
 		updateConversation(inputText, sessionId);
 		inputField.setText("");
 	}
 
-	private String sendRequestAndGetResponse(Conversation conversation) {
-		try {
-			// Creazione di un oggetto ApiRequest con i dati appropriati
-			ApiRequest request = new ApiRequest(conversation.getSessionId(), 
-					projectId, conversation.getQueryId(), conversation.getDiagramAsText(), conversation.getQuery());
-			// Creazione di un oggetto RestClient
-			RestClient client = new RestClient();
+	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
+		// try {
+		// Creazione di un oggetto ApiRequest con i dati appropriati
+		ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
+				conversation.getDiagramAsText(), conversation.getQuery());
+		// Creazione di un oggetto RestClient
+		RestClient client = new RestClient();
 
-			// Invio della richiesta al server e ottenimento della risposta
-			ApiResponse response = client.sendRequest(request);
+		// Invio della richiesta al server e ottenimento della risposta
+		ApiResponse response = client.sendRequest(request);
 
-			// Restituisci il messaggio della risposta
-			return response.getAnswer();
-		} catch (IOException ex) {
-			ex.printStackTrace();
-			return "Error: Unable to get response";
-		}
+		// Restituisci il messaggio della risposta
+		return response.getAnswer();
+//		} catch (ConnectException ex) {
+//			//ex.printStackTrace();
+//			return ex.getMessage();
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//			return "Error: Unable to get response";
+//		} 
 	}
 
-	private void updateConversation(String inputText, String sessionId) {
-		
+	private void updateConversation(String inputText, String sessionId)
+			throws ConnectException, IOException, Exception {
+
 		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
-		
 
 		if (!inputText.isEmpty()) {
 			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
@@ -179,14 +192,14 @@ public class FeedbackHandler {
 			}
 
 			Conversation currentConversation = conversationList.getSelectedValue();
-			
+
 			String response = sendRequestAndGetResponse(currentConversation);
 			String answer = prefixAnswer + inputText;
 			appendToPane(answer);
 			appendToPane(response);
-			
+
 			if (currentConversation != null) {
-				//currentConversation.appendMessage(answer + "\n" + response);
+				// currentConversation.appendMessage(answer + "\n" + response);
 				currentConversation.appendMessage(answer);
 				currentConversation.appendMessage(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
@@ -220,7 +233,7 @@ public class FeedbackHandler {
 	private Conversation createNewConversation(String sessionId, String query, String diagramAsText) {
 
 		// Utilizzo del costruttore con i parametri
-		Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query);
+		Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query, prefixAnswer);
 		newConversation.appendMessage(outputPane.getText());
 		System.out.println(newConversation.toString());
 		return newConversation;
@@ -315,7 +328,7 @@ public class FeedbackHandler {
 		Application.getViewManager().showMessagePaneComponent(id, title, panel);
 	}
 
-	private void createNewChat() {
+	private void createNewChat() throws Exception {
 		// Ottieni il testo dalla JTextPane
 		String query = outputPane.getText();
 
@@ -326,7 +339,7 @@ public class FeedbackHandler {
 			String sessionId = generateSessionId();
 			String diagramAsText = ClassInfo.exportInformation(Application.getProject());
 			// Crea una nuova istanza di Conversation
-			Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query);
+			Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query, prefixAnswer);
 
 			// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
 			conversationListModel.addElement(newConversation);
@@ -359,7 +372,12 @@ public class FeedbackHandler {
 		newChatButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				createNewChat();
+				try {
+					createNewChat();
+				} catch (Exception e1) {
+					GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
+							e1.getMessage());
+				}
 			}
 		});
 		leftPanel.add(newChatButton, BorderLayout.NORTH);

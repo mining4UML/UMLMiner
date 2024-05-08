@@ -216,7 +216,7 @@ public class ClassInfo {
 		} // chiusura else quando ci sono diagrammi
 	}
 
-	public static String exportInformation(IProject project) {
+	public static String exportInformation(IProject project) throws Exception {
 
 		messages = Language.getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
@@ -226,7 +226,10 @@ public class ClassInfo {
 
 		if (diagrams.length == 0) {
 			// Mostra un messaggio se non ci sono classi nel progetto
-			ApplicationManager.instance().getViewManager().showMessage(messages.getString("class.project.absence"));
+			//ApplicationManager.instance().getViewManager().showMessage(messages.getString("class.project.absence"));
+		    throw new Exception( messages.getString("class.project.absence")+
+		    		"\n"+
+		    		messages.getString("feedback.problem") );
 		} else {
 
 			System.out.println("numero diagrammi:" + diagrams.length);

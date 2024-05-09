@@ -12,6 +12,7 @@ public class Conversation implements Serializable {
 	private int queryId;
 	private String diagramAsText;
 	private String query;
+	private String prefixAnswer;
 
 	// Costruttore che genera automaticamente il query ID incrementale
 	public Conversation(String sessionId, String projectId, String diagramAsText, String query, String prefixAnswer) {
@@ -20,7 +21,9 @@ public class Conversation implements Serializable {
 
 		// Calcola il query ID basato sul numero di occorrenze del prefisso della query
 		// nel conversationContent
+		System.out.println(calculateQueryId(prefixAnswer));
 		this.queryId = calculateQueryId(prefixAnswer);
+		this.prefixAnswer = prefixAnswer;
 
 		this.diagramAsText = diagramAsText;
 		this.query = query;
@@ -33,6 +36,7 @@ public class Conversation implements Serializable {
 			// aggiunta di una nuova riga per accodare su riga differente il nuovo messaggio
 			conversationContent.append("\n");
 		}
+		queryId = calculateQueryId(prefixAnswer);
 		conversationContent.append(message);
 	}
 
@@ -43,7 +47,7 @@ public class Conversation implements Serializable {
 		if (conversationContent != null) {
 			String content = conversationContent.toString();
 			count = content.split(prefixAnswer, -1).length - 1;
-			count++; // Aggiungi 1 perché il query ID inizia da 1
+			++count; // Aggiungi 1 perché il query ID inizia da 1
 		}
 		return count;
 	}

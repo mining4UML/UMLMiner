@@ -157,26 +157,18 @@ public class FeedbackHandler {
 	}
 
 	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
-		// try {
 		// Creazione di un oggetto ApiRequest con i dati appropriati
 		ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
 				conversation.getDiagramAsText(), conversation.getQuery());
 		// Creazione di un oggetto RestClient
 		RestClient client = new RestClient();
-
+		
 		// Invio della richiesta al server e ottenimento della risposta
 		ApiResponse response = client.sendRequest(request);
 
 		// Restituisci il messaggio della risposta
 		return response.getAnswer();
-//		} catch (ConnectException ex) {
-//			//ex.printStackTrace();
-//			return ex.getMessage();
-//		} catch (IOException ex) {
-//			ex.printStackTrace();
-//			return "Error: Unable to get response";
-//		} 
-	}
+	}	
 
 	private void updateConversation(String inputText, String sessionId)
 			throws ConnectException, IOException, Exception {
@@ -193,14 +185,17 @@ public class FeedbackHandler {
 
 			Conversation currentConversation = conversationList.getSelectedValue();
 
-			String response = sendRequestAndGetResponse(currentConversation);
-			String answer = prefixAnswer + inputText;
-			appendToPane(answer);
-			appendToPane(response);
-
 			if (currentConversation != null) {
 				// currentConversation.appendMessage(answer + "\n" + response);
+				
+				String answer = prefixAnswer + inputText;
 				currentConversation.appendMessage(answer);
+
+				String response = sendRequestAndGetResponse(currentConversation);
+				appendToPane(answer);
+				appendToPane(response);
+				
+				//currentConversation.appendMessage(answer);
 				currentConversation.appendMessage(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
 				conversationTitleField.setText(currentConversation.getTitle());
@@ -435,6 +430,8 @@ public class FeedbackHandler {
 	public void loadSerializedConversations() {
 		if (projectId != null) {
 			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(projectId);
+			// serve reimpostare il valore di conversationCounter? controllare
+			conversationCounter=0;
 			if (serializedConversations != null) {
 				int maxSessionId = 0; // Inizializza il valore massimo dell'ID della sessione
 				for (Conversation conversation : serializedConversations) {

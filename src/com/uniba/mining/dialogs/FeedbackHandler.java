@@ -169,6 +169,49 @@ public class FeedbackHandler {
 		// Restituisci il messaggio della risposta
 		return response.getAnswer();
 	}	
+	
+//	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
+//	    // Mostra il pop-up di elaborazione
+//	    JDialog processingDialog = new JDialog();
+//	    processingDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+//	    processingDialog.setSize(200, 100);
+//	    processingDialog.setLocationRelativeTo(null);
+//	    processingDialog.setTitle("Working in progress...");
+//	    
+//	     // Ottengo l'icona usando il metodo GUI.getImageIcon()
+//	    ImageIcon icon = GUI.getImageIcon();
+//
+//	    // Imposto l'icona della finestra di dialogo
+//	    processingDialog.setIconImage(icon.getImage());
+//	    
+//	    JLabel processingLabel = new JLabel("Please, wait...", SwingConstants.CENTER);
+//	    processingDialog.add(processingLabel);
+//	    processingDialog.setVisible(true);
+//
+//	    try {
+//	        // Creazione di un oggetto ApiRequest con i dati appropriati
+//	        ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
+//	                conversation.getDiagramAsText(), conversation.getQuery());
+//	        // Creazione di un oggetto RestClient
+//	        RestClient client = new RestClient();
+//
+//	        // Invio della richiesta al server e ottenimento della risposta
+//	        ApiResponse response = client.sendRequest(request);
+//	        try {
+//				Thread.sleep(7500);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//
+//	        // Restituisci il messaggio della risposta
+//	        return response.getAnswer();
+//	    } finally {
+//	        // Chiudi il pop-up di elaborazione quando la richiesta è stata completata (indipendentemente dall'esito)
+//	        processingDialog.dispose();
+//	    }
+//	}
+
 
 	private void updateConversation(String inputText, String sessionId)
 			throws ConnectException, IOException, Exception {

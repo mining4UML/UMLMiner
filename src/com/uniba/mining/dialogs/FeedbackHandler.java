@@ -7,7 +7,9 @@ import javax.swing.text.*;
 
 import com.uniba.mining.utils.Application;
 import com.uniba.mining.utils.GUI;
+import com.vp.plugin.model.IProject;
 import com.uniba.mining.tasks.exportdiag.ClassInfo;
+import com.uniba.mining.tasks.exportdiag.Language;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -56,6 +58,7 @@ public class FeedbackHandler {
 	}
 
 	private FeedbackHandler() {
+	
 		inputField = new JTextField(DIALOG_FEEDBACK_MESSAGE);
 
 		outputPane = new JTextPane();
@@ -96,24 +99,34 @@ public class FeedbackHandler {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!inputField.getText().isEmpty()) {
-					// Ottieni il session id dalla conversazione selezionata
-					Conversation selectedConversation = conversationList.getSelectedValue();
-					String sessionId = selectedConversation != null ? selectedConversation.getSessionId()
-							: generateSessionId();
-
-					// Chiama processUserInput() passando session id
 					try {
-						processUserInput(sessionId);
-					} catch (Exception e1) {
+						// If the project is empty, an exception is thrown with a message indicating the absence of diagrams
+						ClassInfo.isProjectEmpty(Application.getProject());
+						// Get the ession id from the selected conversation
+						Conversation selectedConversation = conversationList.getSelectedValue();
+						String sessionId = selectedConversation != null ? selectedConversation.getSessionId()
+								: generateSessionId();
+
+						// Call processUserInput() passing sessionId ad input
+						try {
+							processUserInput(sessionId);
+						} catch (Exception e1) {
+							GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
+									e1.getMessage());
+						}
+					}
+					catch (Exception e1) {
 						GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
 								e1.getMessage());
+	
 					}
 				}
 			}
 		});
 
 		newChatButton.addActionListener(new ActionListener() {
-			@Override
+
+	@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					createNewChat();
@@ -162,14 +175,14 @@ public class FeedbackHandler {
 				conversation.getDiagramAsText(), conversation.getQuery());
 		// Creazione di un oggetto RestClient
 		RestClient client = new RestClient();
-		
+
 		// Invio della richiesta al server e ottenimento della risposta
 		ApiResponse response = client.sendRequest(request);
 
 		// Restituisci il messaggio della risposta
 		return response.getAnswer();
-	}	
-	
+	}
+
 //	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
 //	    // Mostra il pop-up di elaborazione
 //	    JDialog processingDialog = new JDialog();
@@ -212,11 +225,10 @@ public class FeedbackHandler {
 //	    }
 //	}
 
-
 	private void updateConversation(String inputText, String sessionId)
 			throws ConnectException, IOException, Exception {
 
-		String diagramAsText = ClassInfo.exportInformation(Application.getProject());
+		String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "it");
 
 		if (!inputText.isEmpty()) {
 			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
@@ -230,15 +242,15 @@ public class FeedbackHandler {
 
 			if (currentConversation != null) {
 				// currentConversation.appendMessage(answer + "\n" + response);
-				
+
 				String answer = prefixAnswer + inputText;
 				currentConversation.appendMessage(answer);
 
 				String response = sendRequestAndGetResponse(currentConversation);
 				appendToPane(answer);
 				appendToPane(response);
-				
-				//currentConversation.appendMessage(answer);
+
+				// currentConversation.appendMessage(answer);
 				currentConversation.appendMessage(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
 				conversationTitleField.setText(currentConversation.getTitle());
@@ -353,9 +365,8 @@ public class FeedbackHandler {
 		return instance;
 	}
 
-	public void showFeedbackPanel() {
-		projectId = Application.getProject().getId();
-
+	public void showFeedbackPanel(IProject project) {
+		setProjectId(Application.getProject().getId());
 		if (panel == null)
 			createPanel();
 		else {
@@ -375,7 +386,7 @@ public class FeedbackHandler {
 		if (!query.isEmpty() && !query.equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 			// i valori sessionId, projectId, etc.
 			String sessionId = generateSessionId();
-			String diagramAsText = ClassInfo.exportInformation(Application.getProject());
+			String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "it");
 			// Crea una nuova istanza di Conversation
 			Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query, prefixAnswer);
 
@@ -474,7 +485,7 @@ public class FeedbackHandler {
 		if (projectId != null) {
 			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(projectId);
 			// serve reimpostare il valore di conversationCounter? controllare
-			conversationCounter=0;
+			conversationCounter = 0;
 			if (serializedConversations != null) {
 				int maxSessionId = 0; // Inizializza il valore massimo dell'ID della sessione
 				for (Conversation conversation : serializedConversations) {
@@ -488,6 +499,11 @@ public class FeedbackHandler {
 				}
 				// Imposta il contatore delle conversazioni sul valore massimo trovato
 				conversationCounter = maxSessionId;
+			
+	            // Assign focus to the first element in the conversation list model
+	            if (conversationListModel.size() > 0) {
+	                conversationList.setSelectedIndex(0);
+	            }
 			}
 		}
 	}

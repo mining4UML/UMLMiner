@@ -36,13 +36,16 @@ public class ClassInfo {
 
 	private static ResourceBundle messages;
 
-	public ClassInfo() {
-		messages = Language.getMessages();
-	}
+//	public ClassInfo() {
+//		messages = Language.getMessages();
+//	}
+//
+//	public ClassInfo(String language) {
+//		messages = Language.getMessages(language);
+//	}
 
 	public static void exportInformation(IProject project, File outputFile) {
 
-		// new ClassInfo();
 		messages = Language.getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 
@@ -216,9 +219,24 @@ public class ClassInfo {
 		} // chiusura else quando ci sono diagrammi
 	}
 
-	public static String exportInformation(IProject project) throws Exception {
-
+	/**
+	 * Checks if the specified Visual Paradigm project is empty, i.e., it contains no diagrams.
+	 *
+	 * @param project The Visual Paradigm project to check for emptiness.
+	 * @throws Exception If the project is empty, an exception is thrown with a message indicating the absence of diagrams.
+	 */
+	public static void isProjectEmpty(IProject project) throws Exception {
 		messages = Language.getMessages();
+		IDiagramUIModel[] diagrams = project.toDiagramArray();
+		if (diagrams.length == 0) {
+			throw new Exception(
+					messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
+		}
+	}
+
+	public static String exportInformation(IProject project, String language) throws Exception {
+
+		messages = Language.getMessages(language);
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 
 		// Crea una stringa per memorizzare l'output
@@ -226,10 +244,9 @@ public class ClassInfo {
 
 		if (diagrams.length == 0) {
 			// Mostra un messaggio se non ci sono classi nel progetto
-			//ApplicationManager.instance().getViewManager().showMessage(messages.getString("class.project.absence"));
-		    throw new Exception( messages.getString("class.project.absence")+
-		    		"\n"+
-		    		messages.getString("feedback.problem") );
+			// ApplicationManager.instance().getViewManager().showMessage(messages.getString("class.project.absence"));
+			throw new Exception(
+					messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
 		} else {
 
 			System.out.println("numero diagrammi:" + diagrams.length);

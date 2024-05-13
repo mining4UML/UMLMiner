@@ -31,7 +31,7 @@ public class ProjectListener implements IProjectListener {
 	public void projectAfterOpened(IProject project) {
 		logger.info("Project \"%s\" after opened", project.getName()+ " id:" + project.getId());
 		// se apro un progetto esistente
-		FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
+		FeedbackHandler.getInstance().showFeedbackPanel(project); // Chiamata al metodo statico
 		
 	}
 
@@ -39,7 +39,7 @@ public class ProjectListener implements IProjectListener {
 	public void projectNewed(IProject project) {
 		logger.info("New project \"%s\" created", project.getName()+ " id new project:"+project.getId());
 		init(project);
-		FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
+		FeedbackHandler.getInstance().showFeedbackPanel(project); // Chiamata al metodo statico
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ProjectListener implements IProjectListener {
 		logger.info("Project is renamed to \"%s\"", project.getName());
 		Logger.createEvent(LogActivity.UPDATE_PROJECT, project, "name", project.getName());
 		// se creo un nuovo progetto e gli assegno un nome
-		FeedbackHandler.getInstance().showFeedbackPanel(); // Chiamata al metodo statico
+		FeedbackHandler.getInstance().showFeedbackPanel(project); // Chiamata al metodo statico
 	}
 
 	@Override

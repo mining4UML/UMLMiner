@@ -102,6 +102,7 @@ public class FeedbackHandler {
 					try {
 						// If the project is empty, an exception is thrown with a message indicating the absence of diagrams
 						ClassInfo.isProjectEmpty(Application.getProject());
+						System.out.println(Application.getProject().getName());
 						// Get the ession id from the selected conversation
 						Conversation selectedConversation = conversationList.getSelectedValue();
 						String sessionId = selectedConversation != null ? selectedConversation.getSessionId()

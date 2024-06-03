@@ -56,7 +56,7 @@ public class LanguageDialog {
             String languageCode = languageCodeMap.get(languageComboBox.getSelectedIndex());
             
 	        // Puoi anche chiamare il metodo setLanguage della classe Language per impostare la lingua
-	         Language.setLanguage(languageCode);
+	         Language.getInstance().setLanguage(languageCode);
 	    });
 
 		// Crea un JComboBox con le opzioni e il valore di default impostato al diagramma delle classi per il tipo di diagramma

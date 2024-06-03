@@ -26,7 +26,7 @@ public class ExportInfoActionController implements VPActionController {
 	public void performAction(VPAction arg0) {
 
 		// Utilizza la classe Language per ottenere l'oggetto messages
-		this.messages = Language.getMessages();
+		this.messages = Language.getInstance().getMessages();
 
 		LanguageDiagramSelectionResult selectionResult = new LanguageDialog(messages).showLanguageSelectionDialog();
 

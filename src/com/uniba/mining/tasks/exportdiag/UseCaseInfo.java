@@ -21,7 +21,7 @@ public class UseCaseInfo {
 
 
 	public UseCaseInfo() {
-		messages = Language.getMessages();
+		messages = Language.getInstance().getMessages();
 	}
 
 	public void exportInformation(IProject project, File outputFile) {

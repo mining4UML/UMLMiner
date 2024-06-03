@@ -36,17 +36,17 @@ public class ClassInfo {
 
 	private static ResourceBundle messages;
 
-//	public ClassInfo() {
-//		messages = Language.getMessages();
-//	}
-//
-//	public ClassInfo(String language) {
-//		messages = Language.getMessages(language);
-//	}
+	public ClassInfo() {
+		messages = 	Language.getInstance().getMessages();
+	}
+
+	public ClassInfo(String language) {
+		messages =	Language.getInstance(language).getMessages();
+	}
 
 	public static void exportInformation(IProject project, File outputFile) {
 
-		messages = Language.getMessages();
+		//messages = Language.getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 
 		// Crea una stringa per memorizzare l'output
@@ -226,7 +226,7 @@ public class ClassInfo {
 	 * @throws Exception If the project is empty, an exception is thrown with a message indicating the absence of diagrams.
 	 */
 	public static void isProjectEmpty(IProject project) throws Exception {
-		messages = Language.getMessages();
+		//messages = Language.getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 		if (diagrams.length == 0) {
 			throw new Exception(
@@ -236,7 +236,7 @@ public class ClassInfo {
 
 	public static String exportInformation(IProject project, String language) throws Exception {
 
-		messages = Language.getMessages(language);
+		messages =	Language.getInstance(language).getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 
 		// Crea una stringa per memorizzare l'output
@@ -593,7 +593,7 @@ public class ClassInfo {
 
 							if (_base.equals(relazione.getTo())) {
 								out.append(String.format("%s %s %s", relazione.getTo().getName(),
-										messages.getString("class.relationship.specialization"), _base.getNickname()));
+										messages.getString("class.relationship.specialization"), relazione.getFrom().getNickname()));
 
 							} else {
 								// generalization

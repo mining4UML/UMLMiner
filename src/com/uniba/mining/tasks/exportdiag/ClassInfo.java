@@ -582,8 +582,11 @@ public class ClassInfo {
 											relazione.getTo().getNickname()));
 
 							} else
-								out.append(String.format(" %s is in relation of %s with %s", _base.getNickname(),
-										relazione.getModelType(), relazione.getTo().getNickname()));
+								out.append(String.format(" %s %s %s %s %s", _base.getNickname(), 
+										messages.getString("class.relationship.inrelation"),
+										relazione.getModelType(), 
+										messages.getString("class.relationship.with"),
+										relazione.getTo().getNickname()));
 
 						}
 					} else {
@@ -605,8 +608,11 @@ public class ClassInfo {
 						} else {
 							if (_base.equals(relazione.getTo())) {
 								// out.append(relazione.getFrom().getName() + " To "+ _base.getNickname());
-								out.append(String.format(" %s is in relation of %s with %s", _base.getNickname(),
-										relazione.getModelType(), relazione.getFrom().getName()));
+								out.append(String.format(" %s %s %s %s %s", _base.getNickname(),
+										messages.getString("class.relationship.inrelation"),
+										relazione.getModelType(), 
+										messages.getString("class.relationship.with"),
+										relazione.getFrom().getName()));
 
 							} else {
 								// out.append(relazione.getTo().getName()+ " To "+ _base.getNickname());

@@ -9,7 +9,6 @@ import com.uniba.mining.utils.Application;
 import com.uniba.mining.utils.GUI;
 import com.vp.plugin.model.IProject;
 import com.uniba.mining.tasks.exportdiag.ClassInfo;
-import com.uniba.mining.tasks.exportdiag.Language;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -246,6 +245,8 @@ public class FeedbackHandler {
 				
 				// update text description of diagrams
 				currentConversation.setDiagramAsText(diagramAsText);
+				// update query
+				currentConversation.setQuery(inputText);
 
 				String answer = prefixAnswer + inputText;
 				currentConversation.appendMessage(answer);

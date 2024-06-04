@@ -1,15 +1,32 @@
 package com.uniba.mining.llm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uniba.mining.utils.Application;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import java.io.IOException;
+import java.util.Properties;
 
 public class RestClient {
-    private static final String BASE_URL = "http://31.156.66.133:28000/interact/";
-
+    private static final String BASE_URL;
+    private static final String ROOT_PATH = Application.getPluginInfo("UMLMiner").getPluginDir().getAbsolutePath();
+    private static final String CONFIG_PATH = String.join(File.separator, ROOT_PATH, "config.properties");
     private ObjectMapper objectMapper;
+
+    static {
+        Properties properties = new Properties();
+        try (InputStream config = new FileInputStream(CONFIG_PATH)) {
+            properties.load(config);
+            BASE_URL = properties.getProperty("BASE_URL");
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to load configuration", ex);
+        }
+    }
+    
 
     public RestClient() {
         this.objectMapper = new ObjectMapper();

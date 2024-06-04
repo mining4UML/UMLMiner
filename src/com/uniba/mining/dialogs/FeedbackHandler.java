@@ -243,6 +243,9 @@ public class FeedbackHandler {
 
 			if (currentConversation != null) {
 				// currentConversation.appendMessage(answer + "\n" + response);
+				
+				// update text description of diagrams
+				currentConversation.setDiagramAsText(diagramAsText);
 
 				String answer = prefixAnswer + inputText;
 				currentConversation.appendMessage(answer);

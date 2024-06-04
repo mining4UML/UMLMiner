@@ -252,8 +252,11 @@ public class ClassInfo {
 			System.out.println("numero diagrammi:" + diagrams.length);
 			printInfoProject(project, diagrams, output);
 			output.append(String.format(messages.getString("rows.separator")));
+			
+			int numElements = 0;
 
 			for (IDiagramUIModel diagram : diagrams) {
+			
 
 				if (diagram.getType().equals("ClassDiagram")) {
 					// Ora puoi accedere alle informazioni del diagramma
@@ -281,6 +284,7 @@ public class ClassInfo {
 					}
 
 					IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
+					numElements += diagramElements.length;
 					for (IDiagramElement diagramElement : diagramElements) {
 						IModelElement modelElement = diagramElement.getModelElement();
 
@@ -408,6 +412,12 @@ public class ClassInfo {
 					// output.setLength(0);
 				} // chiusura if
 			} // chiusura iterazione sui diagrammi
+			if (numElements==0) {
+				// andrebbe separata la gestione della lingua del feedback dalla lingua usata per le GUI
+				messages = Language.getInstance("en").getMessages();
+				throw new Exception(
+						messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
+			} 
 		} // chiusura else quando ci sono diagrammi
 			// Restituisci l'output sotto forma di stringa
 		return output.toString();

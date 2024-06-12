@@ -25,6 +25,14 @@ import com.uniba.mining.plugin.Config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FeedbackHandler {
 	private static final String id = "feedbackPanel";
@@ -169,62 +177,100 @@ public class FeedbackHandler {
 		inputField.setText("");
 	}
 
-	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
-		// Creazione di un oggetto ApiRequest con i dati appropriati
-		ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
-				conversation.getDiagramAsText(), conversation.getQuery());
-		// Creazione di un oggetto RestClient
-		RestClient client = new RestClient();
+	 // Metodo per inviare la richiesta al server e ottenere la risposta
+	 // Metodo aggiornato per inviare la richiesta e ottenere la risposta
+    private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
+        // Creazione del dialogo di attesa
+        JDialog dialog = createWaitDialog();
+        //dialog.setVisible(true);
 
-		// Invio della richiesta al server e ottenimento della risposta
-		ApiResponse response = client.sendRequest(request);
+        AtomicReference<String> responseRef = new AtomicReference<>();
 
-		// Restituisci il messaggio della risposta
-		return response.getAnswer();
-	}
+        // Creazione e avvio di un SwingWorker per gestire la richiesta al server
+        SwingWorker<String, Void> worker = new SwingWorker<>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                try {
+                    // Effettua la richiesta al server e ottiene la risposta
+                    ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
+                            conversation.getDiagramAsText(), conversation.getQuery());
+                    RestClient client = new RestClient();
+                    ApiResponse response = client.sendRequest(request);
+                    responseRef.set(response.getAnswer());
+                    return response.getAnswer();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
 
-//	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
-//	    // Mostra il pop-up di elaborazione
-//	    JDialog processingDialog = new JDialog();
-//	    processingDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-//	    processingDialog.setSize(200, 100);
-//	    processingDialog.setLocationRelativeTo(null);
-//	    processingDialog.setTitle("Working in progress...");
-//	    
-//	     // Ottengo l'icona usando il metodo GUI.getImageIcon()
-//	    ImageIcon icon = GUI.getImageIcon();
-//
-//	    // Imposto l'icona della finestra di dialogo
-//	    processingDialog.setIconImage(icon.getImage());
-//	    
-//	    JLabel processingLabel = new JLabel("Please, wait...", SwingConstants.CENTER);
-//	    processingDialog.add(processingLabel);
-//	    processingDialog.setVisible(true);
-//
-//	    try {
-//	        // Creazione di un oggetto ApiRequest con i dati appropriati
-//	        ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
-//	                conversation.getDiagramAsText(), conversation.getQuery());
-//	        // Creazione di un oggetto RestClient
-//	        RestClient client = new RestClient();
-//
-//	        // Invio della richiesta al server e ottenimento della risposta
-//	        ApiResponse response = client.sendRequest(request);
-//	        try {
-//				Thread.sleep(7500);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//
-//	        // Restituisci il messaggio della risposta
-//	        return response.getAnswer();
-//	    } finally {
-//	        // Chiudi il pop-up di elaborazione quando la richiesta è stata completata (indipendentemente dall'esito)
-//	        processingDialog.dispose();
-//	    }
-//	}
+            @Override
+            protected void done() {
+                try {
+                    get(); // Ottieni il risultato della richiesta e gestisci le eccezioni
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    dialog.dispose(); // Chiude il dialogo di attesa
+                }
+            }
+        };
+        
+        worker.execute(); // Avvia il lavoro in background
+        
+        // Mostra il dialogo di attesa in modo modale
+        dialog.setVisible(true);
 
+        // Restituisci la risposta ottenuta
+        return responseRef.get();
+    }
+
+    // Metodo per creare il dialogo di attesa
+ // Metodo per creare il dialogo di attesa con puntini sospensivi
+ // Metodo per creare il dialogo di attesa con puntini sospensivi
+    private JDialog createWaitDialog() {
+        JDialog dialog = new JDialog((Frame) null, "Please wait", true);
+        JLabel label = new JLabel("Processing, please wait");
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        dialog.getContentPane().add(label);
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        dialog.setSize(300, 100);
+        dialog.setLocationRelativeTo(null); // Centra il dialogo sullo schermo
+        dialog.setResizable(false); // Disabilita l'icona di ingrandimento
+
+        // Rimuove il pulsante di chiusura dalla finestra di dialogo
+        dialog.setUndecorated(true);
+        dialog.getRootPane().setWindowDecorationStyle(JRootPane.PLAIN_DIALOG);
+
+        // Creazione di un timer per aggiornare il testo del label con i puntini sospensivi
+        Timer timer = new Timer(500, e -> {
+            String text = label.getText();
+            if (text.endsWith("...")) {
+                label.setText("Processing, please wait");
+            } else {
+                label.setText(text + ".");
+            }
+        });
+        timer.start();
+
+        // Interrompi il timer quando il dialogo viene chiuso
+        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                timer.stop();
+            }
+        });
+
+        return dialog;
+    }
+	
+
+	/*
+	 * private void updateInputFieldText() { StringBuilder text = new
+	 * StringBuilder(inputField.getText()); for (int i = 0; i < dotsCount; i++) {
+	 * text.append("."); } inputField.setText(text.toString()); }
+	 */
+    
 	private void updateConversation(String inputText, String sessionId)
 			throws ConnectException, IOException, Exception {
 
@@ -267,7 +313,7 @@ public class FeedbackHandler {
 			conversationList.repaint();
 		}
 	}
-
+	
 	private String generateSessionId() {
 		// Incrementa il contatore delle conversazioni di 1
 		conversationCounter++;

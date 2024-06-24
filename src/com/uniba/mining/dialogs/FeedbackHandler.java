@@ -25,13 +25,6 @@ import com.uniba.mining.plugin.Config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FeedbackHandler {
@@ -65,7 +58,7 @@ public class FeedbackHandler {
 	}
 
 	private FeedbackHandler() {
-	
+
 		inputField = new JTextField(DIALOG_FEEDBACK_MESSAGE);
 
 		outputPane = new JTextPane();
@@ -110,7 +103,7 @@ public class FeedbackHandler {
 						// If the project is empty, an exception is thrown with a message indicating the absence of diagrams
 						ClassInfo.isProjectEmpty(Application.getProject());
 						System.out.println(Application.getProject().getName());
-						// Get the ession id from the selected conversation
+						// Get the session id from the selected conversation
 						Conversation selectedConversation = conversationList.getSelectedValue();
 						String sessionId = selectedConversation != null ? selectedConversation.getSessionId()
 								: generateSessionId();
@@ -119,14 +112,12 @@ public class FeedbackHandler {
 						try {
 							processUserInput(sessionId);
 						} catch (Exception e1) {
-							GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
-									e1.getMessage());
+							showDetailedErrorMessage(e1);
 						}
 					}
 					catch (Exception e1) {
-						GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
-								e1.getMessage());
-	
+						showDetailedErrorMessage(e1);
+
 					}
 				}
 			}
@@ -134,13 +125,12 @@ public class FeedbackHandler {
 
 		newChatButton.addActionListener(new ActionListener() {
 
-	@Override
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					createNewChat();
 				} catch (Exception e1) {
-					GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
-							e1.getMessage());
+					showDetailedErrorMessage(e1);
 				}
 			}
 		});
@@ -169,6 +159,29 @@ public class FeedbackHandler {
 
 	}
 
+	private void showDetailedErrorMessage(Exception e1) {
+		StringBuilder errorMessage = new StringBuilder();
+
+		// Aggiunge il messaggio dell'eccezione, se presente
+		if (e1.getMessage() != null) {
+			errorMessage.append(e1.getMessage()).append("\n");
+		}
+
+		// Aggiunge informazioni dettagliate sullo stack trace
+		StackTraceElement[] stackTrace = e1.getStackTrace();
+		if (stackTrace.length > 0) {
+			StackTraceElement element = stackTrace[0];
+			errorMessage.append("Classe: ").append(element.getClassName()).append("\n");
+			errorMessage.append("Metodo: ").append(element.getMethodName()).append("\n");
+			errorMessage.append("Linea: ").append(element.getLineNumber()).append("\n");
+		}
+
+		// Mostra il messaggio di errore
+		GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", errorMessage.toString());
+	}
+
+
+
 	private void processUserInput(String sessionId) throws ConnectException, IOException, Exception {
 		// Acquisisco il testo dall'inputField
 		String inputText = inputField.getText();
@@ -177,31 +190,25 @@ public class FeedbackHandler {
 		inputField.setText("");
 	}
 
-	 // Metodo per inviare la richiesta al server e ottenere la risposta
-	 // Metodo aggiornato per inviare la richiesta e ottenere la risposta
+	// Metodo per inviare la richiesta al server e ottenere la risposta
+	// Assicurati che il metodo chiamante sia in grado di gestire ConnectException e IOException
     private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
         // Creazione del dialogo di attesa
         JDialog dialog = createWaitDialog();
-        //dialog.setVisible(true);
-
         AtomicReference<String> responseRef = new AtomicReference<>();
+        AtomicReference<Exception> exceptionRef = new AtomicReference<>();
 
         // Creazione e avvio di un SwingWorker per gestire la richiesta al server
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
             protected String doInBackground() throws Exception {
-                try {
-                    // Effettua la richiesta al server e ottiene la risposta
-                    ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
-                            conversation.getDiagramAsText(), conversation.getQuery());
-                    RestClient client = new RestClient();
-                    ApiResponse response = client.sendRequest(request);
-                    responseRef.set(response.getAnswer());
-                    return response.getAnswer();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw e;
-                }
+                // Effettua la richiesta al server e ottiene la risposta
+                ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
+                        conversation.getDiagramAsText(), conversation.getQuery());
+                RestClient client = new RestClient();
+                ApiResponse response = client.sendRequest(request);
+                responseRef.set(response.getAnswer());
+                return response.getAnswer();
             }
 
             @Override
@@ -209,68 +216,79 @@ public class FeedbackHandler {
                 try {
                     get(); // Ottieni il risultato della richiesta e gestisci le eccezioni
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    exceptionRef.set(e); // Memorizza l'eccezione
                 } finally {
                     dialog.dispose(); // Chiude il dialogo di attesa
                 }
             }
         };
-        
+
         worker.execute(); // Avvia il lavoro in background
-        
+
         // Mostra il dialogo di attesa in modo modale
         dialog.setVisible(true);
+
+        // Controlla se c'è stata un'eccezione e rilanciala
+        if (exceptionRef.get() != null) {
+            Exception e = exceptionRef.get();
+            if (e instanceof ConnectException) {
+                throw (ConnectException) e;
+            } else if (e instanceof IOException) {
+                throw (IOException) e;
+            } else {
+                throw new RuntimeException(e); // Per altre eccezioni non previste
+            }
+        }
 
         // Restituisci la risposta ottenuta
         return responseRef.get();
     }
-
-    // Metodo per creare il dialogo di attesa
- // Metodo per creare il dialogo di attesa con puntini sospensivi
- // Metodo per creare il dialogo di attesa con puntini sospensivi
-    private JDialog createWaitDialog() {
-        JDialog dialog = new JDialog((Frame) null, "Please wait", true);
-        JLabel label = new JLabel("Processing, please wait");
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        dialog.getContentPane().add(label);
-        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        dialog.setSize(300, 100);
-        dialog.setLocationRelativeTo(null); // Centra il dialogo sullo schermo
-        dialog.setResizable(false); // Disabilita l'icona di ingrandimento
-
-        // Rimuove il pulsante di chiusura dalla finestra di dialogo
-        dialog.setUndecorated(true);
-        dialog.getRootPane().setWindowDecorationStyle(JRootPane.PLAIN_DIALOG);
-
-        // Creazione di un timer per aggiornare il testo del label con i puntini sospensivi
-        Timer timer = new Timer(500, e -> {
-            String text = label.getText();
-            if (text.endsWith("...")) {
-                label.setText("Processing, please wait");
-            } else {
-                label.setText(text + ".");
-            }
-        });
-        timer.start();
-
-        // Interrompi il timer quando il dialogo viene chiuso
-        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
-                timer.stop();
-            }
-        });
-
-        return dialog;
-    }
 	
+
+	// Metodo per creare il dialogo di attesa con puntini sospensivi
+	private JDialog createWaitDialog() {
+		JDialog dialog = new JDialog((Frame) null, "Please wait", true);
+		JLabel label = new JLabel("Processing, please wait");
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		dialog.getContentPane().add(label);
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.setSize(300, 100);
+		dialog.setLocationRelativeTo(null); // Centra il dialogo sullo schermo
+		dialog.setResizable(false); // Disabilita l'icona di ingrandimento
+
+		// Rimuove il pulsante di chiusura dalla finestra di dialogo
+		dialog.setUndecorated(true);
+		dialog.getRootPane().setWindowDecorationStyle(JRootPane.PLAIN_DIALOG);
+
+		// Creazione di un timer per aggiornare il testo del label con i puntini sospensivi
+		Timer timer = new Timer(500, e -> {
+			String text = label.getText();
+			if (text.endsWith("...")) {
+				label.setText("Processing, please wait");
+			} else {
+				label.setText(text + ".");
+			}
+		});
+		timer.start();
+
+		// Interrompi il timer quando il dialogo viene chiuso
+		dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
+			public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+				timer.stop();
+			}
+		});
+
+		return dialog;
+	}
+
 
 	/*
 	 * private void updateInputFieldText() { StringBuilder text = new
 	 * StringBuilder(inputField.getText()); for (int i = 0; i < dotsCount; i++) {
 	 * text.append("."); } inputField.setText(text.toString()); }
 	 */
-    
+
 	private void updateConversation(String inputText, String sessionId)
 			throws ConnectException, IOException, Exception {
 
@@ -288,7 +306,7 @@ public class FeedbackHandler {
 
 			if (currentConversation != null) {
 				// currentConversation.appendMessage(answer + "\n" + response);
-				
+
 				// update text description of diagrams
 				currentConversation.setDiagramAsText(diagramAsText);
 				// update query
@@ -299,8 +317,10 @@ public class FeedbackHandler {
 
 				String response = sendRequestAndGetResponse(currentConversation);
 				appendToPane(answer);
-				appendToPane(response);
-
+				if(response!=null)
+					appendToPane(response);
+				else
+					throw new Exception("no response from the server");
 				// currentConversation.appendMessage(answer);
 				currentConversation.appendMessage(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
@@ -313,7 +333,7 @@ public class FeedbackHandler {
 			conversationList.repaint();
 		}
 	}
-	
+
 	private String generateSessionId() {
 		// Incrementa il contatore delle conversazioni di 1
 		conversationCounter++;
@@ -550,11 +570,11 @@ public class FeedbackHandler {
 				}
 				// Imposta il contatore delle conversazioni sul valore massimo trovato
 				conversationCounter = maxSessionId;
-			
-	            // Assign focus to the first element in the conversation list model
-	            if (conversationListModel.size() > 0) {
-	                conversationList.setSelectedIndex(0);
-	            }
+
+				// Assign focus to the first element in the conversation list model
+				if (conversationListModel.size() > 0) {
+					conversationList.setSelectedIndex(0);
+				}
 			}
 		}
 	}

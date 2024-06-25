@@ -111,8 +111,8 @@
 			<action
 					id="ClassDiagramActionControl"
 					actionType="generalAction"
-					label="Create Class Diagram"
-					tooltip="Create Class Diagrams via JSON file"
+					label="Class Diagram Auto-Gen"
+					tooltip="Automatic Class Diagrams Creation via JSON file"
 					style="normal"
 					icon="assets/icons/class.png"
 					ribbonPath="Toolbar/ClassFeedbackActionControl">

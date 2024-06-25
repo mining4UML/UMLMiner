@@ -37,16 +37,16 @@ public class ClassInfo {
 	private static ResourceBundle messages;
 
 	public ClassInfo() {
-		messages = 	Language.getInstance().getMessages();
+		messages = Language.getInstance().getMessages();
 	}
 
 	public ClassInfo(String language) {
-		messages =	Language.getInstance(language).getMessages();
+		messages = Language.getInstance(language).getMessages();
 	}
 
 	public static void exportInformation(IProject project, File outputFile) {
 
-		//messages = Language.getMessages();
+		// messages = Language.getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 
 		// Crea una stringa per memorizzare l'output
@@ -220,13 +220,15 @@ public class ClassInfo {
 	}
 
 	/**
-	 * Checks if the specified Visual Paradigm project is empty, i.e., it contains no diagrams.
+	 * Checks if the specified Visual Paradigm project is empty, i.e., it contains
+	 * no diagrams.
 	 *
 	 * @param project The Visual Paradigm project to check for emptiness.
-	 * @throws Exception If the project is empty, an exception is thrown with a message indicating the absence of diagrams.
+	 * @throws Exception If the project is empty, an exception is thrown with a
+	 *                   message indicating the absence of diagrams.
 	 */
 	public static void isProjectEmpty(IProject project) throws Exception {
-		//messages = Language.getMessages();
+		messages = Language.getInstance("en").getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 		if (diagrams.length == 0) {
 			throw new Exception(
@@ -236,15 +238,26 @@ public class ClassInfo {
 
 	public static String exportInformation(IProject project, String language) throws Exception {
 
-		messages =	Language.getInstance(language).getMessages();
+		messages = Language.getInstance(language).getMessages();
 		IDiagramUIModel[] diagrams = project.toDiagramArray();
 
 		// Crea una stringa per memorizzare l'output
 		StringBuilder output = new StringBuilder();
 
 		if (diagrams.length == 0) {
-			// Mostra un messaggio se non ci sono classi nel progetto
-			// ApplicationManager.instance().getViewManager().showMessage(messages.getString("class.project.absence"));
+			// Mostra un messaggio se non ci sono diagrammi delle classi nel progetto
+			throw new Exception(
+					messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
+		}
+		// Controllo del numero di diagrammi di tipo classe
+		int classDiagramCount = 0;
+		for (IDiagramUIModel diagram : diagrams) {
+			if (diagram instanceof IClassDiagramUIModel) {
+				classDiagramCount++;
+			}
+		}
+
+		if (classDiagramCount == 0) {
 			throw new Exception(
 					messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
 		} else {
@@ -252,11 +265,10 @@ public class ClassInfo {
 			System.out.println("numero diagrammi:" + diagrams.length);
 			printInfoProject(project, diagrams, output);
 			output.append(String.format(messages.getString("rows.separator")));
-			
+
 			int numElements = 0;
 
 			for (IDiagramUIModel diagram : diagrams) {
-			
 
 				if (diagram.getType().equals("ClassDiagram")) {
 					// Ora puoi accedere alle informazioni del diagramma
@@ -412,12 +424,13 @@ public class ClassInfo {
 					// output.setLength(0);
 				} // chiusura if
 			} // chiusura iterazione sui diagrammi
-			if (numElements==0) {
-				// andrebbe separata la gestione della lingua del feedback dalla lingua usata per le GUI
+			if (numElements == 0) {
+				// andrebbe separata la gestione della lingua del feedback dalla lingua usata
+				// per le GUI
 				messages = Language.getInstance("en").getMessages();
-				throw new Exception(
-						messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
-			} 
+				throw new Exception(messages.getString("class.project.elements.absence") + "\n"
+						+ messages.getString("feedback.problem"));
+			}
 		} // chiusura else quando ci sono diagrammi
 			// Restituisci l'output sotto forma di stringa
 		return output.toString();
@@ -592,9 +605,8 @@ public class ClassInfo {
 											relazione.getTo().getNickname()));
 
 							} else
-								out.append(String.format(" %s %s %s %s %s", _base.getNickname(), 
-										messages.getString("class.relationship.inrelation"),
-										relazione.getModelType(), 
+								out.append(String.format(" %s %s %s %s %s", _base.getNickname(),
+										messages.getString("class.relationship.inrelation"), relazione.getModelType(),
 										messages.getString("class.relationship.with"),
 										relazione.getTo().getNickname()));
 
@@ -606,7 +618,8 @@ public class ClassInfo {
 
 							if (_base.equals(relazione.getTo())) {
 								out.append(String.format("%s %s %s", relazione.getTo().getName(),
-										messages.getString("class.relationship.specialization"), relazione.getFrom().getNickname()));
+										messages.getString("class.relationship.specialization"),
+										relazione.getFrom().getNickname()));
 
 							} else {
 								// generalization
@@ -619,10 +632,8 @@ public class ClassInfo {
 							if (_base.equals(relazione.getTo())) {
 								// out.append(relazione.getFrom().getName() + " To "+ _base.getNickname());
 								out.append(String.format(" %s %s %s %s %s", _base.getNickname(),
-										messages.getString("class.relationship.inrelation"),
-										relazione.getModelType(), 
-										messages.getString("class.relationship.with"),
-										relazione.getFrom().getName()));
+										messages.getString("class.relationship.inrelation"), relazione.getModelType(),
+										messages.getString("class.relationship.with"), relazione.getFrom().getName()));
 
 							} else {
 								// out.append(relazione.getTo().getName()+ " To "+ _base.getNickname());

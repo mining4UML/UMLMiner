@@ -111,12 +111,12 @@ public class FeedbackHandler {
 						// Call processUserInput() passing sessionId ad input
 						try {
 							processUserInput(sessionId);
-						} catch (Exception e1) {
-							showDetailedErrorMessage(e1);
+						} catch (Exception processInputExcepetion) {
+							showDetailedErrorMessage(processInputExcepetion);
 						}
 					}
-					catch (Exception e1) {
-						showDetailedErrorMessage(e1);
+					catch (Exception projectInputExcepetion) {
+						showDetailedErrorMessage(projectInputExcepetion);
 
 					}
 				}
@@ -171,9 +171,9 @@ public class FeedbackHandler {
 		StackTraceElement[] stackTrace = e1.getStackTrace();
 		if (stackTrace.length > 0) {
 			StackTraceElement element = stackTrace[0];
-			errorMessage.append("Classe: ").append(element.getClassName()).append("\n");
-			errorMessage.append("Metodo: ").append(element.getMethodName()).append("\n");
-			errorMessage.append("Linea: ").append(element.getLineNumber()).append("\n");
+			errorMessage.append("\nClass: ").append(element.getClassName()).append("\n");
+			errorMessage.append("Method: ").append(element.getMethodName()).append("\n");
+			errorMessage.append("Line: ").append(element.getLineNumber()).append("\n");
 		}
 
 		// Mostra il messaggio di errore

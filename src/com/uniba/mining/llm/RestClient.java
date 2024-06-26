@@ -7,6 +7,7 @@ import com.uniba.mining.utils.Application;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -23,7 +24,7 @@ public class RestClient {
     static {
         try {
             // Configurazione del FileHandler per il logger
-            FileHandler fileHandler = new FileHandler("server.log", true); // true per abilitare l'append
+            FileHandler fileHandler = new FileHandler(String.join(File.separator, ROOT_PATH, "server.log"), true); // true per abilitare l'append
             fileHandler.setFormatter(new SimpleFormatter());
             LOGGER.addHandler(fileHandler);
             LOGGER.setLevel(Level.ALL);
@@ -45,7 +46,7 @@ public class RestClient {
 
     public RestClient() {
         this.objectMapper = new ObjectMapper();
-        //  aggiunta della configurazione per ignorare i campi sconosciuti durante la deserializzazione
+        // Aggiunta della configurazione per ignorare i campi sconosciuti durante la deserializzazione
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
@@ -73,10 +74,16 @@ public class RestClient {
         try {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             connection.setRequestProperty("Accept", "application/json");
             connection.setDoOutput(true);
-            connection.getOutputStream().write(jsonRequest.getBytes());
+
+            // Utilizzare l'encoding UTF-8
+            try (OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8)) {
+                writer.write(jsonRequest);
+                writer.flush();
+            }
+
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open HTTP connection", e);
             throw new IOException("Failed to open HTTP connection", e);
@@ -93,7 +100,7 @@ public class RestClient {
             }
 
             // Log the response content for debugging
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
                 StringBuilder responseContent = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {

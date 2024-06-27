@@ -78,7 +78,6 @@ public class RestClient {
             connection.setRequestProperty("Accept", "application/json");
             connection.setDoOutput(true);
 
-            // Utilizzare l'encoding UTF-8
             try (OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8)) {
                 writer.write(jsonRequest);
                 writer.flush();
@@ -99,17 +98,22 @@ public class RestClient {
                 inputStream = connection.getErrorStream();
             }
 
-            // Log the response content for debugging
+            StringBuilder responseContent = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                StringBuilder responseContent = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     responseContent.append(line);
                 }
-                LOGGER.info("Response Content: " + responseContent.toString());
-                
-                // Deserialize the response content
+            }
+            LOGGER.info("Response Content: " + responseContent.toString());
+
+            if (statusCode >= 200 && statusCode < 400) {
+                // Deserialize the response content if the status code indicates success
                 response = objectMapper.readValue(responseContent.toString(), ApiResponse.class);
+            } else {
+                // Handle error response
+                LOGGER.severe("Server returned an error: " + responseContent.toString());
+                throw new IOException("Server returned an error: " + responseContent.toString());
             }
 
         } catch (IOException e) {
@@ -123,4 +127,5 @@ public class RestClient {
 
         return response;
     }
+
 }

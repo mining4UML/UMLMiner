@@ -60,6 +60,8 @@ public class FeedbackHandler {
 	private FeedbackHandler() {
 
 		inputField = new JTextField(DIALOG_FEEDBACK_MESSAGE);
+		inputField.setBackground(Color.WHITE);
+		inputField.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 
 		outputPane = new JTextPane();
 		outputPane.setEditable(false);
@@ -71,8 +73,8 @@ public class FeedbackHandler {
 
 		conversationTitleField = new JTextField();
 		conversationTitleField.setEditable(false);
-		// Imposta il colore di sfondo della casella di testo a grigio chiaro
-		conversationTitleField.setBackground(Color.LIGHT_GRAY);
+		// Imposta il colore di sfondo della casella di testo a quello del panel
+		conversationTitleField.setBackground(UIManager.getColor("Panel.background"));
 
 		newChatButton = new JButton("New Chat");
 

@@ -449,6 +449,154 @@ public class ClassInfo {
 		return output.toString();
 	}
 
+	public static String exportInformation(IProject project, String language, IDiagramUIModel diagram) throws Exception {
+	    // Ottieni i messaggi nella lingua specificata
+	    messages = Language.getInstance(language).getMessages();
+
+	    // Crea una stringa per memorizzare l'output
+	    StringBuilder output = new StringBuilder();
+
+	    // Controllo che il diagramma passato non sia null
+	    if (diagram == null) {
+	        throw new IllegalArgumentException("Diagram cannot be null");
+	    }
+
+	    // Controllo se il diagramma è un diagramma di classe
+	    if (!(diagram instanceof IClassDiagramUIModel)) {
+	        throw new IllegalArgumentException("Only class diagrams are supported");
+	    }
+
+	    // Informazioni di base del diagramma
+	    appendDiagramInfo(output, diagram);
+
+	    // Itera sugli elementi del diagramma passato
+	    IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
+	    for (IDiagramElement diagramElement : diagramElements) {
+	        IModelElement modelElement = diagramElement.getModelElement();
+
+	        if (modelElement instanceof IClass) {
+	            IClass classe = (IClass) modelElement;
+
+	            // Aggiungi informazioni sulle classi
+	            appendClassInfo(output, classe);
+
+	            // Aggiungi informazioni sulle operazioni della classe
+	            appendOperations(output, messages, classe);
+
+	            // Aggiungi informazioni sulle relazioni della classe
+	            appendRelationships(output, messages, diagramElement, classe);
+	        }
+
+	        // Aggiungi separatore tra le classi
+	        output.append("\n");
+	    }
+
+	    // Se non ci sono elementi nel diagramma, solleva un'eccezione
+	    if (diagramElements.length == 0) {
+	        messages = Language.getInstance("en").getMessages();
+	        throw new Exception(messages.getString("class.project.elements.absence") + "\n"
+	                + messages.getString("feedback.problem"));
+	    }
+
+	    // Restituisci l'output sotto forma di stringa
+	    return output.toString();
+	}
+
+	// Metodi privati per parti comuni
+
+	private static void appendDiagramInfo(StringBuilder output, IDiagramUIModel diagram) {
+	    // Aggiungi informazioni di base sul diagramma
+	    String diagramName = diagram.getName();
+	    if (diagramName != null) {
+	        output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
+	                diagram.getName(), messages.getString("class.diagram.contains")));
+	    } else {
+	        output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
+	                messages.getString("class.diagran.noname"),
+	                messages.getString("class.diagram.contains")));
+	    }
+	}
+
+	private static void appendClassInfo(StringBuilder output, IClass classe) {
+	    // Aggiungi informazioni sulle classi
+	    output.append(String.format("- %s", classe.getName() != null ? classe.getName() : "---"));
+
+	    IModelElement parent = classe.getParent();
+	    if (parent != null) {
+	        output.append(String.format("  %s", parent.getName() != null ? " whose package is " + parent.getName() : "---"));
+	        // Se il diagramma è un IClassDiagramUIModel, puoi accedere al default package
+	        if (parent instanceof IClassDiagramUIModel) {
+	            IClassDiagramUIModel classDiagram = (IClassDiagramUIModel) parent;
+	            if (classDiagram.getDefaultPackage() != null) {
+	                output.append(String.format(" and default package: %s", classDiagram.getDefaultPackage().getName()));
+	            }
+	        }
+	        output.append(String.format("%n"));
+	    }
+	}
+
+	private static void appendOperations(StringBuilder output, ResourceBundle messages, IClass classe) {
+	    // Aggiungi informazioni sulle operazioni della classe
+	    IOperation[] operazioni = classe.toOperationArray();
+	    if (operazioni != null && operazioni.length > 0) {
+	        output.append(String.format("\n%s %s\n", classe.getName(),
+	                messages.getString("class.operations")));
+	        for (IOperation operazione : operazioni) {
+	            output.append(String.format("- %s %s(",
+	                    operazione.getVisibility() != null ? operazione.getVisibility() : "visibilità non definita",
+	                    operazione.getName()));
+
+	            // Aggiungi parametri dell'operazione se presenti
+	            IParameter[] parametri = operazione.toParameterArray();
+	            if (parametri != null && parametri.length > 0) {
+	                for (IParameter parametro : parametri) {
+	                    output.append(String.format("%s: %s, ", parametro.getName(), parametro.getTypeAsString()));
+	                }
+	                // Rimuovi l'ultima virgola aggiunta
+	                output.setLength(output.length() - 2);
+	            }
+	            output.append(")");
+
+	            output.append(String.format((": %s"),
+	                    operazione.getReturnTypeAsString() != null ? operazione.getReturnTypeAsString() : "void"));
+
+	            output.append("\n");
+	        }
+	    } else {
+	        output.append(String.format("\n%s %s", messages.getString("class.operations.empty"),
+	                classe.getName()));
+	    }
+	}
+
+	private static void appendRelationships(StringBuilder output, ResourceBundle messages, IDiagramElement diagramElement, IClass classe) {
+	    // Aggiungi informazioni sulle relazioni della classe
+	    StringBuilder relationships = getRelationshipsInfo(classe);
+	    if (relationships.length() > 0) {
+	        output.append(String.format("\n%s %s:%n", messages.getString("class.relationships"), classe.getName()));
+	        output.append(relationships.toString());
+	    }
+	}
+
+	private static StringBuilder getRelationshipsInfo(IClass classe) {
+	    StringBuilder relationships = new StringBuilder();
+
+	    Iterator<IRelationship> relationshipsIterator = classe.toRelationshipIterator();
+	    while (relationshipsIterator.hasNext()) {
+	        IRelationship relationship = relationshipsIterator.next();
+
+	        // Aggiungi le informazioni sulla relazione al StringBuilder
+	        relationships.append(String.format("- %s %s %s%n",
+	                relationship.getName() != null ? relationship.getName() : "---",
+	                relationship.getModelType() != null ? relationship.getModelType() : "relationship type not defined",
+	                relationship.getFrom().getName() != null ? relationship.getFrom().getName() : "from not defined",
+	                relationship.getTo().getName() != null ? relationship.getTo().getName() : "to not defined"));
+	    }
+
+	    return relationships;
+	}
+	
+	
+	
 	private static void printInfoProject(IProject project, IDiagramUIModel[] diagrams, StringBuilder output) {
 		String projectName = project.getName();
 		output.append(String.format("%s %s", messages.getString("project.info"), projectName));

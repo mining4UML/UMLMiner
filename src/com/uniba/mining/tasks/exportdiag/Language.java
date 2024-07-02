@@ -48,7 +48,7 @@ public class Language {
         if (instance == null) {
             instance = new Language(language);
         } else {
-            instance.setLanguage(language);
+             instance.setLanguage(language);
         }
         return instance;
     }

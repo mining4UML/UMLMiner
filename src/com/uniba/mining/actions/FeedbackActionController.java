@@ -4,12 +4,13 @@ import com.uniba.mining.dialogs.FeedbackHandler;
 import com.uniba.mining.utils.Application;
 import com.vp.plugin.action.VPAction;
 import com.vp.plugin.action.VPActionController;
+import com.vp.plugin.diagram.IDiagramUIModel;
 
 public class FeedbackActionController implements VPActionController {
 
 	@Override
 	public void performAction(VPAction arg0) {
-		 FeedbackHandler.getInstance().showFeedbackPanel(Application.getProject());
+		 FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram());
 	}
 
 	@Override

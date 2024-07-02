@@ -51,6 +51,11 @@ public class Application {
     public static IDiagramUIModel getDiagram() {
         return manager.getDiagramManager().getActiveDiagram();
     }
+    
+    public static String getIDCurrentDiagram() {
+        return manager.getDiagramManager().getActiveDiagram().getId();
+    }
+    
 
     public static void reloadPlugin() {
         manager.reloadPluginClasses(Config.PLUGIN_ID);

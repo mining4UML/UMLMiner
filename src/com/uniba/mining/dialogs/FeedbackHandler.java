@@ -7,6 +7,7 @@ import javax.swing.text.*;
 
 import com.uniba.mining.utils.Application;
 import com.uniba.mining.utils.GUI;
+import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
 import com.uniba.mining.tasks.exportdiag.ClassInfo;
 
@@ -39,6 +40,7 @@ public class FeedbackHandler {
 	private JButton newChatButton;
 	private JTextField conversationTitleField;
 	private String projectId;
+	private IDiagramUIModel diagram;
 	// Contatore per tenere traccia del numero totale di conversazioni
 	private int conversationCounter = 0;
 	// dialogs.feedback.placeholder in plugin.properties
@@ -50,6 +52,20 @@ public class FeedbackHandler {
 
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
+	}
+
+	private void setDiagram(IDiagramUIModel diagram) {
+		this.diagram= diagram;
+	}
+
+	private IDiagramUIModel getDiagram() {
+		return diagram;
+	}
+
+	public void clearPanel(String diagramId) {
+		conversationListModel.removeAllElements();
+		conversationList.clearSelection();
+		conversationTitleField.setText(diagramId);
 	}
 
 	public void clearPanel() {
@@ -102,7 +118,8 @@ public class FeedbackHandler {
 			public void actionPerformed(ActionEvent e) {
 				if (!inputField.getText().isEmpty()) {
 					try {
-						// If the project is empty, an exception is thrown with a message indicating the absence of diagrams
+						// If the project is empty, an exception is thrown with a message indicating the
+						// absence of diagrams
 						ClassInfo.isProjectEmpty(Application.getProject());
 						System.out.println(Application.getProject().getName());
 						// Get the session id from the selected conversation
@@ -116,8 +133,7 @@ public class FeedbackHandler {
 						} catch (Exception processInputExcepetion) {
 							showDetailedErrorMessage(processInputExcepetion);
 						}
-					}
-					catch (Exception projectInputExcepetion) {
+					} catch (Exception projectInputExcepetion) {
 						showDetailedErrorMessage(projectInputExcepetion);
 
 					}
@@ -149,6 +165,8 @@ public class FeedbackHandler {
 				}
 			}
 		});
+		
+		addFocusListenerToOutputPane();
 
 		JPopupMenu popupMenu = new JPopupMenu();
 		JMenuItem copyItem = new JMenuItem("Copy");
@@ -159,6 +177,26 @@ public class FeedbackHandler {
 		// popupMenu.add(clearItem);
 		outputPane.setComponentPopupMenu(popupMenu);
 
+	}
+	
+	private void addFocusListenerToOutputPane() {
+	    outputPane.addFocusListener(new FocusListener() {
+	        @Override
+	        public void focusGained(FocusEvent e) {
+	            IDiagramUIModel diagramUIModel = Application.getDiagram(); // Ottenere il diagramma UIModel dal progetto corrente
+	            if (diagramUIModel != null) {
+	                showFeedbackPanel(diagramUIModel); // Chiamare il metodo con il diagramma UIModel ottenuto
+	            } else {
+	                // Gestire il caso in cui diagramUIModel è null
+	                System.err.println("IDiagramUIModel is null. Unable to show feedback panel.");
+	            }
+	        }
+
+	        @Override
+	        public void focusLost(FocusEvent e) {
+	            // Implementazione non necessaria per il focus perso
+	        }
+	    });
 	}
 
 	private void showDetailedErrorMessage(Exception e1) {
@@ -182,8 +220,6 @@ public class FeedbackHandler {
 		GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", errorMessage.toString());
 	}
 
-
-
 	private void processUserInput(String sessionId) throws ConnectException, IOException, Exception {
 		// Acquisisco il testo dall'inputField
 		String inputText = inputField.getText();
@@ -193,59 +229,59 @@ public class FeedbackHandler {
 	}
 
 	// Metodo per inviare la richiesta al server e ottenere la risposta
-	// Assicurati che il metodo chiamante sia in grado di gestire ConnectException e IOException
-    private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
-        // Creazione del dialogo di attesa
-        JDialog dialog = createWaitDialog();
-        AtomicReference<String> responseRef = new AtomicReference<>();
-        AtomicReference<Exception> exceptionRef = new AtomicReference<>();
+	// Assicurati che il metodo chiamante sia in grado di gestire ConnectException e
+	// IOException
+	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
+		// Creazione del dialogo di attesa
+		JDialog dialog = createWaitDialog();
+		AtomicReference<String> responseRef = new AtomicReference<>();
+		AtomicReference<Exception> exceptionRef = new AtomicReference<>();
 
-        // Creazione e avvio di un SwingWorker per gestire la richiesta al server
-        SwingWorker<String, Void> worker = new SwingWorker<>() {
-            @Override
-            protected String doInBackground() throws Exception {
-                // Effettua la richiesta al server e ottiene la risposta
-                ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
-                        conversation.getDiagramAsText(), conversation.getQuery());
-                RestClient client = new RestClient();
-                ApiResponse response = client.sendRequest(request);
-                responseRef.set(response.getAnswer());
-                return response.getAnswer();
-            }
+		// Creazione e avvio di un SwingWorker per gestire la richiesta al server
+		SwingWorker<String, Void> worker = new SwingWorker<>() {
+			@Override
+			protected String doInBackground() throws Exception {
+				// Effettua la richiesta al server e ottiene la risposta
+				ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
+						conversation.getDiagramAsText(), conversation.getQuery());
+				RestClient client = new RestClient();
+				ApiResponse response = client.sendRequest(request);
+				responseRef.set(response.getAnswer());
+				return response.getAnswer();
+			}
 
-            @Override
-            protected void done() {
-                try {
-                    get(); // Ottieni il risultato della richiesta e gestisci le eccezioni
-                } catch (Exception e) {
-                    exceptionRef.set(e); // Memorizza l'eccezione
-                } finally {
-                    dialog.dispose(); // Chiude il dialogo di attesa
-                }
-            }
-        };
+			@Override
+			protected void done() {
+				try {
+					get(); // Ottieni il risultato della richiesta e gestisci le eccezioni
+				} catch (Exception e) {
+					exceptionRef.set(e); // Memorizza l'eccezione
+				} finally {
+					dialog.dispose(); // Chiude il dialogo di attesa
+				}
+			}
+		};
 
-        worker.execute(); // Avvia il lavoro in background
+		worker.execute(); // Avvia il lavoro in background
 
-        // Mostra il dialogo di attesa in modo modale
-        dialog.setVisible(true);
+		// Mostra il dialogo di attesa in modo modale
+		dialog.setVisible(true);
 
-        // Controlla se c'è stata un'eccezione e rilanciala
-        if (exceptionRef.get() != null) {
-            Exception e = exceptionRef.get();
-            if (e instanceof ConnectException) {
-                throw (ConnectException) e;
-            } else if (e instanceof IOException) {
-                throw (IOException) e;
-            } else {
-                throw new RuntimeException(e); // Per altre eccezioni non previste
-            }
-        }
+		// Controlla se c'è stata un'eccezione e rilanciala
+		if (exceptionRef.get() != null) {
+			Exception e = exceptionRef.get();
+			if (e instanceof ConnectException) {
+				throw (ConnectException) e;
+			} else if (e instanceof IOException) {
+				throw (IOException) e;
+			} else {
+				throw new RuntimeException(e); // Per altre eccezioni non previste
+			}
+		}
 
-        // Restituisci la risposta ottenuta
-        return responseRef.get();
-    }
-	
+		// Restituisci la risposta ottenuta
+		return responseRef.get();
+	}
 
 	// Metodo per creare il dialogo di attesa con puntini sospensivi
 	private JDialog createWaitDialog() {
@@ -262,7 +298,8 @@ public class FeedbackHandler {
 		dialog.setUndecorated(true);
 		dialog.getRootPane().setWindowDecorationStyle(JRootPane.PLAIN_DIALOG);
 
-		// Creazione di un timer per aggiornare il testo del label con i puntini sospensivi
+		// Creazione di un timer per aggiornare il testo del label con i puntini
+		// sospensivi
 		Timer timer = new Timer(500, e -> {
 			String text = label.getText();
 			if (text.endsWith("...")) {
@@ -284,7 +321,6 @@ public class FeedbackHandler {
 		return dialog;
 	}
 
-
 	/*
 	 * private void updateInputFieldText() { StringBuilder text = new
 	 * StringBuilder(inputField.getText()); for (int i = 0; i < dotsCount; i++) {
@@ -294,7 +330,10 @@ public class FeedbackHandler {
 	private void updateConversation(String inputText, String sessionId)
 			throws ConnectException, IOException, Exception {
 
-		String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "it");
+		//String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "it");
+		String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "it", diagram);
+
+
 
 		if (!inputText.isEmpty()) {
 			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
@@ -319,21 +358,34 @@ public class FeedbackHandler {
 
 				String response = sendRequestAndGetResponse(currentConversation);
 				appendToPane(answer);
-				if(response!=null)
+				if (response != null)
 					appendToPane(response);
 				else
 					throw new Exception("no response from the server");
 				// currentConversation.appendMessage(answer);
 				currentConversation.appendMessage(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-				conversationTitleField.setText(currentConversation.getTitle());
+				conversationTitleField.setText(getDiagramTitle() + currentConversation.getTitle());
+
 			}
 
-			serializeConversations();
+			//serializeConversations();
+			String diagramId = Application.getIDCurrentDiagram();
+			serializeConversations(diagramId);
 
 			conversationList.revalidate();
 			conversationList.repaint();
 		}
+	}
+
+	private String getDiagramTitle() {
+		IDiagramUIModel diagram = Application.getDiagram();
+		if (diagram != null && diagram.getName() != null) {
+			return  diagram.getName() + " - ";
+		} else if (diagram != null) {
+			return diagram.getType() + " ";
+		} else
+			return "";
 	}
 
 	private String generateSessionId() {
@@ -351,6 +403,15 @@ public class FeedbackHandler {
 		}
 		// Serializza l'intera lista di conversazioni
 		ConversationsSerializer.serializeConversations(conversations, projectId);
+	}
+
+	private void serializeConversations(String diagramId) {
+		List<Conversation> conversations = new ArrayList<>();
+		for (int i = 0; i < conversationListModel.size(); i++) {
+			conversations.add(conversationListModel.getElementAt(i));
+		}
+		// Serializza l'intera lista di conversazioni
+		ConversationsSerializer.serializeConversations(conversations, diagramId);
 	}
 
 	private Conversation createNewConversation(String sessionId, String query, String diagramAsText) {
@@ -396,7 +457,8 @@ public class FeedbackHandler {
 			// Se l'utente conferma l'eliminazione, procedi con la cancellazione
 			if (choice == JOptionPane.YES_OPTION) {
 				conversationListModel.remove(selectedIndex); // Rimuovi la conversazione dal modello dei dati
-				serializeConversations();
+				//serializeConversations();
+				serializeConversations(Application.getDiagram().getId());
 
 				// Seleziona un'altra conversazione dopo l'eliminazione
 				int conversationCount = conversationListModel.getSize();
@@ -423,10 +485,11 @@ public class FeedbackHandler {
 			if (newTitle != null && !newTitle.isEmpty()) {
 				selectedConversation.setTitle(newTitle);
 				// Aggiorna il testo nella casella di testo del titolo della conversazione
-				conversationTitleField.setText(newTitle);
+				conversationTitleField.setText(getDiagramTitle()+ newTitle);
 				// Aggiorna la visualizzazione della lista delle conversazioni
 				conversationListModel.setElementAt(selectedConversation, conversationList.getSelectedIndex());
-				serializeConversations();
+				//serializeConversations();
+				serializeConversations(Application.getDiagram().getId());
 			}
 		}
 	}
@@ -440,6 +503,8 @@ public class FeedbackHandler {
 
 	public void showFeedbackPanel(IProject project) {
 		setProjectId(Application.getProject().getId());
+
+
 		if (panel == null)
 			createPanel();
 		else {
@@ -449,6 +514,32 @@ public class FeedbackHandler {
 		}
 		Application.getViewManager().showMessagePaneComponent(id, title, panel);
 	}
+
+	public void showFeedbackPanel(IDiagramUIModel diagramUIModel) {
+		setProjectId(Application.getProject().getId());
+		setDiagram(diagramUIModel);
+
+		if (panel == null)
+			createPanel();
+		else {
+			System.out.println(getDiagram().getId());
+			clearPanel(getDiagram().getId());
+			// Load serialized conversations with the diagramId
+			String diagramId = getDiagram().getId(); // Get the diagram ID
+			if (diagramId != null) {
+				loadSerializedConversations(diagramId);
+			}
+		}
+		Application.getViewManager().showMessagePaneComponent(id, title, panel);
+		forceUpdateView();
+	}
+
+	private void forceUpdateView() {
+		// Metodo per forzare l'aggiornamento della vista
+		panel.repaint();
+		panel.revalidate();
+	}
+
 
 	private void createNewChat() throws Exception {
 		// Ottieni il testo dalla JTextPane
@@ -532,7 +623,7 @@ public class FeedbackHandler {
 
 				// Imposta il titolo della conversazione nel conversationTitleField
 				if (selectedConversation != null) {
-					conversationTitleField.setText(selectedConversation.getTitle()); // Aggiorna il titolo
+					conversationTitleField.setText(getDiagramTitle()+selectedConversation.getTitle()); // Aggiorna il titolo
 					// Ottieni il testo della conversazione selezionata
 					String conversationContent = selectedConversation.getConversationContent();
 					// Rimuovi il testo precedente dall'outputPane
@@ -545,7 +636,7 @@ public class FeedbackHandler {
 						appendToPane(line + "\n", textColor);
 					}
 				} else {
-					conversationTitleField.setText(""); // Pulisci il titolo se non c'è una selezione
+					conversationTitleField.setText(getDiagramTitle()); // Pulisci il titolo se non c'è una selezione
 					outputPane.setText(""); // Pulisci l'outputPane se non c'è una selezione
 				}
 			}
@@ -580,6 +671,35 @@ public class FeedbackHandler {
 			}
 		}
 	}
+
+	public void loadSerializedConversations(String diagramId) {
+		if (diagramId != null) {
+			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(diagramId);
+			// serve reimpostare il valore di conversationCounter? controllare
+			conversationCounter = 0;
+			if (serializedConversations != null) {
+				int maxSessionId = 0; // Inizializza il valore massimo dell'ID della sessione
+				for (Conversation conversation : serializedConversations) {
+					conversationListModel.addElement(conversation);
+					int sessionId = Integer.parseInt(conversation.getSessionId());
+					// Trova il valore massimo dell'ID della sessione
+					if (sessionId > maxSessionId) {
+						maxSessionId = sessionId;
+					}
+					System.out.println("*****-" + conversation.getSessionId() + "*****-");
+				}
+				// Imposta il contatore delle conversazioni sul valore massimo trovato
+				conversationCounter = maxSessionId;
+
+				// Assign focus to the first element in the conversation list model
+				if (conversationListModel.size() > 0) {
+					conversationList.setSelectedIndex(0);
+				}
+			}
+		}
+	}
+
+
 
 	private void appendToPane(String text) {
 		// Verifica se il testo inizia con "You:" e termina con "\n"

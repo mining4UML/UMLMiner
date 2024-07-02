@@ -4,6 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.uniba.mining.dialogs.FeedbackHandler;
 import com.uniba.mining.listeners.property.PropertyChangeListenerFactory;
 import com.uniba.mining.logging.LogActivity;
 import com.uniba.mining.logging.LogActivity.ActionType;
@@ -12,12 +13,13 @@ import com.uniba.mining.logging.LogExtractor;
 import com.uniba.mining.logging.Logger;
 import com.uniba.mining.utils.Application;
 import com.vp.plugin.diagram.IDiagramElement;
-import com.vp.plugin.diagram.IDiagramListener;
+import com.vp.plugin.diagram.IDiagramListener2;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IModelElement;
 
-public class DiagramListener implements IDiagramListener {
+public class DiagramListener implements IDiagramListener2 {
 	private static final Logger logger = new Logger(DiagramListener.class);
+	private static String diagramId;
 	private final Map<String, IModelElement> modelElements = new HashMap<>();
 	private IDiagramUIModel diagramUIModel;
 
@@ -32,9 +34,12 @@ public class DiagramListener implements IDiagramListener {
 			LogExtractor.addParentModelElementRecursive(modelElement);
 			diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
 		}
+		logger.info("DiagramListener initizialization");
+		diagramId = diagramUIModel.getId();
 	}
 
 	public IDiagramUIModel getDiagramUIModel() {
+		logger.info("getDiagramUIModel(); ottengo il riferimento al diagramma");
 		return diagramUIModel;
 	}
 
@@ -52,6 +57,8 @@ public class DiagramListener implements IDiagramListener {
 			Logger.createEvent(logActivity, modelElement);
 			diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
 		});
+
+		// FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram());
 
 	}
 
@@ -85,8 +92,8 @@ public class DiagramListener implements IDiagramListener {
 	}
 
 	@Override
-	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String propertyName,
-			Object oldValue, Object newValue) {
+	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String propertyName, Object oldValue,
+			Object newValue) {
 		if (!(propertyName.equals("name")))
 			return;
 
@@ -96,4 +103,16 @@ public class DiagramListener implements IDiagramListener {
 		Logger.createEvent(LogActivity.UPDATE_DIAGRAM, diagramUIModel, propertyName, propertyValue);
 	}
 
+	@Override
+	public void selectionChanged(IDiagramUIModel diagramUIModel) {
+		if (!diagramId.equals(diagramUIModel.getId())) {
+			// Questo metodo viene chiamato quando la selezione del diagramma cambia
+			logger.info("Diagram selection changed: %s \"%s\" \"%s\" ", 
+					diagramUIModel.getType(), diagramUIModel.getName(), 
+					diagramUIModel.getId());
+			diagramId= diagramUIModel.getId();
+			FeedbackHandler.getInstance().showFeedbackPanel(diagramUIModel);
+		}		
+
+	}
 }

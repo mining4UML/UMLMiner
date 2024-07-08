@@ -469,7 +469,7 @@ public class ClassInfo {
 	    // Informazioni di base del diagramma
 	    appendDiagramInfo(output, diagram);
 
-	    // Itera sugli elementi del diagramma passato
+	    // Itera sugli elementi del diagramma passato in input
 	    IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
 	    for (IDiagramElement diagramElement : diagramElements) {
 	        IModelElement modelElement = diagramElement.getModelElement();
@@ -477,13 +477,16 @@ public class ClassInfo {
 	        if (modelElement instanceof IClass) {
 	            IClass classe = (IClass) modelElement;
 
-	            // Aggiungi informazioni sulle classi
+	            // Aggiunge informazioni sulle classi
 	            appendClassInfo(output, classe);
+	            
+	            // Aggiunge informazioni sugli attributi della classe
+	            output.append(getInfoAttributes(classe));
 
-	            // Aggiungi informazioni sulle operazioni della classe
+	            // Aggiunge informazioni sulle operazioni della classe
 	            appendOperations(output, messages, classe);
 
-	            // Aggiungi informazioni sulle relazioni della classe
+	            // Aggiunge informazioni sulle relazioni della classe
 	            appendRelationships(output, messages, diagramElement, classe);
 	        }
 

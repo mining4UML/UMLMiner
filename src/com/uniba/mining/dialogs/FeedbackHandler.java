@@ -219,8 +219,7 @@ public class FeedbackHandler {
 			}
 		});
 	}
-	
-	
+
 //	if (!diagramId.equals(diagramUIModel.getId())) {
 //		// Questo metodo viene chiamato quando la selezione del diagramma cambia
 //		logger.info("Diagram selection changed: %s \"%s\" \"%s\" ", 
@@ -231,30 +230,32 @@ public class FeedbackHandler {
 //	}	
 
 	private void addFocusListenerToOutputPane() {
-	    outputPane.addFocusListener(new FocusListener() {
-	        @Override
-	        public void focusGained(FocusEvent e) {
-	            //Optional<IDiagramUIModel> optionalDiagramUIModel = Optional.ofNullable(Application.getDiagram());
+		outputPane.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				// Optional<IDiagramUIModel> optionalDiagramUIModel =
+				// Optional.ofNullable(Application.getDiagram());
 
-	            //optionalDiagramUIModel.ifPresent(diagramUIModel -> {
-	                //if (diagramUIModel.getId()!= diagram.getId()) {
-	                    showFeedbackPanel(diagram);
-	                    //diagram = diagram;
-	               // }
-	            //});
+				// optionalDiagramUIModel.ifPresent(diagramUIModel -> {
+				// if (diagramUIModel.getId()!= diagram.getId()) {
+				if (conversationListModel.size()< 2)
+					showFeedbackPanel(diagram);
+				// diagram = diagram;
+				// }
+				// });
 
-	           // if (optionalDiagramUIModel.isEmpty()) {
-	            //    System.err.println("IDiagramUIModel is null. Unable to show feedback panel.");
-	            //}
-	        }
+				// if (optionalDiagramUIModel.isEmpty()) {
+				// System.err.println("IDiagramUIModel is null. Unable to show feedback
+				// panel.");
+				// }
+			}
 
-	        @Override
-	        public void focusLost(FocusEvent e) {
-	            // Implementazione non necessaria per il focus perso
-	        }
-	    });
+			@Override
+			public void focusLost(FocusEvent e) {
+				// Implementazione non necessaria per il focus perso
+			}
+		});
 	}
-
 
 	private void showDetailedErrorMessage(Exception e1) {
 		StringBuilder errorMessage = new StringBuilder();

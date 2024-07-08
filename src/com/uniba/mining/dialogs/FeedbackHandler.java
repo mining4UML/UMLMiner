@@ -1,8 +1,8 @@
 package com.uniba.mining.dialogs;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 
 import com.uniba.mining.utils.Application;
@@ -19,6 +19,7 @@ import java.net.ConnectException;
 import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.feedback.ConversationListCellRenderer;
 import com.uniba.mining.feedback.ConversationsSerializer;
+import com.uniba.mining.feedback.LimitedTextField;
 import com.uniba.mining.llm.ApiRequest;
 import com.uniba.mining.llm.ApiResponse;
 import com.uniba.mining.llm.RestClient;
@@ -26,14 +27,15 @@ import com.uniba.mining.plugin.Config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FeedbackHandler {
 	private static final String id = "feedbackPanel";
 	private static final String prefixAnswer = "You: ";
 	private static final String title = "UML Miner - Feedback";
-	private JTextField inputField;
+	private LimitedTextField inputField;
+	private JLabel charCountLabel;
+	private static final String suffixCountLabel = "\t\t\t";
 	private JTextPane outputPane;
 	private StyledDocument document;
 	private DefaultListModel<Conversation> conversationListModel;
@@ -45,7 +47,6 @@ public class FeedbackHandler {
 	// Contatore per tenere traccia del numero totale di conversazioni
 	private int conversationCounter = 0;
 	// dialogs.feedback.placeholder in plugin.properties
-	private static final String DIALOG_FEEDBACK_MESSAGE = "Type your question here...";
 
 	private static FeedbackHandler instance;
 
@@ -82,9 +83,17 @@ public class FeedbackHandler {
 
 	private FeedbackHandler() {
 
-		inputField = new JTextField(DIALOG_FEEDBACK_MESSAGE);
+		inputField = new LimitedTextField();
+		inputField.setText(Config.DIALOG_FEEDBACK_MESSAGE);
 		inputField.setBackground(Color.WHITE);
 		inputField.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+
+		String text = String.format("%d / %d %s", inputField.getText().length(), LimitedTextField.LIMIT,
+				suffixCountLabel);
+		charCountLabel = new JLabel(text);
+
+		// Aggiungi DocumentListener tramite metodo privato
+		addDocumentListener(inputField, charCountLabel);
 
 		outputPane = new JTextPane();
 		outputPane.setEditable(false);
@@ -106,6 +115,11 @@ public class FeedbackHandler {
 		inputField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
+				// Verifica se la dimensione del conversationListModel è inferiore a 2
+				if (conversationListModel.size() < 2) {
+					// Mostra il pannello di feedback solo se la dimensione è minore di 2
+					showFeedbackPanel(Application.getDiagram());
+				}
 				if (inputField.getText().equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 					inputField.setText("");
 				}
@@ -127,6 +141,10 @@ public class FeedbackHandler {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
+					if (conversationListModel.size() < 2) {
+						// Mostra il pannello di feedback solo se la dimensione è minore di 2
+						showFeedbackPanel(Application.getDiagram());
+					}
 					createNewChat();
 				} catch (Exception e1) {
 					showDetailedErrorMessage(e1);
@@ -148,29 +166,25 @@ public class FeedbackHandler {
 		});
 
 		// Inizializza i nuovi pulsanti
-		String add = "Provide suggestions for adding processes or contents to this diagram";
 		addButton = new JButton("Add Contents");
-		addButton.setToolTipText(add);
+		addButton.setToolTipText(Config.FEEDBACK_BUTTON_ADD);
 		addButton.setForeground(Color.BLUE);
-		addButton.addActionListener(e -> handleButtonClick(add));
+		addButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_ADD));
 
-		String improvements = "List suggestions to improve this diagram";
 		improvementsButton = new JButton("Improvements");
-		improvementsButton.setToolTipText(improvements);
+		improvementsButton.setToolTipText(Config.FEEDBACK_BUTTON_IMROVEMENT);
 		improvementsButton.setForeground(Color.BLUE);
-		improvementsButton.addActionListener(e -> handleButtonClick(improvements));
+		improvementsButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_IMROVEMENT));
 
-		String issues = "List issues in this diagram";
 		issuesButton = new JButton("Issues");
-		issuesButton.setToolTipText(issues);
+		issuesButton.setToolTipText(Config.FEEDBACK_BUTTON_ISSUES);
 		issuesButton.setForeground(Color.BLUE);
-		issuesButton.addActionListener(e -> handleButtonClick(issues));
+		issuesButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_ISSUES));
 
-		String explain = "Explain this diagram";
 		explainButton = new JButton("Explain");
-		explainButton.setToolTipText(explain);
+		explainButton.setToolTipText(Config.FEEDBACK_BUTTON_EXPLAIN);
 		explainButton.setForeground(Color.BLUE);
-		explainButton.addActionListener(e -> handleButtonClick("Explain this diagram"));
+		explainButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_EXPLAIN));
 
 		addFocusListenerToOutputPane();
 
@@ -185,10 +199,37 @@ public class FeedbackHandler {
 
 	}
 
+	private static void addDocumentListener(JTextField textField, JLabel label) {
+		textField.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				updateCharCount();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				updateCharCount();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				updateCharCount();
+			}
+
+			private void updateCharCount() {
+				String text = String.format("%d / %d %s", textField.getText().length(), LimitedTextField.LIMIT,
+						suffixCountLabel);
+				label.setText(text);
+
+				label.setText(text);
+			}
+		});
+	}
+
 	private void handleButtonClick(String text) {
 		inputField.setText(text);
 		inputField.postActionEvent();
-		inputField.setText(DIALOG_FEEDBACK_MESSAGE);
+		inputField.setText(Config.DIALOG_FEEDBACK_MESSAGE);
 	}
 
 	private void setInputFieldListener() {
@@ -220,39 +261,25 @@ public class FeedbackHandler {
 		});
 	}
 
-//	if (!diagramId.equals(diagramUIModel.getId())) {
-//		// Questo metodo viene chiamato quando la selezione del diagramma cambia
-//		logger.info("Diagram selection changed: %s \"%s\" \"%s\" ", 
-//				diagramUIModel.getType(), diagramUIModel.getName(), 
-//				diagramUIModel.getId());
-//		diagramId= diagramUIModel.getId();
-//		FeedbackHandler.getInstance().showFeedbackPanel(diagramUIModel);
-//	}	
-
 	private void addFocusListenerToOutputPane() {
+		// Aggiunge un listener di focus all'outputPane
 		outputPane.addFocusListener(new FocusListener() {
+
+			// Metodo chiamato quando il focus viene guadagnato sull'outputPane
 			@Override
 			public void focusGained(FocusEvent e) {
-				// Optional<IDiagramUIModel> optionalDiagramUIModel =
-				// Optional.ofNullable(Application.getDiagram());
-
-				// optionalDiagramUIModel.ifPresent(diagramUIModel -> {
-				// if (diagramUIModel.getId()!= diagram.getId()) {
-				if (conversationListModel.size()< 2)
-					showFeedbackPanel(diagram);
-				// diagram = diagram;
-				// }
-				// });
-
-				// if (optionalDiagramUIModel.isEmpty()) {
-				// System.err.println("IDiagramUIModel is null. Unable to show feedback
-				// panel.");
-				// }
+				// Verifica se la dimensione del conversationListModel è inferiore a 2
+				if (conversationListModel.size() < 2) {
+					// Mostra il pannello di feedback solo se la dimensione è minore di 2
+					showFeedbackPanel(Application.getDiagram());
+				}
 			}
 
+			// Metodo chiamato quando il focus viene perso sull'outputPane
 			@Override
 			public void focusLost(FocusEvent e) {
 				// Implementazione non necessaria per il focus perso
+				// Potrebbe essere vuoto se non ci sono azioni specifiche da eseguire
 			}
 		});
 	}
@@ -379,18 +406,10 @@ public class FeedbackHandler {
 		return dialog;
 	}
 
-	/*
-	 * private void updateInputFieldText() { StringBuilder text = new
-	 * StringBuilder(inputField.getText()); for (int i = 0; i < dotsCount; i++) {
-	 * text.append("."); } inputField.setText(text.toString()); }
-	 */
-
 	private void updateConversation(String inputText, String sessionId)
 			throws ConnectException, IOException, Exception {
 
-		// String diagramAsText = ClassInfo.exportInformation(Application.getProject(),
-		// "it");
-		String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "it", diagram);
+		String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "en", diagram);
 
 		if (!inputText.isEmpty()) {
 			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
@@ -605,7 +624,7 @@ public class FeedbackHandler {
 		if (!query.isEmpty() && !query.equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 			// i valori sessionId, projectId, etc.
 			String sessionId = generateSessionId();
-			String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "it");
+			String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "en");
 			// Crea una nuova istanza di Conversation
 			Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query, prefixAnswer);
 
@@ -628,77 +647,22 @@ public class FeedbackHandler {
 		}
 	}
 
-//	private JPanel createPanel() {
-//		panel = new JPanel(new BorderLayout());
-//
-//		// Pannello principale diviso in due parti: sinistra e destra
-//		JPanel mainPanel = new JPanel(new BorderLayout());
-//
-//		// Pannello sinistro contiene il pulsante "New Chat" e la lista delle
-//		// conversazioni
-//		JPanel leftPanel = new JPanel(new BorderLayout());
-//		newChatButton.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				try {
-//					createNewChat();
-//				} catch (Exception e1) {
-//					GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
-//							e1.getMessage());
-//				}
-//			}
-//		});
-//		leftPanel.add(newChatButton, BorderLayout.NORTH);
-//		JScrollPane listScrollPane = new JScrollPane(conversationList);
-//		listScrollPane.setPreferredSize(new Dimension(200, 200)); // Imposta le dimensioni desiderate
-//		leftPanel.add(listScrollPane, BorderLayout.CENTER);
-//
-//		mainPanel.add(leftPanel, BorderLayout.WEST);
-//
-//		// Pannello destro contiene il conversationTitleField, l'outputPane e
-//		// l'inputField
-//		JPanel rightPanel = new JPanel(new BorderLayout());
-//		rightPanel.add(conversationTitleField, BorderLayout.NORTH); // Aggiungi questa linea
-//		rightPanel.add(new JScrollPane(outputPane), BorderLayout.CENTER);
-//		rightPanel.add(inputField, BorderLayout.SOUTH);
-//
-//		mainPanel.add(rightPanel, BorderLayout.CENTER);
-//
-//		panel.add(mainPanel, BorderLayout.CENTER);
-//
-//		projectId = Application.getProject().getId();
-//		// Carica le conversazioni serializzate durante l'inizializzazione del pannello
-//		loadSerializedConversations();
-//
-//		// cattura l'evento di selezione di una conversazione nella list
-//		conversationList.addListSelectionListener(new ListSelectionListener() {
-//			@Override
-//			public void valueChanged(ListSelectionEvent e) {
-//				Conversation selectedConversation = conversationList.getSelectedValue();
-//
-//				// Imposta il titolo della conversazione nel conversationTitleField
-//				if (selectedConversation != null) {
-//					conversationTitleField.setText(getDiagramTitle()+selectedConversation.getTitle()); // Aggiorna il titolo
-//					// Ottieni il testo della conversazione selezionata
-//					String conversationContent = selectedConversation.getConversationContent();
-//					// Rimuovi il testo precedente dall'outputPane
-//					outputPane.setText("");
-//					// Dividi il testo in righe
-//					String[] lines = conversationContent.split("\n");
-//					// Applica il colore appropriato a ciascuna riga
-//					for (String line : lines) {
-//						Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
-//						appendToPane(line + "\n", textColor);
-//					}
-//				} else {
-//					conversationTitleField.setText(getDiagramTitle()); // Pulisci il titolo se non c'è una selezione
-//					outputPane.setText(""); // Pulisci l'outputPane se non c'è una selezione
-//				}
-//			}
-//		});
-//
-//		return panel;
-//	}
+	private static JLabel createHelpLabel() {
+		JLabel helpLabel = new JLabel("?");
+		helpLabel.setFont(new Font("Arial", Font.BOLD, 14));
+		helpLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
+		// Impostazione del tooltip con il testo di aiuto
+		helpLabel.setToolTipText("<html><body style='width: 200px;'>"
+				+ "Use these buttons or type your own question to get information about the diagram:<br><br>"
+				+ "<b>Add</b>: Provide suggestions for adding processes or contents to this diagram.<br>"
+				+ "<b>Improvements</b>: List suggestions to improve this diagram.<br>"
+				+ "<b>Issues</b>: List issues in this diagram.<br>"
+				+ "<b>Explain</b>: Explain this diagram.</body></html>");
+
+		return helpLabel;
+	}
+
 	private JPanel createPanel() {
 		panel = new JPanel(new BorderLayout());
 
@@ -708,20 +672,16 @@ public class FeedbackHandler {
 		// Pannello sinistro contiene il pulsante "New Chat" e la lista delle
 		// conversazioni
 		JPanel leftPanel = new JPanel(new BorderLayout());
-		newChatButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					createNewChat();
-				} catch (Exception e1) {
-					GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback",
-							e1.getMessage());
-				}
+		newChatButton.addActionListener(e -> {
+			try {
+				createNewChat();
+			} catch (Exception e1) {
+				GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", e1.getMessage());
 			}
 		});
 		leftPanel.add(newChatButton, BorderLayout.NORTH);
 		JScrollPane listScrollPane = new JScrollPane(conversationList);
-		listScrollPane.setPreferredSize(new Dimension(200, 200)); // Imposta le dimensioni desiderate
+		listScrollPane.setPreferredSize(new Dimension(200, 200));
 		leftPanel.add(listScrollPane, BorderLayout.CENTER);
 
 		mainPanel.add(leftPanel, BorderLayout.WEST);
@@ -729,23 +689,47 @@ public class FeedbackHandler {
 		// Pannello destro contiene il conversationTitleField, l'outputPane e
 		// l'inputField
 		JPanel rightPanel = new JPanel(new BorderLayout());
-		rightPanel.add(conversationTitleField, BorderLayout.NORTH); // Aggiungi questa linea
+		rightPanel.add(conversationTitleField, BorderLayout.NORTH);
 		rightPanel.add(new JScrollPane(outputPane), BorderLayout.CENTER);
 
-		// Crea un nuovo pannello per inputField e buttonPanel con BorderLayout
-		JPanel inputAndButtonPanel = new JPanel();
-		inputAndButtonPanel.setLayout(new BoxLayout(inputAndButtonPanel, BoxLayout.Y_AXIS)); // Layout a box verticale
-		inputAndButtonPanel.add(inputField); // Aggiungi inputField prima dei pulsanti
+		// Crea un nuovo pannello per inputField e buttonPanel con GridBagLayout
+		JPanel inputAndButtonPanel = new JPanel(new GridBagLayout());
 
-		// Aggiungi i pulsanti creati nel pannello
+		// Vincoli per buttonPanel (sopra)
+		GridBagConstraints gbcButtonPanel = new GridBagConstraints();
+		gbcButtonPanel.gridx = 0;
+		gbcButtonPanel.gridy = 0;
+		gbcButtonPanel.anchor = GridBagConstraints.CENTER;
+		gbcButtonPanel.insets = new Insets(5, 5, 5, 5); // Margine
+
 		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS)); // Layout a box orizzontale
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+		buttonPanel.add(createHelpLabel());
 		buttonPanel.add(addButton);
 		buttonPanel.add(improvementsButton);
 		buttonPanel.add(issuesButton);
 		buttonPanel.add(explainButton);
 
-		inputAndButtonPanel.add(buttonPanel); // Aggiungi il pannello dei pulsanti dopo l'inputField
+		inputAndButtonPanel.add(buttonPanel, gbcButtonPanel); // Aggiungi buttonPanel con i vincoli
+
+		// Vincoli per inputField (sotto)
+		GridBagConstraints gbcInputField = new GridBagConstraints();
+		gbcInputField.gridx = 0;
+		gbcInputField.gridy = 1;
+		gbcInputField.fill = GridBagConstraints.HORIZONTAL;
+		gbcInputField.weightx = 1.0; // Espande orizzontalmente
+		gbcInputField.insets = new Insets(5, 5, 5, 5); // Margine
+
+		inputAndButtonPanel.add(inputField, gbcInputField); // Aggiungi inputField con i vincoli
+
+		// Vincoli per charCountLabel (sotto)
+		GridBagConstraints gbcCharCountLabel = new GridBagConstraints();
+		gbcCharCountLabel.gridx = 1;
+		gbcCharCountLabel.gridy = 1;
+		gbcCharCountLabel.anchor = GridBagConstraints.WEST;
+		gbcCharCountLabel.insets = new Insets(5, 5, 5, 5); // Margine
+
+		inputAndButtonPanel.add(charCountLabel, gbcCharCountLabel); // Aggiungi charCountLabel con i vincoli
 
 		rightPanel.add(inputAndButtonPanel, BorderLayout.SOUTH);
 
@@ -754,34 +738,23 @@ public class FeedbackHandler {
 		panel.add(mainPanel, BorderLayout.CENTER);
 
 		projectId = Application.getProject().getId();
-		// Carica le conversazioni serializzate durante l'inizializzazione del pannello
 		loadSerializedConversations();
 
-		// Cattura l'evento di selezione di una conversazione nella list
-		conversationList.addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				Conversation selectedConversation = conversationList.getSelectedValue();
+		conversationList.addListSelectionListener(e -> {
+			Conversation selectedConversation = conversationList.getSelectedValue();
 
-				// Imposta il titolo della conversazione nel conversationTitleField
-				if (selectedConversation != null) {
-					conversationTitleField.setText(getDiagramTitle() + selectedConversation.getTitle()); // Aggiorna il
-																											// titolo
-					// Ottieni il testo della conversazione selezionata
-					String conversationContent = selectedConversation.getConversationContent();
-					// Rimuovi il testo precedente dall'outputPane
-					outputPane.setText("");
-					// Dividi il testo in righe
-					String[] lines = conversationContent.split("\n");
-					// Applica il colore appropriato a ciascuna riga
-					for (String line : lines) {
-						Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
-						appendToPane(line + "\n", textColor);
-					}
-				} else {
-					conversationTitleField.setText(getDiagramTitle()); // Pulisci il titolo se non c'è una selezione
-					outputPane.setText(""); // Pulisci l'outputPane se non c'è una selezione
+			if (selectedConversation != null) {
+				conversationTitleField.setText(getDiagramTitle() + selectedConversation.getTitle());
+				String conversationContent = selectedConversation.getConversationContent();
+				outputPane.setText("");
+				String[] lines = conversationContent.split("\n");
+				for (String line : lines) {
+					Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
+					appendToPane(line + "\n", textColor);
 				}
+			} else {
+				conversationTitleField.setText(getDiagramTitle());
+				outputPane.setText("");
 			}
 		});
 

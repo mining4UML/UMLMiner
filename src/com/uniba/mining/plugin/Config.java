@@ -52,6 +52,13 @@ public class Config {
 			pluginProperties.getProperty("actions.export.violations.inputerror");
 	
 	public static final String DIALOG_FEEDBACK_MESSAGE = pluginProperties.getProperty("dialogs.feedback.placeholder"); 
+	public static final String FEEDBACK_BUTTON_ADD = pluginProperties.getProperty("dialogs.feedback.button.add"); 
+	public static final String FEEDBACK_BUTTON_IMROVEMENT = pluginProperties.getProperty("dialogs.feedback.button.improvement"); 
+	public static final String FEEDBACK_BUTTON_ISSUES = pluginProperties.getProperty("dialogs.feedback.button.issues"); 
+	public static final String FEEDBACK_BUTTON_EXPLAIN = pluginProperties.getProperty("dialogs.feedback.button.explain"); 
+	
+	public static final String FEEDBACK_CHAR_COUNTING = pluginProperties.getProperty("dialogs.feedback.label.characters"); 
+	
 	
 	public static final String PLUGIN_WINDOWS_SEPARATOR=" - ";
 	

@@ -119,10 +119,10 @@ public class FeedbackHandler {
 			@Override
 			public void focusGained(FocusEvent e) {
 				// Verifica se la dimensione del conversationListModel è inferiore a 2
-				if (conversationListModel.size() < 2) {
+				//if (conversationListModel.size() < 2) {
 					// Mostra il pannello di feedback solo se la dimensione è minore di 2
 					showFeedbackPanel(Application.getDiagram());
-				}
+				//}
 				if (inputField.getText().equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 					inputField.setText("");
 				}
@@ -272,10 +272,10 @@ public class FeedbackHandler {
 			@Override
 			public void focusGained(FocusEvent e) {
 				// Verifica se la dimensione del conversationListModel è inferiore a 2
-				if (conversationListModel.size() < 2) {
+				//if (conversationListModel.size() < 2) {
 					// Mostra il pannello di feedback solo se la dimensione è minore di 2
 					showFeedbackPanel(Application.getDiagram());
-				}
+				//}
 			}
 
 			// Metodo chiamato quando il focus viene perso sull'outputPane

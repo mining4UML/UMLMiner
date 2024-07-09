@@ -13,12 +13,15 @@ import com.uniba.mining.tasks.exportdiag.ClassInfo;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ConnectException;
 
 import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.feedback.ConversationListCellRenderer;
 import com.uniba.mining.feedback.ConversationsSerializer;
+import com.uniba.mining.feedback.ErrorUtils;
 import com.uniba.mining.feedback.LimitedTextField;
 import com.uniba.mining.llm.ApiRequest;
 import com.uniba.mining.llm.ApiResponse;
@@ -147,7 +150,7 @@ public class FeedbackHandler {
 					}
 					createNewChat();
 				} catch (Exception e1) {
-					showDetailedErrorMessage(e1);
+					ErrorUtils.showDetailedErrorMessage(e1);
 				}
 			}
 		});
@@ -251,10 +254,10 @@ public class FeedbackHandler {
 						try {
 							processUserInput(sessionId);
 						} catch (Exception processInputException) {
-							showDetailedErrorMessage(processInputException);
+							ErrorUtils.showDetailedErrorMessage(processInputException);
 						}
 					} catch (Exception projectInputException) {
-						showDetailedErrorMessage(projectInputException);
+						ErrorUtils.showDetailedErrorMessage(projectInputException);
 					}
 				}
 			}
@@ -284,26 +287,26 @@ public class FeedbackHandler {
 		});
 	}
 
-	private void showDetailedErrorMessage(Exception e1) {
-		StringBuilder errorMessage = new StringBuilder();
-
-		// Aggiunge il messaggio dell'eccezione, se presente
-		if (e1.getMessage() != null) {
-			errorMessage.append(e1.getMessage()).append("\n");
-		}
-
-		// Aggiunge informazioni dettagliate sullo stack trace
-		StackTraceElement[] stackTrace = e1.getStackTrace();
-		if (stackTrace.length > 0) {
-			StackTraceElement element = stackTrace[0];
-			errorMessage.append("\nClass: ").append(element.getClassName()).append("\n");
-			errorMessage.append("Method: ").append(element.getMethodName()).append("\n");
-			errorMessage.append("Line: ").append(element.getLineNumber()).append("\n");
-		}
-
-		// Mostra il messaggio di errore
-		GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", errorMessage.toString());
-	}
+	//	private void showDetailedErrorMessage(Exception e1) {
+	//		StringBuilder errorMessage = new StringBuilder();
+	//
+	//		// Aggiunge il messaggio dell'eccezione, se presente
+	//		if (e1.getMessage() != null) {
+	//			errorMessage.append(e1.getMessage()).append("\n");
+	//		}
+	//
+	//		// Aggiunge informazioni dettagliate sullo stack trace
+	//		StackTraceElement[] stackTrace = e1.getStackTrace();
+	//		if (stackTrace.length > 0) {
+	//			StackTraceElement element = stackTrace[0];
+	//			errorMessage.append("\nClass: ").append(element.getClassName()).append("\n");
+	//			errorMessage.append("Method: ").append(element.getMethodName()).append("\n");
+	//			errorMessage.append("Line: ").append(element.getLineNumber()).append("\n");
+	//		}
+	//
+	//		// Mostra il messaggio di errore
+	//		GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", errorMessage.toString());
+	//	}
 
 	private void processUserInput(String sessionId) throws ConnectException, IOException, Exception {
 		// Acquisisco il testo dall'inputField
@@ -410,6 +413,7 @@ public class FeedbackHandler {
 			throws ConnectException, IOException, Exception {
 
 		String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "en", diagram);
+		boolean empty = false;
 
 		if (!inputText.isEmpty()) {
 			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
@@ -417,6 +421,7 @@ public class FeedbackHandler {
 				Conversation newConversation = createNewConversation(sessionId, inputText, diagramAsText);
 				conversationListModel.addElement(newConversation);
 				conversationList.setSelectedValue(newConversation, true);
+				empty = true;
 			}
 
 			Conversation currentConversation = conversationList.getSelectedValue();
@@ -424,13 +429,15 @@ public class FeedbackHandler {
 			if (currentConversation != null) {
 				// currentConversation.appendMessage(answer + "\n" + response);
 
-				// update text description of diagrams
-				currentConversation.setDiagramAsText(diagramAsText);
-				// update query
-				currentConversation.setQuery(inputText);
+				if (!empty) {
+					// add text description of diagrams
+					currentConversation.setDiagramAsText(diagramAsText);
+					// add query
+					currentConversation.setQuery(inputText);
+				}
 
 				String answer = prefixAnswer + inputText;
-				currentConversation.appendMessage(answer);
+				currentConversation.appendMessage(answer, true);
 
 				String response = sendRequestAndGetResponse(currentConversation);
 				appendToPane(answer);
@@ -439,7 +446,8 @@ public class FeedbackHandler {
 				else
 					throw new Exception("no response from the server");
 				// currentConversation.appendMessage(answer);
-				currentConversation.appendMessage(response);
+				currentConversation.appendMessage(response, false);
+				// currentConversation.setResponse(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
 				conversationTitleField.setText(getDiagramTitle() + currentConversation.getTitle());
 
@@ -494,7 +502,7 @@ public class FeedbackHandler {
 
 		// Utilizzo del costruttore con i parametri
 		Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query, prefixAnswer);
-		newConversation.appendMessage(outputPane.getText());
+		newConversation.appendMessage(outputPane.getText(), false);
 		System.out.println(newConversation.toString());
 		return newConversation;
 	}
@@ -504,6 +512,8 @@ public class FeedbackHandler {
 		JPopupMenu popupMenu = new JPopupMenu();
 		JMenuItem renameItem = new JMenuItem("Rename");
 		JMenuItem deleteItem = new JMenuItem("Delete");
+		JMenuItem exportItem = new JMenuItem("Export as Text");
+
 		renameItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -516,9 +526,64 @@ public class FeedbackHandler {
 				deleteConversation();
 			}
 		});
+
+		exportItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				exportConversationAsText();
+			}
+		});
+
 		popupMenu.add(renameItem);
 		popupMenu.add(deleteItem);
+		popupMenu.add(exportItem);
 		popupMenu.show(conversationList, e.getX(), e.getY());
+	}
+
+	private void exportConversationAsText() {
+		int selectedIndex = conversationList.getSelectedIndex();
+		if (selectedIndex != -1) { // Verifica se è stata selezionata una conversazione
+			Conversation selectedConversation = conversationList.getSelectedValue();
+			if (selectedConversation != null) {
+				JFileChooser fileChooser = new JFileChooser();
+				int option = fileChooser.showSaveDialog(null);
+				if (option == JFileChooser.APPROVE_OPTION) {
+					try (BufferedWriter writer = new BufferedWriter(
+							new FileWriter(fileChooser.getSelectedFile() + ".txt"))) {
+						writer.write(selectedConversation.toString()); // Supponiamo che toString() restituisca il testo
+						// della conversazione
+						JOptionPane.showMessageDialog(null, "Conversation exported successfully!");
+					} catch (IOException ex) {
+						JOptionPane.showMessageDialog(null, "Error exporting conversation: " + ex.getMessage());
+					}
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "No conversation selected!");
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "No conversation selected!");
+		}
+	}
+
+	// Metodo per esportare tutte le conversazioni come testo
+	private void exportAllConversationsAsText() {
+		Conversation selectedConversation = conversationList.getSelectedValue();
+		if (selectedConversation != null) {
+			JFileChooser fileChooser = new JFileChooser();
+			int option = fileChooser.showSaveDialog(null);
+			if (option == JFileChooser.APPROVE_OPTION) {
+				try (BufferedWriter writer = new BufferedWriter(
+						new FileWriter(fileChooser.getSelectedFile() + ".txt"))) {
+					writer.write(selectedConversation.toString()); // Supponiamo che toString() restituisca il testo
+					// della conversazione
+					JOptionPane.showMessageDialog(null, "Conversation exported successfully!");
+				} catch (IOException ex) {
+					JOptionPane.showMessageDialog(null, "Error exporting conversation: " + ex.getMessage());
+				}
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "No conversation selected!");
+		}
 	}
 
 	// Metodo per eliminare la conversazione selezionata
@@ -624,7 +689,7 @@ public class FeedbackHandler {
 		if (!query.isEmpty() && !query.equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 			// i valori sessionId, projectId, etc.
 			String sessionId = generateSessionId();
-			String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "en");
+			String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "en", diagram);
 			// Crea una nuova istanza di Conversation
 			Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query, prefixAnswer);
 
@@ -751,6 +816,7 @@ public class FeedbackHandler {
 				for (String line : lines) {
 					Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
 					appendToPane(line + "\n", textColor);
+
 				}
 			} else {
 				conversationTitleField.setText(getDiagramTitle());

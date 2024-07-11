@@ -33,9 +33,13 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 		logger.info(String.format("%s \"%s\" removed", diagramUIModel.getType(), diagramUIModel.getName()));
 
 		Logger.createEvent(LogActivity.REMOVE_DIAGRAM, diagramUIModel);
-		// quando creo un nuovo diagramma aggiorno il pannello
-		FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram()); // Chiamata al metodo statico
-
+		// quando elimino un diagramma verifico che ci sia almeno un diagramma delle classi
+		if (FeedbackHandler.toBeClosed(project)) {
+			FeedbackHandler.closeFeedBackPanel();
+		}
+		else
+			// Chiamata al metodo statico
+			FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram()); 
 	}
 
 }

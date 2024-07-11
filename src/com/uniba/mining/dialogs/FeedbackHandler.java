@@ -654,6 +654,17 @@ public class FeedbackHandler {
 		}
 		Application.getViewManager().showMessagePaneComponent(id, title, panel);
 	}
+	
+	public static boolean toBeClosed(IProject project) {
+		boolean toBeClosed= false;
+		if (project.toDiagramArray().length==0)
+			toBeClosed= true;
+		return toBeClosed;	
+	}
+	
+	public static void closeFeedBackPanel() {
+		Application.getViewManager().removeMessagePaneComponent(id);
+	}
 
 	public void showFeedbackPanel(IDiagramUIModel diagramUIModel) {
 		setProjectId(Application.getProject().getId());

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.uniba.mining.dialogs.FeedbackHandler;
 import com.uniba.mining.logging.LogActivity;
 import com.uniba.mining.logging.Logger;
 import com.uniba.mining.logging.LogActivity.ActionType;

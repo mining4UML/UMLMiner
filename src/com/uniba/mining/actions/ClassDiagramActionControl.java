@@ -1,15 +1,9 @@
 package com.uniba.mining.actions;
 
-import java.nio.file.Path;
-
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 
 import com.uniba.mining.dialogs.ClassDiagramHandler;
 import com.uniba.mining.dialogs.ExportDialog;
-import com.uniba.mining.tasks.generator.DiagramCombinations;
 import com.uniba.mining.utils.Application;
 import com.uniba.mining.utils.GUI;
 import com.vp.plugin.ViewManager;

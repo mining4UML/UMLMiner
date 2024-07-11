@@ -1,8 +1,5 @@
-<plugin
-	id="%plugin.id"
-	name="%plugin.name"
-	description="%plugin.description"
-	provider="%plugin.provider"
+<plugin id="%plugin.id" name="%plugin.name"
+	description="%plugin.description" provider="%plugin.provider"
 	class="com.uniba.mining.plugin.MiningPlugin">
 
 	<runtime>
@@ -11,174 +8,113 @@
 
 	<actionSets>
 		<actionSet id="%actions.id">
-			<menu
-				id="Toolbar"
-				label="%actions.toolbar.label"
-				ribbonPath="Help"
-			/>
-			<!--<action
-				id="ProcessDiscovery"
-				actionType="generalAction"
-				label="%actions.ProcessDiscovery.label"
-				tooltip="%actions.ProcessDiscovery.label"
-				icon="assets/icons/spaceman.png"
-				style="normal"
-				ribbonPath="Toolbar/#">
-				<actionController class="com.uniba.mining.actions.ProcessDiscoveryActionController" />
-			</action>
-			<action
-				id="ConformanceChecking"
-				actionType="generalAction"
-				label="%actions.ConformanceChecking.label"
-				tooltip="%actions.ConformanceChecking.label"
-				icon="assets/icons/checklist.png"
-				style="normal"
-				ribbonPath="Toolbar/Discovery">
-				<actionController
-					class="com.uniba.mining.actions.ConformanceCheckingActionController" />
-			</action>-->
-			<action
-				id="ExportLogs"
-				actionType="generalAction"
+			<menu id="Toolbar" label="%actions.toolbar.label"
+				ribbonPath="Help" />
+			<!--<action id="ProcessDiscovery" actionType="generalAction" label="%actions.ProcessDiscovery.label" 
+				tooltip="%actions.ProcessDiscovery.label" icon="assets/icons/spaceman.png" 
+				style="normal" ribbonPath="Toolbar/#"> <actionController class="com.uniba.mining.actions.ProcessDiscoveryActionController" 
+				/> </action> <action id="ConformanceChecking" actionType="generalAction" 
+				label="%actions.ConformanceChecking.label" tooltip="%actions.ConformanceChecking.label" 
+				icon="assets/icons/checklist.png" style="normal" ribbonPath="Toolbar/Discovery"> 
+				<actionController class="com.uniba.mining.actions.ConformanceCheckingActionController" 
+				/> </action> -->
+			<action id="ExportLogs" actionType="generalAction"
 				label="%actions.ExportLogs.label"
-				tooltip="%actions.ExportLogs.label"
-				icon="assets/icons/book.png"
-				style="normal"
-				ribbonPath="Toolbar/#">
-				<actionController class="com.uniba.mining.actions.ExportLogsActionController" />
+				tooltip="%actions.ExportLogs.label" icon="assets/icons/book.png"
+				style="normal" ribbonPath="Toolbar/#">
+				<actionController
+					class="com.uniba.mining.actions.ExportLogsActionController" />
 			</action>
-			<action
-				id="ExportInfo"
-				actionType="generalAction"
+			<action id="ExportInfo" actionType="generalAction"
 				label="%actions.ExportInfo.label"
-				tooltip="%actions.ExportInfo.label"
-				icon="assets/icons/icon.png"
-				style="normal"
-				ribbonPath="Toolbar/ExportLogs">
-				<actionController class="com.uniba.mining.actions.ExportInfoActionController" />
+				tooltip="%actions.ExportInfo.label" icon="assets/icons/icon.png"
+				style="normal" ribbonPath="Toolbar/ExportLogs">
+				<actionController
+					class="com.uniba.mining.actions.ExportInfoActionController" />
 			</action>
-			<action
-				id="Violations"
-				actionType="generalAction"
+			<action id="Violations" actionType="generalAction"
 				label="%actions.Violations.label"
 				tooltip="%actions.Violations.label"
-				icon="assets/icons/violation.png"
-				style="normal"
+				icon="assets/icons/violation.png" style="normal"
 				ribbonPath="Toolbar/ExportInfo">
-				<actionController class="com.uniba.mining.actions.ExportViolationsController" />
+				<actionController
+					class="com.uniba.mining.actions.ExportViolationsController" />
 			</action>
 			<!-- creazione di un sottomenu -->
-			<menu
-				id="External"
-				label="%actions.External.miner"
-				ribbonPath="Toolbar/Violations"
-				icon="assets/icons/spaceman.png"
-			/>
-			<action
-				id="RuM"
-				actionType="generalAction"
+			<menu id="External" label="%actions.External.miner"
+				ribbonPath="Toolbar/Violations" icon="assets/icons/spaceman.png" />
+			<action id="RuM" actionType="generalAction"
 				label="%actions.External.RuM.label"
-				tooltip="%actions.External.RuM.label"
-				icon="assets/icons/rum.png"
-				style="normal"
-				ribbonPath="Toolbar/External/#">
-				<actionController class="com.uniba.mining.actions.ExternalActionController" />
+				tooltip="%actions.External.RuM.label" icon="assets/icons/rum.png"
+				style="normal" ribbonPath="Toolbar/External/#">
+				<actionController
+					class="com.uniba.mining.actions.ExternalActionController" />
 			</action>
-			<separator
-				id="ExternalSeparator"
+			<separator id="ExternalSeparator"
 				ribbonPath="Toolbar/External/ProM" />
-			<action
-				id="ConfigureExternal"
-				actionType="generalAction"
+			<action id="ConfigureExternal" actionType="generalAction"
 				label="%actions.External.ConfigureExternal.label"
 				tooltip="%actions.External.ConfigureExternal.label"
-				icon="assets/icons/settings.png"
-				style="normal"
+				icon="assets/icons/settings.png" style="normal"
 				ribbonPath="Toolbar/External/ExternalSeparator">
-				<actionController class="com.uniba.mining.actions.ConfigureExternalActionController" />
+				<actionController
+					class="com.uniba.mining.actions.ConfigureExternalActionController" />
 			</action>
-			<action
-					id="ClassFeedbackActionControl"
-					actionType="generalAction"
-					label="Feedback"
-					tooltip="Get Feedback on Diagrams"
-					style="normal"
-					icon="assets/icons/feedback.png"
-					ribbonPath="Toolbar/ConfigureExternal">
-				<actionController class="com.uniba.mining.actions.FeedbackActionController"/>
+			<action id="ClassFeedbackActionControl"
+				actionType="generalAction" label="Feedback"
+				tooltip="Get Feedback on Diagrams" style="normal"
+				icon="assets/icons/feedback.png"
+				ribbonPath="Toolbar/ConfigureExternal">
+				<actionController
+					class="com.uniba.mining.actions.FeedbackActionController" />
 			</action>
-						
-			<action
-					id="ClassDiagramActionControl"
-					actionType="generalAction"
-					label="Class Diagram Auto-Gen"
-					tooltip="Automatic Class Diagrams Creation via JSON file"
-					style="normal"
-					icon="assets/icons/class.png"
-					ribbonPath="Toolbar/ClassFeedbackActionControl">
-				<actionController class="com.uniba.mining.actions.ClassDiagramActionControl"/>
+			<action id="ClassDiagramActionControl"
+				actionType="generalAction" label="Class Diagram Auto-Gen"
+				tooltip="Automatic Class Diagrams Creation via JSON file"
+				style="normal" icon="assets/icons/class.png"
+				ribbonPath="Toolbar/ClassFeedbackActionControl">
+				<actionController
+					class="com.uniba.mining.actions.ClassDiagramActionControl" />
 			</action>
-			<separator
-				id="Separator2"
+			<separator id="Separator2"
 				ribbonPath="Toolbar/ClassDiagramActionControl" />
-			<action
-				id="ReloadPlugin"
-				actionType="generalAction"
+			<action id="ReloadPlugin" actionType="generalAction"
 				label="%actions.ReloadPlugin.label"
-				tooltip="%actions.ReloadPlugin.label"
-				icon="assets/icons/reload.png"
-				style="normal"
-				ribbonPath="Toolbar/Separator2">
-				<actionController class="com.uniba.mining.actions.ReloadPluginActionController" />
+				tooltip="%actions.ReloadPlugin.label" icon="assets/icons/reload.png"
+				style="normal" ribbonPath="Toolbar/Separator2">
+				<actionController
+					class="com.uniba.mining.actions.ReloadPluginActionController" />
 			</action>
-			<action
-				id="About"
-				actionType="generalAction"
-				label="%actions.About.label"
-				tooltip="%actions.About.label"
-				icon="assets/icons/question.png"
-				style="normal"
+			<action id="About" actionType="generalAction"
+				label="%actions.About.label" tooltip="%actions.About.label"
+				icon="assets/icons/question.png" style="normal"
 				ribbonPath="Toolbar/ReloadPlugin">
-				<actionController class="com.uniba.mining.actions.AboutActionController" />
+				<actionController
+					class="com.uniba.mining.actions.AboutActionController" />
 			</action>
-			<!--<menu
-				id="External"
-				label="%actions.External.label"
-				ribbonPath="Toolbar/Separator2"
-				icon="assets/icons/external.png"
-			/>-->
-			<!--<action
-				id="RuM"
-				actionType="generalAction"
-				label="%actions.External.RuM.label"
-				tooltip="%actions.External.RuM.label"
-				icon="assets/icons/rum.png"
-				style="normal"
-				ribbonPath="Toolbar/External/#">
-				<actionController class="com.uniba.mining.actions.ExternalActionController" />
-			</action>
-			<action
-				id="Disco"
-				actionType="generalAction"
-				label="%actions.External.Disco.label"
-				tooltip="%actions.External.Disco.label"
-				icon="assets/icons/disco.png"
-				style="normal"
-				ribbonPath="Toolbar/External/RuM">
-				<actionController class="com.uniba.mining.actions.ExternalActionController" />
-			</action>
-			<action
-				id="ProM"
-				actionType="generalAction"
-				label="%actions.External.ProM.label"
-				tooltip="%actions.External.ProM.label"
-				icon="assets/icons/prom.png"
-				style="normal"
-				ribbonPath="Toolbar/External/Disco">
-				<actionController class="com.uniba.mining.actions.ExternalActionController" />
-			</action>-->
+			<!--<menu id="External" label="%actions.External.label" ribbonPath="Toolbar/Separator2" 
+				icon="assets/icons/external.png" /> -->
+			<!--<action id="RuM" actionType="generalAction" label="%actions.External.RuM.label" 
+				tooltip="%actions.External.RuM.label" icon="assets/icons/rum.png" style="normal" 
+				ribbonPath="Toolbar/External/#"> <actionController class="com.uniba.mining.actions.ExternalActionController" 
+				/> </action> <action id="Disco" actionType="generalAction" label="%actions.External.Disco.label" 
+				tooltip="%actions.External.Disco.label" icon="assets/icons/disco.png" style="normal" 
+				ribbonPath="Toolbar/External/RuM"> <actionController class="com.uniba.mining.actions.ExternalActionController" 
+				/> </action> <action id="ProM" actionType="generalAction" label="%actions.External.ProM.label" 
+				tooltip="%actions.External.ProM.label" icon="assets/icons/prom.png" style="normal" 
+				ribbonPath="Toolbar/External/Disco"> <actionController class="com.uniba.mining.actions.ExternalActionController" 
+				/> </action> -->
 
 		</actionSet>
+		<!-- <contextSensitiveActionSet id="ActionSet"> <contextTypes all="false"> 
+			<include type="Class" /> -->
+		<!-- ignored when contextTypes.all = true -->
+		<!-- <exclude type="Package" /> -->
+		<!-- ignored when contextTypes.all = false -->
+		<!-- </contextTypes> <action id="ClassDiagramActionControl" label="Feedback" 
+			icon="assets/icons/feedback.png" style="toggle" menuPath="ActionSet/OpenSpecification"> 
+			<actionController class="com.uniba.mining.actions.FeedbackActionController" 
+			/> </action> </contextSensitiveActionSet> -->
 	</actionSets>
 
 </plugin>

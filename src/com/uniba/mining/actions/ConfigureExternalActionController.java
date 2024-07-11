@@ -15,9 +15,10 @@ public class ConfigureExternalActionController implements VPActionController {
         viewManager.showDialog(new ConfigureExternalDialogHandler());
     }
 
-    @Override
-    public void update(VPAction vpAction) {
-        // Empty
-    }
+	@Override
+	public void update(VPAction arg0) {
+		// TODO Auto-generated method stub		
+	}
+
 
 }

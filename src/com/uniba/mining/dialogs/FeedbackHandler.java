@@ -118,11 +118,9 @@ public class FeedbackHandler {
 		inputField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				// Verifica se la dimensione del conversationListModel è inferiore a 2
-				//if (conversationListModel.size() < 2) {
-					// Mostra il pannello di feedback solo se la dimensione è minore di 2
+				// aggiorna il pannello di feedback solo se il diagramma è cambiato
+				if (!Application.getDiagram().equals(getDiagram()))
 					showFeedbackPanel(Application.getDiagram());
-				//}
 				if (inputField.getText().equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
 					inputField.setText("");
 				}
@@ -271,11 +269,9 @@ public class FeedbackHandler {
 			// Metodo chiamato quando il focus viene guadagnato sull'outputPane
 			@Override
 			public void focusGained(FocusEvent e) {
-				// Verifica se la dimensione del conversationListModel è inferiore a 2
-				//if (conversationListModel.size() < 2) {
-					// Mostra il pannello di feedback solo se la dimensione è minore di 2
+				// aggiorna il pannello di feedback solo se il diagramma è cambiato
+				if (!Application.getDiagram().equals(getDiagram()))
 					showFeedbackPanel(Application.getDiagram());
-				//}
 			}
 
 			// Metodo chiamato quando il focus viene perso sull'outputPane
@@ -287,26 +283,27 @@ public class FeedbackHandler {
 		});
 	}
 
-	//	private void showDetailedErrorMessage(Exception e1) {
-	//		StringBuilder errorMessage = new StringBuilder();
+	// private void showDetailedErrorMessage(Exception e1) {
+	// StringBuilder errorMessage = new StringBuilder();
 	//
-	//		// Aggiunge il messaggio dell'eccezione, se presente
-	//		if (e1.getMessage() != null) {
-	//			errorMessage.append(e1.getMessage()).append("\n");
-	//		}
+	// // Aggiunge il messaggio dell'eccezione, se presente
+	// if (e1.getMessage() != null) {
+	// errorMessage.append(e1.getMessage()).append("\n");
+	// }
 	//
-	//		// Aggiunge informazioni dettagliate sullo stack trace
-	//		StackTraceElement[] stackTrace = e1.getStackTrace();
-	//		if (stackTrace.length > 0) {
-	//			StackTraceElement element = stackTrace[0];
-	//			errorMessage.append("\nClass: ").append(element.getClassName()).append("\n");
-	//			errorMessage.append("Method: ").append(element.getMethodName()).append("\n");
-	//			errorMessage.append("Line: ").append(element.getLineNumber()).append("\n");
-	//		}
+	// // Aggiunge informazioni dettagliate sullo stack trace
+	// StackTraceElement[] stackTrace = e1.getStackTrace();
+	// if (stackTrace.length > 0) {
+	// StackTraceElement element = stackTrace[0];
+	// errorMessage.append("\nClass: ").append(element.getClassName()).append("\n");
+	// errorMessage.append("Method: ").append(element.getMethodName()).append("\n");
+	// errorMessage.append("Line: ").append(element.getLineNumber()).append("\n");
+	// }
 	//
-	//		// Mostra il messaggio di errore
-	//		GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", errorMessage.toString());
-	//	}
+	// // Mostra il messaggio di errore
+	// GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(),
+	// "Feedback", errorMessage.toString());
+	// }
 
 	private void processUserInput(String sessionId) throws ConnectException, IOException, Exception {
 		// Acquisisco il testo dall'inputField
@@ -654,14 +651,14 @@ public class FeedbackHandler {
 		}
 		Application.getViewManager().showMessagePaneComponent(id, title, panel);
 	}
-	
+
 	public static boolean toBeClosed(IProject project) {
-		boolean toBeClosed= false;
-		if (project.toDiagramArray().length==0)
-			toBeClosed= true;
-		return toBeClosed;	
+		boolean toBeClosed = false;
+		if (project.toDiagramArray().length == 0)
+			toBeClosed = true;
+		return toBeClosed;
 	}
-	
+
 	public static void closeFeedBackPanel() {
 		Application.getViewManager().removeMessagePaneComponent(id);
 	}

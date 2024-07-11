@@ -34,6 +34,7 @@ public class LogStreamer {
     private static final Path logsDirectory = Paths.get(USER_DIR, "logs", USER_NAME);
     private static final Path modelsDirectory = Paths.get(USER_DIR, "models", USER_NAME);
     private static final Path reportsDirectory = Paths.get(USER_DIR, "reports", USER_NAME);
+    private static final Path conversationsDirectory = Paths.get(USER_DIR, "conversations", USER_NAME);
     private static final Logger logger = new Logger(LogStreamer.class);
     private static final XesXmlParser xesXmlParser = new XesXmlParser();
     private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
@@ -59,6 +60,8 @@ public class LogStreamer {
                 Files.createDirectories(modelsDirectory);
             if (Files.notExists(reportsDirectory))
                 Files.createDirectories(reportsDirectory);
+            if (Files.notExists(conversationsDirectory))
+                Files.createDirectories(conversationsDirectory);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,6 +81,10 @@ public class LogStreamer {
 
     public static Path getReportsDirectory() {
         return reportsDirectory;
+    }
+    
+    public static Path getConversationsDirectory() {
+        return conversationsDirectory;
     }
 
     public static FileFilter getLogFileFilter() {

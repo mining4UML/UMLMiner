@@ -1,13 +1,9 @@
 package com.uniba.mining.listeners;
 
-import com.uniba.mining.actions.FeedbackActionController;
-import com.uniba.mining.dialogs.FeedbackHandler;
 import com.uniba.mining.listeners.property.PropertyChangeListenerFactory;
 import com.uniba.mining.logging.LogActivity;
 import com.uniba.mining.logging.Logger;
-import com.uniba.mining.utils.Application;
 import com.vp.plugin.ApplicationManager;
-import com.vp.plugin.action.VPAction;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.IProjectListener;

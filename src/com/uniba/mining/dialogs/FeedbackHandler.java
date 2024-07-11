@@ -44,6 +44,7 @@ public class FeedbackHandler {
 	private DefaultListModel<Conversation> conversationListModel;
 	private JList<Conversation> conversationList;
 	private JButton newChatButton;
+	private JLabel conversationLabel;
 	private JTextField conversationTitleField;
 	private String projectId;
 	private IDiagramUIModel diagram;
@@ -108,13 +109,31 @@ public class FeedbackHandler {
 
 		conversationTitleField = new JTextField();
 		conversationTitleField.setEditable(false);
+		conversationTitleField.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
+		conversationTitleField.setForeground(new Color(34, 139, 34)); // Verde scuro
+		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in grassetto
 		// Imposta il colore di sfondo della casella di testo a quello del panel
 		conversationTitleField.setBackground(UIManager.getColor("Panel.background"));
 
 		newChatButton = new JButton("New Chat");
+		newChatButton.setForeground(Color.BLUE);
+	    //newChatButton.setFocusPainted(false);
+	    //newChatButton.setBorderPainted(false);
+	    //newChatButton.setOpaque(true);
+	    
+        // Imposta le dimensioni preferite del pulsante
+        Dimension buttonSize = new Dimension(50, 30); // Larghezza: 100px, Altezza: 30px
+        newChatButton.setPreferredSize(buttonSize);
+		newChatButton.setToolTipText("Start a new chat for this diagram");
 
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
-
+		
+		// Crea l'etichetta
+        conversationLabel = new JLabel("Conversation List");
+        conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
+        conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
+        conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in grassetto
+        
 		inputField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -750,10 +769,12 @@ public class FeedbackHandler {
 				GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", e1.getMessage());
 			}
 		});
-		leftPanel.add(newChatButton, BorderLayout.NORTH);
+		
+		leftPanel.add(newChatButton, BorderLayout.SOUTH);
 		JScrollPane listScrollPane = new JScrollPane(conversationList);
 		listScrollPane.setPreferredSize(new Dimension(200, 200));
 		leftPanel.add(listScrollPane, BorderLayout.CENTER);
+		leftPanel.add(conversationLabel, BorderLayout.NORTH);
 
 		mainPanel.add(leftPanel, BorderLayout.WEST);
 

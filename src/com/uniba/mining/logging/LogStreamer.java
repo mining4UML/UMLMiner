@@ -30,7 +30,7 @@ public class LogStreamer {
     public static final String CSV_EXTENSION = ".csv";
     public static final String ZIP_EXTENSION = ".zip";
     private static final String USER_NAME = System.getProperty("user.name");
-    private static final String USER_DIR = System.getProperty("user.dir");
+    private static final String USER_DIR = System.getProperty("user.home");
     private static final Path logsDirectory = Paths.get(USER_DIR, "logs", USER_NAME);
     private static final Path modelsDirectory = Paths.get(USER_DIR, "models", USER_NAME);
     private static final Path reportsDirectory = Paths.get(USER_DIR, "reports", USER_NAME);

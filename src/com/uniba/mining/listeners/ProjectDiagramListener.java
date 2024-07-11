@@ -24,7 +24,8 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 				Logger.createEvent(LogActivity.ADD_DIAGRAM, diagramUIModel);
 			diagramUIModel.addDiagramListener(new DiagramListener(diagramUIModel));
 		});
-		// quando creo un nuovo diagramma aggiorno il pannello
+		System.out.println(diagramUIModel.getId());
+		// quando creo un nuovo diagramma o aggiungo uno esistente aggiorno il pannello
 		FeedbackHandler.getInstance().showFeedbackPanel(diagramUIModel); // Chiamata al metodo statico
 	}
 

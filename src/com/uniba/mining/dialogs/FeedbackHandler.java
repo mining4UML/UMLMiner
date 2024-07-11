@@ -327,8 +327,8 @@ public class FeedbackHandler {
 			@Override
 			protected String doInBackground() throws Exception {
 				// Effettua la richiesta al server e ottiene la risposta
-				ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getQueryId(),
-						conversation.getDiagramAsText(), conversation.getQuery());
+				ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getDiagramId(),
+						conversation.getQueryId(), conversation.getDiagramAsText(), conversation.getQuery());
 				RestClient client = new RestClient();
 				ApiResponse response = client.sendRequest(request);
 				responseRef.set(response.getAnswer());
@@ -426,7 +426,7 @@ public class FeedbackHandler {
 			if (currentConversation != null) {
 				// currentConversation.appendMessage(answer + "\n" + response);
 
-				if (!empty) {
+			if (!empty) {
 					// add text description of diagrams
 					currentConversation.setDiagramAsText(diagramAsText);
 					// add query
@@ -477,14 +477,14 @@ public class FeedbackHandler {
 		return String.valueOf(conversationCounter);
 	}
 
-	private void serializeConversations() {
-		List<Conversation> conversations = new ArrayList<>();
-		for (int i = 0; i < conversationListModel.size(); i++) {
-			conversations.add(conversationListModel.getElementAt(i));
-		}
-		// Serializza l'intera lista di conversazioni
-		ConversationsSerializer.serializeConversations(conversations, projectId);
-	}
+//	private void serializeConversations() {
+//		List<Conversation> conversations = new ArrayList<>();
+//		for (int i = 0; i < conversationListModel.size(); i++) {
+//			conversations.add(conversationListModel.getElementAt(i));
+//		}
+//		// Serializza l'intera lista di conversazioni
+//		ConversationsSerializer.serializeConversations(conversations, projectId);
+//	}
 
 	private void serializeConversations(String diagramId) {
 		List<Conversation> conversations = new ArrayList<>();
@@ -498,7 +498,8 @@ public class FeedbackHandler {
 	private Conversation createNewConversation(String sessionId, String query, String diagramAsText) {
 
 		// Utilizzo del costruttore con i parametri
-		Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query, prefixAnswer);
+		Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), diagramAsText,
+				query, prefixAnswer);
 		newConversation.appendMessage(outputPane.getText(), false);
 		System.out.println(newConversation.toString());
 		return newConversation;
@@ -639,18 +640,18 @@ public class FeedbackHandler {
 		return instance;
 	}
 
-	public void showFeedbackPanel(IProject project) {
-		setProjectId(Application.getProject().getId());
-
-		if (panel == null)
-			createPanel();
-		else {
-			// after opened
-			clearPanel();
-			loadSerializedConversations();
-		}
-		Application.getViewManager().showMessagePaneComponent(id, title, panel);
-	}
+//	public void showFeedbackPanel(IProject project) {
+//		setProjectId(Application.getProject().getId());
+//
+//		if (panel == null)
+//			createPanel();
+//		else {
+//			// after opened
+//			clearPanel();
+//			loadSerializedConversations();
+//		}
+//		Application.getViewManager().showMessagePaneComponent(id, title, panel);
+//	}
 
 	public static boolean toBeClosed(IProject project) {
 		boolean toBeClosed = false;
@@ -670,13 +671,9 @@ public class FeedbackHandler {
 		if (panel == null)
 			createPanel();
 		else {
-			System.out.println(getDiagram().getId());
 			clearPanel(getDiagram().getId());
 			// Load serialized conversations with the diagramId
-			String diagramId = getDiagram().getId(); // Get the diagram ID
-			if (diagramId != null) {
-				loadSerializedConversations(diagramId);
-			}
+				loadSerializedConversations(getDiagram().getId());
 		}
 		Application.getViewManager().showMessagePaneComponent(id, title, panel);
 		forceUpdateView();
@@ -699,7 +696,8 @@ public class FeedbackHandler {
 			String sessionId = generateSessionId();
 			String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "en", diagram);
 			// Crea una nuova istanza di Conversation
-			Conversation newConversation = new Conversation(sessionId, projectId, diagramAsText, query, prefixAnswer);
+			Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), diagramAsText,
+					query, prefixAnswer);
 
 			// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
 			conversationListModel.addElement(newConversation);
@@ -810,6 +808,7 @@ public class FeedbackHandler {
 
 		panel.add(mainPanel, BorderLayout.CENTER);
 
+		// imposto l'id del progetto in base al progetto corrente
 		projectId = Application.getProject().getId();
 		loadSerializedConversations();
 
@@ -836,8 +835,8 @@ public class FeedbackHandler {
 	}
 
 	public void loadSerializedConversations() {
-		if (projectId != null) {
-			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(projectId);
+		if (getDiagram().getId() != null) {
+			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(getDiagram().getId());
 			// serve reimpostare il valore di conversationCounter? controllare
 			conversationCounter = 0;
 			if (serializedConversations != null) {

@@ -1,8 +1,10 @@
 package com.uniba.mining.listeners;
 
+import com.uniba.mining.dialogs.FeedbackHandler;
 import com.uniba.mining.listeners.property.PropertyChangeListenerFactory;
 import com.uniba.mining.logging.LogActivity;
 import com.uniba.mining.logging.Logger;
+import com.uniba.mining.utils.Application;
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.model.IProject;
@@ -93,7 +95,9 @@ public class ProjectListener implements IProjectListener {
     @Override
     public void projectAfterOpened(IProject project) {
         logger.info("Project \"%s\" after opened", project.getName() + " id:" + project.getId());
+        System.out.println(Application.getDiagram().getId());
         // qui si dovrebbe verificare che ci sia almeno un diagramma altrimenti feedback del menu disabilitato
+        FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram()); // Chiamata al metodo statico
     }
 
     @Override

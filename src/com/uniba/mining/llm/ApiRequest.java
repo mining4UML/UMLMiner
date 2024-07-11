@@ -8,6 +8,9 @@ public class ApiRequest {
 
     @JsonProperty("project_id")
     private String projectId;
+    
+    @JsonProperty("diagramId")
+    private String diagramId;
 
     @JsonProperty("query_id")
     private String queryId;
@@ -17,10 +20,20 @@ public class ApiRequest {
 
     private String query;
 
-    // Costruttore, getter e setter
-    public ApiRequest(String sessionId, String projectId, String queryId, String diagramAsText, String query) {
+    /**
+     * 
+     * @param sessionId
+     * @param projectId
+     * @param diagramId
+     * @param queryId
+     * @param diagramAsText
+     * @param query
+     */
+    public ApiRequest(String sessionId, String projectId, 
+    		String diagramId, String queryId, String diagramAsText, String query) {
         this.sessionId = sessionId;
         this.projectId = projectId;
+        this.diagramId = diagramId;
         this.queryId = queryId;
         this.diagramAsText = diagramAsText;
         this.query = query;
@@ -42,6 +55,15 @@ public class ApiRequest {
     public void setProjectId(String projectId) {
         this.projectId = projectId;
     }
+    
+    public String getDiagramId() {
+        return diagramId;
+    }
+
+    public void setDiagramId(String diagramId) {
+        this.diagramId = diagramId;
+    }
+
 
     public String getQueryId() {
         return queryId;

@@ -64,7 +64,7 @@
 			<action id="ClassFeedbackActionControl"
 				actionType="generalAction" label="Feedback"
 				tooltip="Get Feedback on Diagrams" style="normal"
-				icon="assets/icons/feedback.png" enabled="false"
+				icon="assets/icons/feedback.png"
 				ribbonPath="Toolbar/ConfigureExternal">
 				<actionController
 					class="com.uniba.mining.actions.FeedbackActionController" />

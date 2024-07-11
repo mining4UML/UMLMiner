@@ -11,6 +11,7 @@ public class Conversation implements Serializable {
 	private String title;
 	private String sessionId;
 	private String projectId;
+	private String diagramId;
 	private int queryId;
 
 	private String diagramAsText;
@@ -22,10 +23,21 @@ public class Conversation implements Serializable {
 	private List<String> responseList = new ArrayList<String>();
 	private String prefixAnswer;
 
-	// Costruttore che genera automaticamente il query ID incrementale
-	public Conversation(String sessionId, String projectId, String diagramAsText, String query, String prefixAnswer) {
+	/**
+	 * Costruttore che genera automaticamente il query ID incrementale
+	 * 
+	 * @param sessionId
+	 * @param projectId
+	 * @param diagramId
+	 * @param diagramAsText
+	 * @param query
+	 * @param prefixAnswer
+	 */
+	public Conversation(String sessionId, String projectId, String diagramId, String diagramAsText, String query,
+			String prefixAnswer) {
 		this.sessionId = sessionId;
 		this.projectId = projectId;
+		this.diagramId = diagramId; // Inizializzazione del nuovo attributo
 
 		// Calcola il query ID basato sul numero di occorrenze del prefisso della query
 		// nel conversationContent
@@ -100,6 +112,15 @@ public class Conversation implements Serializable {
 		this.projectId = projectId;
 	}
 
+	// Getter e setter per diagramId
+	public String getDiagramId() {
+		return diagramId;
+	}
+
+	public void setDiagramId(String diagramId) {
+		this.diagramId = diagramId;
+	}
+
 	// Getter e setter per queryId
 	public String getQueryId() {
 		return String.valueOf(queryId);
@@ -152,6 +173,9 @@ public class Conversation implements Serializable {
 		builder.append("PROJECT ID: ");
 		builder.append(projectId);
 		builder.append("\n");
+		builder.append("DIAGRAM ID: ");
+		builder.append(diagramId);
+		builder.append("\n");
 		builder.append("Conversation ID: ");
 		builder.append(sessionId);
 		if (title != null) {
@@ -170,6 +194,7 @@ public class Conversation implements Serializable {
 
 		return builder.toString();
 	}
+}
 
 //	// Metodo toString per rappresentare l'oggetto Conversation come stringa
 //	@Override
@@ -179,7 +204,6 @@ public class Conversation implements Serializable {
 //				+ title + '\'' + ", conversationContent='" + conversationContent + '\'' + '}';
 //	}
 
-}
 //import java.io.Serializable;
 //import java.util.ArrayList;
 //import java.util.List;

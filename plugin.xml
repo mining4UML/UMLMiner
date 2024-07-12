@@ -61,14 +61,27 @@
 				<actionController
 					class="com.uniba.mining.actions.ConfigureExternalActionController" />
 			</action>
-			<action id="ClassFeedbackActionControl"
-				actionType="generalAction" label="Feedback"
-				tooltip="Get Feedback on Diagrams" style="normal"
+			<!-- sottomenu per feedback -->
+			<menu id="Feedback" label="%actions.Feedback.label"
+			     tooltip="%actions.Feedback.tooltip"
+				ribbonPath="Toolbar/ConfigureExternal" icon="assets/icons/feedback.png" />
+			<action id="FeedbackChat"
+				actionType="generalAction" label="%actions.Feedback.label"
+				tooltip="%actions.Feedback.tooltip" style="normal"
 				icon="assets/icons/feedback.png"
-				ribbonPath="Toolbar/ConfigureExternal">
+				ribbonPath="Toolbar/Feedback/#">
 				<actionController
 					class="com.uniba.mining.actions.FeedbackActionController" />
 			</action>
+			<action id="FeedbackRequirements"
+				actionType="generalAction" label="%actions.Feedback.labelRequ"
+				tooltip="%actions.Feedback.tooltipRequ" style="normal"
+				icon="assets/icons/requirement.png"
+				ribbonPath="Toolbar/Feedback/FeedbackChat">
+				<actionController
+					class="com.uniba.mining.actions.FeedbackRequActionController" />
+			</action>
+			
 			<action id="ClassDiagramActionControl"
 				actionType="generalAction" label="Class Diagram Auto-Gen"
 				tooltip="Automatic Class Diagrams Creation via JSON file"

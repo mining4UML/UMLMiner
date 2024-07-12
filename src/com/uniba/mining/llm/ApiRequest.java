@@ -2,91 +2,109 @@ package com.uniba.mining.llm;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 
+ * pasqualeardimento
+ */
 public class ApiRequest {
-    @JsonProperty("session_id")
-    private String sessionId;
+	@JsonProperty("session_id")
+	private String sessionId;
 
-    @JsonProperty("project_id")
-    private String projectId;
-    
-    @JsonProperty("diagramId")
-    private String diagramId;
+	@JsonProperty("project_id")
+	private String projectId;
 
-    @JsonProperty("query_id")
-    private String queryId;
+	@JsonProperty("diagramId")
+	private String diagramId;
 
-    @JsonProperty("diagram_as_text")
-    private String diagramAsText;
+	@JsonProperty("query_id")
+	private String queryId;
 
-    private String query;
+	@JsonProperty("diagram_as_text")
+	private String diagramAsText;
 
-    /**
-     * 
-     * @param sessionId
-     * @param projectId
-     * @param diagramId
-     * @param queryId
-     * @param diagramAsText
-     * @param query
-     */
-    public ApiRequest(String sessionId, String projectId, 
-    		String diagramId, String queryId, String diagramAsText, String query) {
-        this.sessionId = sessionId;
-        this.projectId = projectId;
-        this.diagramId = diagramId;
-        this.queryId = queryId;
-        this.diagramAsText = diagramAsText;
-        this.query = query;
-    }
+	@JsonProperty("requirements")
+	private String requirements;
 
-    // Getter e setter
-    public String getSessionId() {
-        return sessionId;
-    }
+	private String query;
 
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
+	/**
+	 * 
+	 * @param sessionId
+	 * @param projectId
+	 * @param diagramId
+	 * @param queryId
+	 * @param diagramAsText
+	 * @param requirements
+	 * @param query
+	 */
+	public ApiRequest(String sessionId, String projectId, 
+			String diagramId, String queryId, String diagramAsText, 
+			String requirements, String query) {
+		this.sessionId = sessionId;
+		this.projectId = projectId;
+		this.diagramId = diagramId;
+		this.queryId = queryId;
+		this.diagramAsText = diagramAsText;
+		this.requirements = requirements;
+		this.query = query;
+	}
 
-    public String getProjectId() {
-        return projectId;
-    }
+	// Getter e setter
+	public String getSessionId() {
+		return sessionId;
+	}
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
-    
-    public String getDiagramId() {
-        return diagramId;
-    }
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
 
-    public void setDiagramId(String diagramId) {
-        this.diagramId = diagramId;
-    }
+	public String getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+
+	public String getDiagramId() {
+		return diagramId;
+	}
+
+	public void setDiagramId(String diagramId) {
+		this.diagramId = diagramId;
+	}
 
 
-    public String getQueryId() {
-        return queryId;
-    }
+	public String getQueryId() {
+		return queryId;
+	}
 
-    public void setQueryId(String queryId) {
-        this.queryId = queryId;
-    }
+	public void setQueryId(String queryId) {
+		this.queryId = queryId;
+	}
 
-    public String getDiagramAsText() {
-        return diagramAsText;
-    }
+	public String getDiagramAsText() {
+		return diagramAsText;
+	}
 
-    public void setDiagramAsText(String diagramAsText) {
-        this.diagramAsText = diagramAsText;
-    }
+	public void setDiagramAsText(String diagramAsText) {
+		this.diagramAsText = diagramAsText;
+	}
 
-    public String getQuery() {
-        return query;
-    }
+	public String getRequirements() {
+		return requirements;
+	}
 
-    public void setQuery(String query) {
-        this.query = query;
-    }
-    
+	public void setRequirements(String requirements) {
+		this.requirements = requirements;
+	}
+
+	public String getQuery() {
+		return query;
+	}
+
+	public void setQuery(String query) {
+		this.query = query;
+	}
+
 }

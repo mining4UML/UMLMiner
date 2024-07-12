@@ -17,15 +17,18 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.nio.file.Path;
 
 import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.feedback.ConversationListCellRenderer;
 import com.uniba.mining.feedback.ConversationsSerializer;
 import com.uniba.mining.feedback.ErrorUtils;
+import com.uniba.mining.feedback.FileUtilities;
 import com.uniba.mining.feedback.LimitedTextField;
 import com.uniba.mining.llm.ApiRequest;
 import com.uniba.mining.llm.ApiResponse;
 import com.uniba.mining.llm.RestClient;
+import com.uniba.mining.logging.LogStreamer;
 import com.uniba.mining.plugin.Config;
 
 import java.util.ArrayList;
@@ -60,6 +63,8 @@ public class FeedbackHandler {
 	private JButton newChatButton;
 	private JLabel conversationLabel;
 	private JTextField conversationTitleField;
+	private JLabel previewRequirements;
+	private JTextArea requirementsTextArea = new JTextArea();
 	private String projectId;
 	private IDiagramUIModel diagram;
 	// Counter to track the total number of conversations
@@ -126,7 +131,7 @@ public class FeedbackHandler {
 		conversationTitleField.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
 		conversationTitleField.setForeground(new Color(34, 139, 34)); // Verde scuro
 		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta
-																								// in grassetto
+		// in grassetto
 		// Imposta il colore di sfondo della casella di testo a quello del panel
 		conversationTitleField.setBackground(UIManager.getColor("Panel.background"));
 
@@ -148,17 +153,19 @@ public class FeedbackHandler {
 		conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
 		conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
 		conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in
-																						// grassetto
+		// grassetto
 
 		inputField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
 				// aggiorna il pannello di feedback solo se il diagramma è cambiato
-				if (!Application.getDiagram().equals(getDiagram()))
+				if (!Application.getDiagram().equals(getDiagram())) {
 					showFeedbackPanel(Application.getDiagram());
+				}
 				if (inputField.getText().equals(PLACEHOLDER)) {
 					inputField.setText("");
 				}
+				printReqFound();
 			}
 
 			@Override
@@ -180,7 +187,8 @@ public class FeedbackHandler {
 					if (conversationListModel.size() < 2) {
 						// Mostra il pannello di feedback solo se la dimensione è minore di 2
 						showFeedbackPanel(Application.getDiagram());
-					}
+					} else
+						printReqFound();
 					createNewChat();
 				} catch (Exception e1) {
 					ErrorUtils.showDetailedErrorMessage(e1);
@@ -202,6 +210,7 @@ public class FeedbackHandler {
 		});
 
 		initQueryButtons();
+		initRequirements();
 
 		addFocusListenerToOutputPane();
 
@@ -215,6 +224,56 @@ public class FeedbackHandler {
 		outputPane.setComponentPopupMenu(popupMenu);
 
 	}
+
+	/**
+	 * 
+	 */
+	private void initRequirements() {
+		requirementsTextArea = new JTextArea();
+		//requirementsTextArea.setForeground(Color.RED); // Set text color to red
+		//Font boldFont = requirementsTextArea.getFont().deriveFont(Font.BOLD); // Create bold font
+		//requirementsTextArea.setFont(boldFont); // Set text area font to bold
+		requirementsTextArea.setEditable(false); // Make the text area non-editable
+		requirementsTextArea.setLineWrap(true); // Enable line wrapping
+		requirementsTextArea.setWrapStyleWord(true); // Wrap at word boundaries
+		requirementsTextArea.setPreferredSize(new Dimension(200, requirementsTextArea.getPreferredSize().height)); // Set default width
+		// Set default text for when no requirements are found
+		requirementsTextArea.setText("Requirements NOT Found");
+		
+		previewRequirements = new JLabel();
+		previewRequirements.setText("Requirements Preview");
+
+		previewRequirements.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
+		previewRequirements.setForeground(new Color(34, 139, 34)); // Verde scuro
+		previewRequirements.setFont(previewRequirements.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta
+		// Add a right margin to previewRequirements
+		previewRequirements.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));// margin right
+
+		
+		printReqFound(); // Call method to update the text area content
+	}
+
+	private void printReqFound() {
+		if (getDiagram() != null) {
+			String diagramId= getDiagram().getId();
+			Path path = LogStreamer.getRequirementsDirectory();
+			if (FileUtilities.doesFileExist(diagramId, path))
+				try {
+					requirementsTextArea.setText(FileUtilities.loadFileContent(diagramId, path));
+				} catch (IOException e) {
+					ErrorUtils.showDetailedErrorMessage(e);
+					requirementsTextArea.setText("Requirements NOT found");
+				}
+			else
+				requirementsTextArea.setText("Requirements NOT found");
+		}
+		else
+			requirementsTextArea.setText("Requirements NOT found");
+	}
+
+	//	public void setReqFoundLabel(String text) {
+	//		requirementsTextArea.setText(text);
+	//	}
 
 	/**
 	 * Query Buttons initialization
@@ -311,8 +370,10 @@ public class FeedbackHandler {
 			@Override
 			public void focusGained(FocusEvent e) {
 				// aggiorna il pannello di feedback solo se il diagramma è cambiato
-				if (!Application.getDiagram().equals(getDiagram()))
+				if (!Application.getDiagram().equals(getDiagram())) {
 					showFeedbackPanel(Application.getDiagram());
+				} else
+					printReqFound();
 			}
 
 			// Metodo chiamato quando il focus viene perso sull'outputPane
@@ -351,8 +412,13 @@ public class FeedbackHandler {
 			@Override
 			protected String doInBackground() throws Exception {
 				// Effettua la richiesta al server e ottiene la risposta
-				ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, conversation.getDiagramId(),
-						conversation.getQueryId(), conversation.getDiagramAsText(), conversation.getQuery());
+				String diagramId = conversation.getDiagramId();
+				Path path = LogStreamer.getRequirementsDirectory();
+				String requirements = FileUtilities.loadFileContent(diagramId, path);
+				System.out.println(requirements);
+				ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, diagramId,
+						conversation.getQueryId(), conversation.getDiagramAsText(), 
+						requirements, conversation.getQuery());
 				RestClient client = new RestClient();
 				ApiResponse response = client.sendRequest(request);
 				responseRef.set(response.getAnswer());
@@ -668,18 +734,18 @@ public class FeedbackHandler {
 		return instance;
 	}
 
-//	public void showFeedbackPanel(IProject project) {
-//		setProjectId(Application.getProject().getId());
-//
-//		if (panel == null)
-//			createPanel();
-//		else {
-//			// after opened
-//			clearPanel();
-//			loadSerializedConversations();
-//		}
-//		Application.getViewManager().showMessagePaneComponent(id, title, panel);
-//	}
+	//	public void showFeedbackPanel(IProject project) {
+	//		setProjectId(Application.getProject().getId());
+	//
+	//		if (panel == null)
+	//			createPanel();
+	//		else {
+	//			// after opened
+	//			clearPanel();
+	//			loadSerializedConversations();
+	//		}
+	//		Application.getViewManager().showMessagePaneComponent(id, title, panel);
+	//	}
 
 	public static boolean toBeClosed(IProject project) {
 		boolean toBeClosed = false;
@@ -705,6 +771,7 @@ public class FeedbackHandler {
 		}
 		Application.getViewManager().showMessagePaneComponent(panelId, title, panel);
 		forceUpdateView();
+		printReqFound();
 	}
 
 	/**
@@ -775,9 +842,6 @@ public class FeedbackHandler {
 		// Pannello principale diviso in due parti: sinistra e destra
 		JPanel mainPanel = new JPanel(new BorderLayout());
 
-		// Pannello sinistro contiene il pulsante "New Chat" e la lista delle
-		// conversazioni
-		JPanel leftPanel = new JPanel(new BorderLayout());
 		newChatButton.addActionListener(e -> {
 			try {
 				createNewChat();
@@ -785,7 +849,10 @@ public class FeedbackHandler {
 				GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", e1.getMessage());
 			}
 		});
-
+		
+		// Pannello sinistro contiene il pulsante "New Chat" e la lista delle
+		// conversazioni
+		JPanel leftPanel = new JPanel(new BorderLayout());
 		leftPanel.add(newChatButton, BorderLayout.SOUTH);
 		JScrollPane listScrollPane = new JScrollPane(conversationList);
 		listScrollPane.setPreferredSize(new Dimension(200, 200));
@@ -793,11 +860,23 @@ public class FeedbackHandler {
 		leftPanel.add(conversationLabel, BorderLayout.NORTH);
 
 		mainPanel.add(leftPanel, BorderLayout.WEST);
-
-		// Pannello destro contiene il conversationTitleField, l'outputPane e
-		// l'inputField
+		
+		// Right panel contains the conversationTitleField, outputPane, and inputField
 		JPanel rightPanel = new JPanel(new BorderLayout());
-		rightPanel.add(conversationTitleField, BorderLayout.NORTH);
+
+		// Panel to hold conversationTitleField and previewRequirements
+		JPanel northPanel = new JPanel(new BorderLayout());
+		northPanel.add(conversationTitleField, BorderLayout.CENTER);
+		northPanel.add(previewRequirements, BorderLayout.EAST);
+
+		// Add the north panel to the right panel
+		rightPanel.add(northPanel, BorderLayout.NORTH);
+
+		// Add requirementsTextArea to the east region in a JScrollPane
+		JScrollPane requirementsScrollPane = new JScrollPane(requirementsTextArea);
+		rightPanel.add(requirementsScrollPane, BorderLayout.EAST);
+
+		// Add outputPane in a JScrollPane to the center region
 		rightPanel.add(new JScrollPane(outputPane), BorderLayout.CENTER);
 
 		// Crea un nuovo pannello per inputField e buttonPanel con GridBagLayout

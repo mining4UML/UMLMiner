@@ -1,7 +1,9 @@
 package com.uniba.mining.actions;
 
 import com.uniba.mining.dialogs.FeedbackHandler;
+import com.uniba.mining.plugin.Config;
 import com.uniba.mining.utils.Application;
+import com.uniba.mining.utils.GUI;
 import com.vp.plugin.action.VPAction;
 import com.vp.plugin.action.VPActionController;
 
@@ -17,15 +19,11 @@ public class FeedbackActionController implements VPActionController {
 
     @Override
     public void performAction(VPAction arg0) {
-//        logger.info("performAction called");
-//        System.out.println(arg0.getActionId());
-//        System.out.println(arg0.getTooltip());
-//        arg0.setEnabled(false);
-//        System.out.println(String.valueOf(arg0.isSelected()));
-//        System.out.println(arg0.toString());
         if (Application.getDiagram() != null) {
             FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram());
         } else {
+        	GUI.showInformationMessageDialog(Application.getViewManager().getRootFrame(), 
+        			Config.PLUGIN_NAME, Config.FEEDBACK_NODIAGRAM_OPENED);
             logger.warning("No diagram found when performAction was called");
         }
     }

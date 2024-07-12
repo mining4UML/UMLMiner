@@ -51,6 +51,18 @@ public class Config {
 	public static final String EXPORT_VIOLATIONS_INPUT_ERROR = pluginProperties
 			.getProperty("actions.export.violations.inputerror");
 
+	public static final String FEEDBACK_LABEL= pluginProperties
+			.getProperty("actions.Feedback.label");
+	public static final String FEEDBACK_TOOLTIP= pluginProperties
+			.getProperty("actions.Feedback.tooltip");
+	public static final String FEEDBACK_TOOLTIPREQU= pluginProperties
+			.getProperty("actions.Feedback.tooltipRequ");
+	public static final String FEEDBACK_LABELREQU= pluginProperties
+			.getProperty("actions.Feedback.labelRequ");
+
+	
+
+	public static final String FEEDBACK_NODIAGRAM_OPENED= pluginProperties.getProperty("dialogs.feedback.nodiagraopened");
 	public static final String DIALOG_FEEDBACK_MESSAGE_PLACEHOLDER = pluginProperties.getProperty("dialogs.feedback.placeholder");
 	public static final String FEEDBACK_BUTTON_ADD = pluginProperties.getProperty("dialogs.feedback.button.add");
 	public static final String FEEDBACK_BUTTON_IMROVEMENT = pluginProperties

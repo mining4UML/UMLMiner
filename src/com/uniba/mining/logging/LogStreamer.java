@@ -22,159 +22,172 @@ import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.out.XesXmlSerializer;
 
+import com.uniba.mining.plugin.Config;
 import com.uniba.mining.utils.Application;
 import com.vp.plugin.model.IProject;
 
 public class LogStreamer {
-    public static final String LOG_EXTENSION = ".xes";
-    public static final String CSV_EXTENSION = ".csv";
-    public static final String ZIP_EXTENSION = ".zip";
-    private static final String USER_NAME = System.getProperty("user.name");
-    private static final String USER_HOME = System.getProperty("user.home");
-    private static final Path logsDirectory = Paths.get(USER_HOME, "logs", USER_NAME);
-    private static final Path modelsDirectory = Paths.get(USER_HOME, "models", USER_NAME);
-    private static final Path reportsDirectory = Paths.get(USER_HOME, "reports", USER_NAME);
-    private static final Path conversationsDirectory = Paths.get(USER_HOME, "conversations", USER_NAME);
-    private static final Logger logger = new Logger(LogStreamer.class);
-    private static final XesXmlParser xesXmlParser = new XesXmlParser();
-    private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
-    private static final Set<String> logExtensions = new HashSet<>(
-            Arrays.asList("xes", "csv", "jsoncel", "xmlocel"));
-    private static final FileFilter logFileFilter = new FileNameExtensionFilter(
-            "Log " + Arrays.toString(logExtensions.toArray()),
-            logExtensions.toArray(String[]::new));
-    private static final FileFilter modelFileFilter = new FileNameExtensionFilter("MP-Declare File", "decl");
-    public static final String LOG_EXTENSIONS_REGEX = "\\.(" + logExtensions.stream().reduce("",
-            (t, u) -> String.join(t.isEmpty() ? "" : "|", t, u)) + ").*";
-    public static final String LOG_FILENAME_REGEX = String.format(".*%s", LOG_EXTENSIONS_REGEX);
+	public static final String LOG_EXTENSION = ".xes";
+	public static final String CSV_EXTENSION = ".csv";
+	public static final String ZIP_EXTENSION = ".zip";
+	private static final String USER_NAME = System.getProperty("user.name");
+	private static final String USER_HOME = System.getProperty("user.home");
 
-    private LogStreamer() {
+	private static final Path logsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
+			"logs", USER_NAME);
+	private static final Path modelsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
+			"models", USER_NAME);
+	private static final Path reportsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
+			"reports", USER_NAME);
+	private static final Path conversationsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
+			"conversations", USER_NAME);
+	private static final Path requirementsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
+			"requirements", USER_NAME);
+	private static final Logger logger = new Logger(LogStreamer.class);
+	private static final XesXmlParser xesXmlParser = new XesXmlParser();
+	private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
+	private static final Set<String> logExtensions = new HashSet<>(
+			Arrays.asList("xes", "csv", "jsoncel", "xmlocel"));
+	private static final FileFilter logFileFilter = new FileNameExtensionFilter(
+			"Log " + Arrays.toString(logExtensions.toArray()),
+			logExtensions.toArray(String[]::new));
+	private static final FileFilter modelFileFilter = new FileNameExtensionFilter("MP-Declare File", "decl");
+	public static final String LOG_EXTENSIONS_REGEX = "\\.(" + logExtensions.stream().reduce("",
+			(t, u) -> String.join(t.isEmpty() ? "" : "|", t, u)) + ").*";
+	public static final String LOG_FILENAME_REGEX = String.format(".*%s", LOG_EXTENSIONS_REGEX);
 
-    }
+	private LogStreamer() {
 
-    private static void createDirectories() {
-        try {
-            if (Files.notExists(logsDirectory))
-                Files.createDirectories(logsDirectory);
-            if (Files.notExists(modelsDirectory))
-                Files.createDirectories(modelsDirectory);
-            if (Files.notExists(reportsDirectory))
-                Files.createDirectories(reportsDirectory);
-            if (Files.notExists(conversationsDirectory))
-                Files.createDirectories(conversationsDirectory);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static {
-        createDirectories();
-    }
-
-    public static Path getLogsDirectory() {
-        return logsDirectory;
-    }
-
-    public static Path getModelsDirectory() {
-        return modelsDirectory;
-    }
-
-    public static Path getReportsDirectory() {
-        return reportsDirectory;
-    }
-    
-    public static Path getConversationsDirectory() {
-        return conversationsDirectory;
-    }
-
-    public static FileFilter getLogFileFilter() {
-        return logFileFilter;
-    }
-
-    public static FileFilter getModelFileFilter() {
-        return modelFileFilter;
-    }
-
-    private static String getLogName() {
-        IProject project = Application.getProject();
-        return String.join("-", project.getName(), project.getId()) + LOG_EXTENSION;
-    }
-
-    private static boolean isLogFile(File dir, String name) {
-        return name.matches(LOG_FILENAME_REGEX);
-    }
-
-    public static XLog parseLog() {
-        XLog xLog = null;
-
-        try {
-            String logName = getLogName();
-            System.out.println("Parse log " + logName);
-            Path logPath = logsDirectory.resolve(logName);
-
-            if (Files.isReadable(logPath))
-                xLog = xesXmlParser.parse(logPath.toFile()).get(0);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return xLog;
-    }
-
-    public static void serializeLog(XLog xLog) {
-        try {
-            String logName = getLogName();
-            System.out.println("Save log " + logName);
-            Path logPath = logsDirectory.resolve(logName);
-
-            OutputStream logOutputStream = new FileOutputStream(
-                    Files.isWritable(logPath) ? logPath.toFile() : Files.createFile(logPath).toFile());
-
-            xLog.removeIf(Collection::isEmpty);
-            xesXmlSerializer.serialize(xLog, logOutputStream);
-
-            logOutputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static int countLogs() {
-        if (logsDirectory != null && logsDirectory.toFile().exists()) {
-			return logsDirectory.toFile().listFiles(LogStreamer::isLogFile).length;
-		} 
-        else return 0;
 	}
 
-    public static void exportZip(Path filePath, File... files) {
-        try (OutputStream outputStream = new FileOutputStream(Files.createFile(filePath).toFile());
-                ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+	private static void createDirectories() {
+		try {
+			if (Files.notExists(logsDirectory))
+				Files.createDirectories(logsDirectory);
+			if (Files.notExists(modelsDirectory))
+				Files.createDirectories(modelsDirectory);
+			if (Files.notExists(reportsDirectory))
+				Files.createDirectories(reportsDirectory);
+			if (Files.notExists(conversationsDirectory))
+				Files.createDirectories(conversationsDirectory);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-            for (File file : files) {
-                if (file != null) {
-                    ZipEntry zipEntry = new ZipEntry(file.getName());
-                    zipOutputStream.putNextEntry(zipEntry);
+	static {
+		createDirectories();
+	}
 
-                    try (FileInputStream logInputStream = new FileInputStream(file)) {
-                        byte[] bytes = new byte[logInputStream.available()];
-                        if (logInputStream.read(bytes) != -1)
-                            zipOutputStream.write(bytes);
-                    }
-                }
-            }
+	public static Path getLogsDirectory() {
+		return logsDirectory;
+	}
 
-            logger.info("Files exported in %s", filePath.toString());
+	public static Path getModelsDirectory() {
+		return modelsDirectory;
+	}
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	public static Path getReportsDirectory() {
+		return reportsDirectory;
+	}
 
-    public static void exportLogs(Path directoryPath) {
-        String fileName = String.join("-", "logs", Application.getStringTimestamp()) + ZIP_EXTENSION;
-        Path filePath = directoryPath.resolve(fileName);
+	public static Path getConversationsDirectory() {
+		return conversationsDirectory;
+	}
 
-        exportZip(filePath, logsDirectory.toFile().listFiles(LogStreamer::isLogFile));
-    }
+	public static Path getRequirementsDirectory() {
+		return requirementsDirectory;
+	}
+
+
+	public static FileFilter getLogFileFilter() {
+		return logFileFilter;
+	}
+
+	public static FileFilter getModelFileFilter() {
+		return modelFileFilter;
+	}
+
+	private static String getLogName() {
+		IProject project = Application.getProject();
+		return String.join("-", project.getName(), project.getId()) + LOG_EXTENSION;
+	}
+
+	private static boolean isLogFile(File dir, String name) {
+		return name.matches(LOG_FILENAME_REGEX);
+	}
+
+	public static XLog parseLog() {
+		XLog xLog = null;
+
+		try {
+			String logName = getLogName();
+			System.out.println("Parse log " + logName);
+			Path logPath = logsDirectory.resolve(logName);
+
+			if (Files.isReadable(logPath))
+				xLog = xesXmlParser.parse(logPath.toFile()).get(0);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return xLog;
+	}
+
+	public static void serializeLog(XLog xLog) {
+		try {
+			String logName = getLogName();
+			System.out.println("Save log " + logName);
+			Path logPath = logsDirectory.resolve(logName);
+
+			OutputStream logOutputStream = new FileOutputStream(
+					Files.isWritable(logPath) ? logPath.toFile() : Files.createFile(logPath).toFile());
+
+			xLog.removeIf(Collection::isEmpty);
+			xesXmlSerializer.serialize(xLog, logOutputStream);
+
+			logOutputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static int countLogs() {
+		if (logsDirectory != null && logsDirectory.toFile().exists()) {
+			return logsDirectory.toFile().listFiles(LogStreamer::isLogFile).length;
+		} 
+		else return 0;
+	}
+
+	public static void exportZip(Path filePath, File... files) {
+		try (OutputStream outputStream = new FileOutputStream(Files.createFile(filePath).toFile());
+				ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+
+			for (File file : files) {
+				if (file != null) {
+					ZipEntry zipEntry = new ZipEntry(file.getName());
+					zipOutputStream.putNextEntry(zipEntry);
+
+					try (FileInputStream logInputStream = new FileInputStream(file)) {
+						byte[] bytes = new byte[logInputStream.available()];
+						if (logInputStream.read(bytes) != -1)
+							zipOutputStream.write(bytes);
+					}
+				}
+			}
+
+			logger.info("Files exported in %s", filePath.toString());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void exportLogs(Path directoryPath) {
+		String fileName = String.join("-", "logs", Application.getStringTimestamp()) + ZIP_EXTENSION;
+		Path filePath = directoryPath.resolve(fileName);
+
+		exportZip(filePath, logsDirectory.toFile().listFiles(LogStreamer::isLogFile));
+	}
 }

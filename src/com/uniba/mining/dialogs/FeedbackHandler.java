@@ -32,13 +32,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * The {@code FeedbackHandler} class is responsible for managing
+ * feedback-related operations within the application. It provides
+ * functionalities to display feedback panels, handle feedback submissions, and
+ * manage the state of feedback-related data.
+ * <p>
+ * This class follows the singleton design pattern to ensure a single instance
+ * is used throughout the application.
+ * </p>
+ * 
+ * <p>
+ * <strong>Author:</strong> Pasquale Ardimento
+ * </p>
+ */
 public class FeedbackHandler {
-	private static final String id = "feedbackPanel";
-	private static final String prefixAnswer = "You: ";
-	private static final String title = "UML Miner - Feedback";
+	private static final String panelId = "feedbackPanel";
+	private static final String prefixAnswer = Config.FEEDBACK_PREFIX_ANSWER;
+	private static final String title = Config.FEEDBACK_TITLE;
 	private LimitedTextField inputField;
 	private JLabel charCountLabel;
-	private static final String suffixCountLabel = "\t\t\t";
+	private static final String suffixCountLabel = Config.FEEDBACK_SUFFIX_COUNT_LABEL;
 	private JTextPane outputPane;
 	private StyledDocument document;
 	private DefaultListModel<Conversation> conversationListModel;
@@ -48,15 +62,15 @@ public class FeedbackHandler {
 	private JTextField conversationTitleField;
 	private String projectId;
 	private IDiagramUIModel diagram;
-	// Contatore per tenere traccia del numero totale di conversazioni
+	// Counter to track the total number of conversations
 	private int conversationCounter = 0;
-	// dialogs.feedback.placeholder in plugin.properties
+	private static final String PLACEHOLDER = Config.DIALOG_FEEDBACK_MESSAGE_PLACEHOLDER;
 
 	private static FeedbackHandler instance;
 
 	private static JPanel panel;
 
-	// Aggiungi i pulsanti
+	// Pulsanti per query predefinite
 	private JButton addButton;
 	private JButton improvementsButton;
 	private JButton issuesButton;
@@ -88,7 +102,7 @@ public class FeedbackHandler {
 	private FeedbackHandler() {
 
 		inputField = new LimitedTextField();
-		inputField.setText(Config.DIALOG_FEEDBACK_MESSAGE);
+		inputField.setText(PLACEHOLDER);
 		inputField.setBackground(Color.WHITE);
 		inputField.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 
@@ -111,36 +125,38 @@ public class FeedbackHandler {
 		conversationTitleField.setEditable(false);
 		conversationTitleField.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
 		conversationTitleField.setForeground(new Color(34, 139, 34)); // Verde scuro
-		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in grassetto
+		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta
+																								// in grassetto
 		// Imposta il colore di sfondo della casella di testo a quello del panel
 		conversationTitleField.setBackground(UIManager.getColor("Panel.background"));
 
 		newChatButton = new JButton("New Chat");
 		newChatButton.setForeground(Color.BLUE);
-	    //newChatButton.setFocusPainted(false);
-	    //newChatButton.setBorderPainted(false);
-	    //newChatButton.setOpaque(true);
-	    
-        // Imposta le dimensioni preferite del pulsante
-        Dimension buttonSize = new Dimension(50, 30); // Larghezza: 100px, Altezza: 30px
-        newChatButton.setPreferredSize(buttonSize);
+		// newChatButton.setFocusPainted(false);
+		// newChatButton.setBorderPainted(false);
+		// newChatButton.setOpaque(true);
+
+		// Imposta le dimensioni preferite del pulsante
+		Dimension buttonSize = new Dimension(50, 30); // Larghezza: 100px, Altezza: 30px
+		newChatButton.setPreferredSize(buttonSize);
 		newChatButton.setToolTipText("Start a new chat for this diagram");
 
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
-		
+
 		// Crea l'etichetta
-        conversationLabel = new JLabel("Conversation List");
-        conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
-        conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
-        conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in grassetto
-        
+		conversationLabel = new JLabel("Conversation List");
+		conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
+		conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
+		conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in
+																						// grassetto
+
 		inputField.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
 				// aggiorna il pannello di feedback solo se il diagramma è cambiato
 				if (!Application.getDiagram().equals(getDiagram()))
 					showFeedbackPanel(Application.getDiagram());
-				if (inputField.getText().equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
+				if (inputField.getText().equals(PLACEHOLDER)) {
 					inputField.setText("");
 				}
 			}
@@ -148,7 +164,7 @@ public class FeedbackHandler {
 			@Override
 			public void focusLost(FocusEvent e) {
 				if (inputField.getText().isEmpty()) {
-					inputField.setText(Config.DIALOG_FEEDBACK_MESSAGE);
+					inputField.setText(PLACEHOLDER);
 				}
 			}
 		});
@@ -185,7 +201,25 @@ public class FeedbackHandler {
 			}
 		});
 
-		// Inizializza i nuovi pulsanti
+		initQueryButtons();
+
+		addFocusListenerToOutputPane();
+
+		JPopupMenu popupMenu = new JPopupMenu();
+		JMenuItem copyItem = new JMenuItem("Copy");
+		// JMenuItem clearItem = new JMenuItem("Clear");
+		copyItem.addActionListener(e -> outputPane.copy());
+		// clearItem.addActionListener(e -> outputPane.setText(""));
+		popupMenu.add(copyItem);
+		// popupMenu.add(clearItem);
+		outputPane.setComponentPopupMenu(popupMenu);
+
+	}
+
+	/**
+	 * Query Buttons initialization
+	 */
+	private void initQueryButtons() {
 		addButton = new JButton("Add Contents");
 		addButton.setToolTipText(Config.FEEDBACK_BUTTON_ADD);
 		addButton.setForeground(Color.BLUE);
@@ -205,18 +239,6 @@ public class FeedbackHandler {
 		explainButton.setToolTipText(Config.FEEDBACK_BUTTON_EXPLAIN);
 		explainButton.setForeground(Color.BLUE);
 		explainButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_EXPLAIN));
-
-		addFocusListenerToOutputPane();
-
-		JPopupMenu popupMenu = new JPopupMenu();
-		JMenuItem copyItem = new JMenuItem("Copy");
-		// JMenuItem clearItem = new JMenuItem("Clear");
-		copyItem.addActionListener(e -> outputPane.copy());
-		// clearItem.addActionListener(e -> outputPane.setText(""));
-		popupMenu.add(copyItem);
-		// popupMenu.add(clearItem);
-		outputPane.setComponentPopupMenu(popupMenu);
-
 	}
 
 	private static void addDocumentListener(JTextField textField, JLabel label) {
@@ -249,7 +271,7 @@ public class FeedbackHandler {
 	private void handleButtonClick(String text) {
 		inputField.setText(text);
 		inputField.postActionEvent();
-		inputField.setText(Config.DIALOG_FEEDBACK_MESSAGE);
+		inputField.setText(PLACEHOLDER);
 	}
 
 	private void setInputFieldListener() {
@@ -302,28 +324,6 @@ public class FeedbackHandler {
 		});
 	}
 
-	// private void showDetailedErrorMessage(Exception e1) {
-	// StringBuilder errorMessage = new StringBuilder();
-	//
-	// // Aggiunge il messaggio dell'eccezione, se presente
-	// if (e1.getMessage() != null) {
-	// errorMessage.append(e1.getMessage()).append("\n");
-	// }
-	//
-	// // Aggiunge informazioni dettagliate sullo stack trace
-	// StackTraceElement[] stackTrace = e1.getStackTrace();
-	// if (stackTrace.length > 0) {
-	// StackTraceElement element = stackTrace[0];
-	// errorMessage.append("\nClass: ").append(element.getClassName()).append("\n");
-	// errorMessage.append("Method: ").append(element.getMethodName()).append("\n");
-	// errorMessage.append("Line: ").append(element.getLineNumber()).append("\n");
-	// }
-	//
-	// // Mostra il messaggio di errore
-	// GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(),
-	// "Feedback", errorMessage.toString());
-	// }
-
 	private void processUserInput(String sessionId) throws ConnectException, IOException, Exception {
 		// Acquisisco il testo dall'inputField
 		String inputText = inputField.getText();
@@ -332,9 +332,14 @@ public class FeedbackHandler {
 		inputField.setText("");
 	}
 
-	// Metodo per inviare la richiesta al server e ottenere la risposta
-	// Assicurati che il metodo chiamante sia in grado di gestire ConnectException e
-	// IOException
+	/**
+	 * Send and get response from the server
+	 * 
+	 * @param conversation
+	 * @return Return the obtained response
+	 * @throws ConnectException
+	 * @throws IOException
+	 */
 	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
 		// Creazione del dialogo di attesa
 		JDialog dialog = createWaitDialog();
@@ -387,7 +392,14 @@ public class FeedbackHandler {
 		return responseRef.get();
 	}
 
-	// Metodo per creare il dialogo di attesa con puntini sospensivi
+	/**
+	 * Creates a modal JDialog that displays a "Please wait" message with a loading
+	 * animation. The dialog is centered on the screen and does not allow resizing
+	 * or closing via the close button. A Timer is used to animate ellipsis in the
+	 * message to indicate processing.
+	 *
+	 * @return A JDialog instance configured with a loading message and animation.
+	 */
 	private JDialog createWaitDialog() {
 		JDialog dialog = new JDialog((Frame) null, "Please wait", true);
 		JLabel label = new JLabel("Processing, please wait");
@@ -445,7 +457,7 @@ public class FeedbackHandler {
 			if (currentConversation != null) {
 				// currentConversation.appendMessage(answer + "\n" + response);
 
-			if (!empty) {
+				if (!empty) {
 					// add text description of diagrams
 					currentConversation.setDiagramAsText(diagramAsText);
 					// add query
@@ -496,15 +508,6 @@ public class FeedbackHandler {
 		return String.valueOf(conversationCounter);
 	}
 
-//	private void serializeConversations() {
-//		List<Conversation> conversations = new ArrayList<>();
-//		for (int i = 0; i < conversationListModel.size(); i++) {
-//			conversations.add(conversationListModel.getElementAt(i));
-//		}
-//		// Serializza l'intera lista di conversazioni
-//		ConversationsSerializer.serializeConversations(conversations, projectId);
-//	}
-
 	private void serializeConversations(String diagramId) {
 		List<Conversation> conversations = new ArrayList<>();
 		for (int i = 0; i < conversationListModel.size(); i++) {
@@ -524,7 +527,13 @@ public class FeedbackHandler {
 		return newConversation;
 	}
 
-	// Metodo per visualizzare il menu a comparsa
+	/**
+	 * Displays a popup menu with options to rename, delete, or export a
+	 * conversation when a mouse event occurs. The popup menu appears at the
+	 * location of the mouse event.
+	 *
+	 * @param e the MouseEvent that triggered the popup menu
+	 */
 	private void showPopupMenu(MouseEvent e) {
 		JPopupMenu popupMenu = new JPopupMenu();
 		JMenuItem renameItem = new JMenuItem("Rename");
@@ -680,7 +689,7 @@ public class FeedbackHandler {
 	}
 
 	public static void closeFeedBackPanel() {
-		Application.getViewManager().removeMessagePaneComponent(id);
+		Application.getViewManager().removeMessagePaneComponent(panelId);
 	}
 
 	public void showFeedbackPanel(IDiagramUIModel diagramUIModel) {
@@ -692,14 +701,21 @@ public class FeedbackHandler {
 		else {
 			clearPanel(getDiagram().getId());
 			// Load serialized conversations with the diagramId
-				loadSerializedConversations(getDiagram().getId());
+			loadSerializedConversations(getDiagram().getId());
 		}
-		Application.getViewManager().showMessagePaneComponent(id, title, panel);
+		Application.getViewManager().showMessagePaneComponent(panelId, title, panel);
 		forceUpdateView();
 	}
 
+	/**
+	 * Forces the update of the panel's view. This method ensures that any changes
+	 * made to the panel's components or layout are reflected immediately.
+	 * <p>
+	 * It achieves this by calling {@code repaint()} and {@code revalidate()} on the
+	 * panel, which triggers a re-rendering and layout validation.
+	 * </p>
+	 */
 	private void forceUpdateView() {
-		// Metodo per forzare l'aggiornamento della vista
 		panel.repaint();
 		panel.revalidate();
 	}
@@ -710,7 +726,7 @@ public class FeedbackHandler {
 
 		// Controlla se l'inputText non è vuoto o uguale al messaggio di feedback
 		// predefinito
-		if (!query.isEmpty() && !query.equals(Config.DIALOG_FEEDBACK_MESSAGE)) {
+		if (!query.isEmpty() && !query.equals(PLACEHOLDER)) {
 			// i valori sessionId, projectId, etc.
 			String sessionId = generateSessionId();
 			String diagramAsText = ClassInfo.exportInformation(Application.getProject(), "en", diagram);
@@ -769,7 +785,7 @@ public class FeedbackHandler {
 				GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", e1.getMessage());
 			}
 		});
-		
+
 		leftPanel.add(newChatButton, BorderLayout.SOUTH);
 		JScrollPane listScrollPane = new JScrollPane(conversationList);
 		listScrollPane.setPreferredSize(new Dimension(200, 200));
@@ -857,7 +873,8 @@ public class FeedbackHandler {
 
 	public void loadSerializedConversations() {
 		if (getDiagram().getId() != null) {
-			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(getDiagram().getId());
+			List<Conversation> serializedConversations = ConversationsSerializer
+					.deserializeConversations(getDiagram().getId());
 			// serve reimpostare il valore di conversationCounter? controllare
 			conversationCounter = 0;
 			if (serializedConversations != null) {
@@ -909,13 +926,18 @@ public class FeedbackHandler {
 		}
 	}
 
+	/**
+	 * Appends the given text to a text pane with a specific color based on the
+	 * text's prefix. If the text starts with the prefix defined by
+	 * {@code prefixAnswer}, it will be appended in blue. Otherwise, it will be
+	 * appended in black.
+	 *
+	 * @param text the text to append to the pane
+	 */
 	private void appendToPane(String text) {
-		// Verifica se il testo inizia con "You:" e termina con "\n"
 		if (text.startsWith(prefixAnswer)) {
-			// Se sì, imposta il colore del testo su BLUE
 			appendToPane(text, Color.BLUE);
 		} else {
-			// Altrimenti, imposta il colore del testo su nero
 			appendToPane(text, Color.BLACK);
 		}
 	}

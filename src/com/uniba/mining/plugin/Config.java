@@ -45,24 +45,30 @@ public class Config {
 	public static final String EXPORT_INFO_OK = pluginProperties.getProperty("actions.export.infodiag.successfully");
 	public static final String EXPORT_INFO_ERROR = pluginProperties.getProperty("actions.export.infodiag.error");
 
-	
 	public static final String EXPORT_VIOLATIONS_ACTION = pluginProperties.getProperty("actions.Violations.label");
-	public static final String EXPORT_VIOLATIONS_OK = pluginProperties.getProperty("actions.export.violations.successfully");
-	public static final String EXPORT_VIOLATIONS_INPUT_ERROR = 
-			pluginProperties.getProperty("actions.export.violations.inputerror");
-	
-	public static final String DIALOG_FEEDBACK_MESSAGE = pluginProperties.getProperty("dialogs.feedback.placeholder"); 
-	public static final String FEEDBACK_BUTTON_ADD = pluginProperties.getProperty("dialogs.feedback.button.add"); 
-	public static final String FEEDBACK_BUTTON_IMROVEMENT = pluginProperties.getProperty("dialogs.feedback.button.improvement"); 
-	public static final String FEEDBACK_BUTTON_ISSUES = pluginProperties.getProperty("dialogs.feedback.button.issues"); 
-	public static final String FEEDBACK_BUTTON_EXPLAIN = pluginProperties.getProperty("dialogs.feedback.button.explain"); 
-	
-	public static final String FEEDBACK_CHAR_COUNTING = pluginProperties.getProperty("dialogs.feedback.label.characters"); 
-	
-	
-	public static final String PLUGIN_WINDOWS_SEPARATOR=" - ";
-	
+	public static final String EXPORT_VIOLATIONS_OK = pluginProperties
+			.getProperty("actions.export.violations.successfully");
+	public static final String EXPORT_VIOLATIONS_INPUT_ERROR = pluginProperties
+			.getProperty("actions.export.violations.inputerror");
 
+	public static final String DIALOG_FEEDBACK_MESSAGE_PLACEHOLDER = pluginProperties.getProperty("dialogs.feedback.placeholder");
+	public static final String FEEDBACK_BUTTON_ADD = pluginProperties.getProperty("dialogs.feedback.button.add");
+	public static final String FEEDBACK_BUTTON_IMROVEMENT = pluginProperties
+			.getProperty("dialogs.feedback.button.improvement");
+	public static final String FEEDBACK_BUTTON_ISSUES = pluginProperties.getProperty("dialogs.feedback.button.issues");
+	public static final String FEEDBACK_BUTTON_EXPLAIN = pluginProperties
+			.getProperty("dialogs.feedback.button.explain");
+	public static final String FEEDBACK_PREFIX_ANSWER = pluginProperties.getProperty("dialogs.feedback.prefixAnswer");
+	public static final String FEEDBACK_TITLE = pluginProperties.getProperty("plugin.name") + " - "
+			+ pluginProperties.getProperty("dialogs.feedback.name");
+	
+	public static final String FEEDBACK_SUFFIX_COUNT_LABEL = pluginProperties
+			.getProperty("dialogs.feedback.suffixCountLabel");
+
+	public static final String FEEDBACK_CHAR_COUNTING = pluginProperties
+			.getProperty("dialogs.feedback.label.characters");
+
+	public static final String PLUGIN_WINDOWS_SEPARATOR = " - ";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

@@ -123,7 +123,7 @@ public class ClassInfo {
 							if (classe.getParent() != null && classe.getParent().getParent() != null) {
 								System.out.println(classe.getParent().getParent().getName() != null
 										? classe.getParent().getParent().getName()
-										: "non c'è parent model");
+												: "non c'è parent model");
 							} else {
 								System.out.println("Parent o Parent Model è null");
 							}
@@ -144,7 +144,7 @@ public class ClassInfo {
 									output.append(String.format("- %s %s(",
 											operazione.getVisibility() != null ? operazione.getVisibility()
 													: " visibilità non definita",
-											operazione.getName()));
+													operazione.getName()));
 
 									// Aggiungi parametri dell'operazione se presenti
 									IParameter[] parametri = operazione.toParameterArray();
@@ -161,7 +161,7 @@ public class ClassInfo {
 
 									output.append(String.format((": %s"),
 											operazione.getReturnTypeAsString() != null
-													? operazione.getReturnTypeAsString()
+											? operazione.getReturnTypeAsString()
 													: "void"));
 
 									// Vai a capo dopo ogni operazione
@@ -196,7 +196,7 @@ public class ClassInfo {
 							// info sul fatto che la classe sia in una view master o auxiliary
 							output.append(!diagramElement.isMasterView()
 									? "\nClass " + classe.getName() + " is an auxiliary view. Master view is in "
-											+ modelElement.getMasterView().getDiagramUIModel().getName() + " diagram"
+									+ modelElement.getMasterView().getDiagramUIModel().getName() + " diagram"
 									: "");
 
 						}
@@ -331,13 +331,13 @@ public class ClassInfo {
 							if (classe.getParent() != null && classe.getParent().getParent() != null) {
 								System.out.println(classe.getParent().getParent().getName() != null
 										? classe.getParent().getParent().getName()
-										: "non c'è parent model");
+												: "non c'è parent model");
 							} else {
 								System.out.println("Parent o Parent Model è null");
 							}
 
 							Optional.ofNullable(classe).map(c -> c.getMasterView()).map(mv -> mv.getModelElement())
-									.map(me -> me.getName()).ifPresent(name -> System.out.println("*********" + name));
+							.map(me -> me.getName()).ifPresent(name -> System.out.println("*********" + name));
 
 							Optional.ofNullable(classe).ifPresent(c -> System.out.println("Classe: " + c.getName()));
 
@@ -352,7 +352,7 @@ public class ClassInfo {
 									output.append(String.format("- %s %s(",
 											operazione.getVisibility() != null ? operazione.getVisibility()
 													: " visibilità non definita",
-											operazione.getName()));
+													operazione.getName()));
 
 									// Aggiungi parametri dell'operazione se presenti
 									IParameter[] parametri = operazione.toParameterArray();
@@ -369,7 +369,7 @@ public class ClassInfo {
 
 									output.append(String.format((": %s"),
 											operazione.getReturnTypeAsString() != null
-													? operazione.getReturnTypeAsString()
+											? operazione.getReturnTypeAsString()
 													: "void"));
 
 									// Vai a capo dopo ogni operazione
@@ -404,14 +404,14 @@ public class ClassInfo {
 							// info sul fatto che la classe sia in una view master o auxiliary
 							Optional<String> optionalMessage = Optional.ofNullable(diagramElement)
 									.filter(element -> !element.isMasterView()) // Verifica se diagramElement non è una
-																				// vista principale
+									// vista principale
 									.map(element -> {
 										if (modelElement != null && modelElement.getMasterView() != null
 												&& modelElement.getMasterView().getDiagramUIModel() != null) {
 											return "\nClass " + classe.getName()
-													+ " is an auxiliary view. Master view is in "
-													+ modelElement.getMasterView().getDiagramUIModel().getName()
-													+ " diagram";
+											+ " is an auxiliary view. Master view is in "
+											+ modelElement.getMasterView().getDiagramUIModel().getName()
+											+ " diagram";
 										} else {
 											return ""; // Se uno dei valori è null, restituisci una stringa vuota
 										}
@@ -445,161 +445,261 @@ public class ClassInfo {
 						+ messages.getString("feedback.problem"));
 			}
 		} // chiusura else quando ci sono diagrammi
-			// Restituisci l'output sotto forma di stringa
+		// Restituisci l'output sotto forma di stringa
 		return output.toString();
 	}
 
 	public static String exportInformation(IProject project, String language, IDiagramUIModel diagram) throws Exception {
-	    // Ottieni i messaggi nella lingua specificata
-	    messages = Language.getInstance(language).getMessages();
+		// Ottieni i messaggi nella lingua specificata
+		messages = Language.getInstance(language).getMessages();
 
-	    // Crea una stringa per memorizzare l'output
-	    StringBuilder output = new StringBuilder();
+		// Crea una stringa per memorizzare l'output
+		StringBuilder output = new StringBuilder();
 
-	    // Controllo che il diagramma passato non sia null
-	    if (diagram == null) {
-	        throw new IllegalArgumentException("Diagram cannot be null");
-	    }
+		// Controllo che il diagramma passato non sia null
+		if (diagram == null) {
+			throw new IllegalArgumentException("Diagram cannot be null");
+		}
 
-	    // Controllo se il diagramma è un diagramma di classe
-	    if (!(diagram instanceof IClassDiagramUIModel)) {
-	        throw new IllegalArgumentException("Only class diagrams are supported");
-	    }
+		// Controllo se il diagramma è un diagramma di classe
+		if (!(diagram instanceof IClassDiagramUIModel)) {
+			throw new IllegalArgumentException("Only class diagrams are supported");
+		}
 
-	    // Informazioni di base del diagramma
-	    appendDiagramInfo(output, diagram);
+		// Informazioni di base del diagramma
+		appendDiagramInfo(output, diagram);
 
-	    // Itera sugli elementi del diagramma passato in input
-	    IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
-	    for (IDiagramElement diagramElement : diagramElements) {
-	        IModelElement modelElement = diagramElement.getModelElement();
+		// Itera sugli elementi del diagramma passato in input
+		IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
+		for (IDiagramElement diagramElement : diagramElements) {
+			IModelElement modelElement = diagramElement.getModelElement();
 
-	        if (modelElement instanceof IClass) {
-	            IClass classe = (IClass) modelElement;
+			if (modelElement instanceof IClass) {
+				IClass classe = (IClass) modelElement;
 
-	            // Aggiunge informazioni sulle classi
-	            appendClassInfo(output, classe);
+				// Aggiunge informazioni sulle classi
+				appendClassInfo(output, classe);
+
+				// Aggiunge informazioni sugli attributi della classe
+				output.append(getInfoAttributes(classe));
+
+				// Aggiunge informazioni sulle operazioni della classe
+				appendOperations(output, messages, classe);
+
+				// Aggiunge informazioni sulle relazioni della classe
+				appendRelationships(output, messages, diagramElement, classe);
+				
+				// Aggiungi le informazioni sulle relazioni semplici
+	            //output.append(simpleRelationships(classe));
 	            
-	            // Aggiunge informazioni sugli attributi della classe
-	            output.append(getInfoAttributes(classe));
+	            // Chiamata al metodo per le informazioni sulla vista principale o ausiliaria
+	            appendViewInfo(output, diagramElement, classe);
+	           
+			}
 
-	            // Aggiunge informazioni sulle operazioni della classe
-	            appendOperations(output, messages, classe);
+			// Aggiungi separatore tra le classi
+			output.append("\n");
+		}
 
-	            // Aggiunge informazioni sulle relazioni della classe
-	            appendRelationships(output, messages, diagramElement, classe);
-	        }
-
-	        // Aggiungi separatore tra le classi
-	        output.append("\n");
-	    }
-
-	    // Se non ci sono elementi nel diagramma, solleva un'eccezione
-	    if (diagramElements.length == 0) {
-	        messages = Language.getInstance("en").getMessages();
-	        throw new Exception(messages.getString("class.project.elements.absence") + "\n"
-	                + messages.getString("feedback.problem"));
-	    }
-
-	    // Restituisci l'output sotto forma di stringa
-	    return output.toString();
+		// Se non ci sono elementi nel diagramma, solleva un'eccezione
+		if (diagramElements.length == 0) {
+			messages = Language.getInstance("en").getMessages();
+			throw new Exception(messages.getString("class.project.elements.absence") + "\n"
+					+ messages.getString("feedback.problem"));
+		}
+		
+		// Rimuovi caratteri di nuova riga e spazi vuoti finali
+		while (output.length() > 0 && (output.charAt(output.length() - 1) == '\n' 
+				|| Character.isWhitespace(output.charAt(output.length() - 1)))) {
+			output.deleteCharAt(output.length() - 1);
+		}
+		
+		// Restituisci l'output sotto forma di stringa
+		return output.toString();
 	}
 
 	// Metodi privati per parti comuni
 
 	private static void appendDiagramInfo(StringBuilder output, IDiagramUIModel diagram) {
-	    // Aggiungi informazioni di base sul diagramma
-	    String diagramName = diagram.getName();
-	    if (diagramName != null) {
-	        output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
-	                diagram.getName(), messages.getString("class.diagram.contains")));
-	    } else {
-	        output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
-	                messages.getString("class.diagran.noname"),
-	                messages.getString("class.diagram.contains")));
-	    }
+		// Aggiungi informazioni di base sul diagramma
+		String diagramName = diagram.getName();
+		if (diagramName != null) {
+			output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
+					diagram.getName(), messages.getString("class.diagram.contains")));
+		} else {
+			output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
+					messages.getString("class.diagram.noname"),
+					messages.getString("class.diagram.contains")));
+		}
+	}
+	
+	// Metodo privato per aggiungere informazioni sulla vista principale o ausiliaria della classe
+	private static void appendViewInfo(StringBuilder output, IDiagramElement diagramElement, IClass classe) {
+	    Optional<String> optionalMessage = Optional.ofNullable(diagramElement)
+	            .filter(element -> !element.isMasterView())
+	            .map(element -> {
+	                if (classe != null && classe.getMasterView() != null
+	                        && classe.getMasterView().getDiagramUIModel() != null) {
+	                    return "\nClass " + classe.getName() + " is an auxiliary view. Master view is in "
+	                            + classe.getMasterView().getDiagramUIModel().getName() + " diagram";
+	                } else {
+	                    return ""; // Se uno dei valori è null, restituisci una stringa vuota
+	                }
+	            });
+
+	    optionalMessage.ifPresent(message -> {
+	        output.append(message);
+	        output.append("\n");
+	    });
 	}
 
 	private static void appendClassInfo(StringBuilder output, IClass classe) {
-	    // Aggiungi informazioni sulle classi
-	    output.append(String.format("- %s", classe.getName() != null ? classe.getName() : "---"));
+		// Aggiungi informazioni sulle classi
+		output.append(String.format("\nclass %s", classe.getName() != null ? classe.getName() : "---"));
 
-	    IModelElement parent = classe.getParent();
-	    if (parent != null) {
-	        output.append(String.format("  %s", parent.getName() != null ? " whose package is " + parent.getName() : "---"));
-	        // Se il diagramma è un IClassDiagramUIModel, puoi accedere al default package
-	        if (parent instanceof IClassDiagramUIModel) {
-	            IClassDiagramUIModel classDiagram = (IClassDiagramUIModel) parent;
-	            if (classDiagram.getDefaultPackage() != null) {
-	                output.append(String.format(" and default package: %s", classDiagram.getDefaultPackage().getName()));
-	            }
-	        }
-	        output.append(String.format("%n"));
-	    }
+		IModelElement parent = classe.getParent();
+		if (parent != null) {
+			output.append(String.format(" %s", parent.getName() != null ? " whose package is " + parent.getName() : "---"));
+			// Se il diagramma è un IClassDiagramUIModel, puoi accedere al default package
+			if (parent instanceof IClassDiagramUIModel) {
+				IClassDiagramUIModel classDiagram = (IClassDiagramUIModel) parent;
+				if (classDiagram.getDefaultPackage() != null) {
+					output.append(String.format(" and default package: %s", classDiagram.getDefaultPackage().getName()));
+				}
+			}
+			output.append(String.format("%n"));
+		}
 	}
 
 	private static void appendOperations(StringBuilder output, ResourceBundle messages, IClass classe) {
-	    // Aggiungi informazioni sulle operazioni della classe
-	    IOperation[] operazioni = classe.toOperationArray();
-	    if (operazioni != null && operazioni.length > 0) {
-	        output.append(String.format("\n%s %s\n", classe.getName(),
-	                messages.getString("class.operations")));
-	        for (IOperation operazione : operazioni) {
-	            output.append(String.format("- %s %s(",
-	                    operazione.getVisibility() != null ? operazione.getVisibility() : "visibilità non definita",
-	                    operazione.getName()));
+		// Aggiungi informazioni sulle operazioni della classe
+		IOperation[] operazioni = classe.toOperationArray();
+		if (operazioni != null && operazioni.length > 0) {
+			output.append(String.format("\n%s %s\n", classe.getName(),
+					messages.getString("class.operations")));
+			for (IOperation operazione : operazioni) {
+				output.append(String.format("- %s %s(",
+						operazione.getVisibility() != null ? operazione.getVisibility() : "visibilità non definita",
+								operazione.getName()));
 
-	            // Aggiungi parametri dell'operazione se presenti
-	            IParameter[] parametri = operazione.toParameterArray();
-	            if (parametri != null && parametri.length > 0) {
-	                for (IParameter parametro : parametri) {
-	                    output.append(String.format("%s: %s, ", parametro.getName(), parametro.getTypeAsString()));
-	                }
-	                // Rimuovi l'ultima virgola aggiunta
-	                output.setLength(output.length() - 2);
-	            }
-	            output.append(")");
+				// Aggiungi parametri dell'operazione se presenti
+				IParameter[] parametri = operazione.toParameterArray();
+				if (parametri != null && parametri.length > 0) {
+					for (IParameter parametro : parametri) {
+						output.append(String.format("%s: %s, ", parametro.getName(), parametro.getTypeAsString()));
+					}
+					// Rimuovi l'ultima virgola aggiunta
+					output.setLength(output.length() - 2);
+				}
+				output.append(")");
 
-	            output.append(String.format((": %s"),
-	                    operazione.getReturnTypeAsString() != null ? operazione.getReturnTypeAsString() : "void"));
+				output.append(String.format((": %s"),
+						operazione.getReturnTypeAsString() != null ? operazione.getReturnTypeAsString() : "void"));
 
-	            output.append("\n");
-	        }
-	    } else {
-	        output.append(String.format("\n%s %s", messages.getString("class.operations.empty"),
-	                classe.getName()));
-	    }
+				output.append("\n");
+			}
+		} else {
+			output.append(String.format("\n%s %s", messages.getString("class.operations.empty"),
+					classe.getName()));
+		}
 	}
 
+	/**
+	 * Appends relationship information of the class to the provided StringBuilder.
+	 * Retrieves both "To" and "From" relationships and appends them to the output if present.
+	 *
+	 * @param output The StringBuilder where the relationship information will be appended.
+	 * @param messages ResourceBundle containing localized messages for output formatting.
+	 * @param diagramElement The diagram element associated with the class.
+	 * @param classe The class for which relationships are to be retrieved and appended.
+	 */
 	private static void appendRelationships(StringBuilder output, ResourceBundle messages, IDiagramElement diagramElement, IClass classe) {
-	    // Aggiungi informazioni sulle relazioni della classe
-	    StringBuilder relationships = getRelationshipsInfo(classe);
+	    // Retrieve "To" relationships information of the class
+	    StringBuilder relationships = getToRelationshipsInfo(classe);
+	    // Retrieve "From" relationships information of the class
+	    relationships.append(getFromRelationshipsInfo(classe));
+	    
+        // Relazioni di associazione
+	    relationships.append(fromEndRelationships(classe));
+	    
+	    // Append relationships information to output if there are any relationships
 	    if (relationships.length() > 0) {
-	        output.append(String.format("\n%s %s:%n", messages.getString("class.relationships"), classe.getName()));
+	        output.append(String.format("\n%s %s :\n", messages.getString("class.relationships"), classe.getName()));
 	        output.append(relationships.toString());
 	    }
 	}
 
-	private static StringBuilder getRelationshipsInfo(IClass classe) {
-	    StringBuilder relationships = new StringBuilder();
 
+
+	//	private static StringBuilder getRelationshipsInfo(IClass classe) {
+	//	    StringBuilder relationships = new StringBuilder();
+	//
+	//	    Iterator<IRelationship> relationshipsIterator = classe.toRelationshipIterator();
+	//	    while (relationshipsIterator.hasNext()) {
+	//	        IRelationship relationship = relationshipsIterator.next();
+	//
+	//	        // Aggiungi le informazioni sulla relazione al StringBuilder
+	//	        relationships.append(String.format("- %s %s %s%n",
+	//	                relationship.getName() != null ? relationship.getName() : "---",
+	//	                relationship.getModelType() != null ? relationship.getModelType() : "relationship type not defined",
+	//	                relationship.getFrom().getName() != null ? relationship.getFrom().getName() : "from not defined",
+	//	                relationship.getTo().getName() != null ? relationship.getTo().getName() : "to not defined"));
+	//	    }
+	//
+	//	    return relationships;
+	//	}
+
+	/**
+	 * 
+	 * @param classe
+	 * @return
+	 */
+	private static StringBuilder getToRelationshipsInfo(IClass classe) {
+	    StringBuilder relationships = new StringBuilder();
+	    
 	    Iterator<IRelationship> relationshipsIterator = classe.toRelationshipIterator();
 	    while (relationshipsIterator.hasNext()) {
 	        IRelationship relationship = relationshipsIterator.next();
 
+	        // Estrai le informazioni sulla relazione
+	        String relationshipName = relationship.getName() != null ? relationship.getName().trim() : "";
+	        String relationshipType = relationship.getModelType() != null ? relationship.getModelType().trim() : "relationship type not defined";
+	        String fromName = relationship.getFrom() != null && relationship.getFrom().getName() != null ? " from "+ relationship.getFrom().getName().trim() : "from not defined";
+	        String toName = relationship.getTo() != null && relationship.getTo().getName() != null ? " to " + relationship.getTo().getName().trim() : "to not defined";
+
 	        // Aggiungi le informazioni sulla relazione al StringBuilder
-	        relationships.append(String.format("- %s %s %s%n",
-	                relationship.getName() != null ? relationship.getName() : "---",
-	                relationship.getModelType() != null ? relationship.getModelType() : "relationship type not defined",
-	                relationship.getFrom().getName() != null ? relationship.getFrom().getName() : "from not defined",
-	                relationship.getTo().getName() != null ? relationship.getTo().getName() : "to not defined"));
+	        relationships.append(String.format("- %s%s%s%s%n", relationshipName, relationshipType, fromName, toName));
 	    }
 
 	    return relationships;
 	}
-	
-	
-	
+
+
+	// Metodo che acquisisce informazioni per le relazioni "From"
+	private static StringBuilder getFromRelationshipsInfo(IClass classe) {
+	    StringBuilder relationships = new StringBuilder();
+
+	    Iterator<IRelationship> relationshipsIterator = classe.fromRelationshipIterator();
+	    while (relationshipsIterator.hasNext()) {
+	        IRelationship relationship = relationshipsIterator.next();
+
+	        // Estrai le informazioni sulla relazione
+	        String relationshipName = relationship.getName() != null ? relationship.getName().trim() : "";
+	        String relationshipType = relationship.getModelType() != null ? relationship.getModelType().trim() : "relationship type not defined";
+	        String fromName = relationship.getFrom() != null && relationship.getFrom().getName() != null ? " from "+ relationship.getFrom().getName().trim() : "from not defined";
+	        String toName = relationship.getTo() != null && relationship.getTo().getName() != null ? " to " + relationship.getTo().getName().trim() : "to not defined";
+
+	        // Aggiungi le informazioni sulla relazione al StringBuilder
+	        relationships.append(String.format("- %s%s%s%s%n", relationshipName, relationshipType, fromName, toName));
+	    }
+
+	    return relationships;
+	}
+
+
+
+
+
 	private static void printInfoProject(IProject project, IDiagramUIModel[] diagrams, StringBuilder output) {
 		String projectName = project.getName();
 		output.append(String.format("%s %s", messages.getString("project.info"), projectName));
@@ -834,23 +934,24 @@ public class ClassInfo {
 			System.out.println(relazione.getModelType());
 
 			Optional.ofNullable(relazione.getMasterView()).map(masterView -> masterView.getDiagramUIModel())
-					.map(diagramUIModel -> diagramUIModel.getName()).ifPresent(diagramName -> {
-						if (diagramName.equals(Optional.ofNullable(_base.getMasterView())
-								.map(baseMasterView -> baseMasterView.getDiagramUIModel())
-								.map(baseDiagramUIModel -> baseDiagramUIModel.getName()).orElse(null))) {
+			.map(diagramUIModel -> diagramUIModel.getName()).ifPresent(diagramName -> {
+				if (diagramName.equals(Optional.ofNullable(_base.getMasterView())
+						.map(baseMasterView -> baseMasterView.getDiagramUIModel())
+						.map(baseDiagramUIModel -> baseDiagramUIModel.getName()).orElse(null))) {
 
-							if (relazione.getModelType().equals("Association")) {
-								out.append(handleAssociationRelationship(_base, relazione));
-							} else {
-								out.append(handleNonAssociationRelationship(relazione, _base));
-							}
-						}
-					});
+					if (relazione.getModelType().equals("Association")) {
+						out.append(handleAssociationRelationship(_base, relazione));
+					} else {
+						out.append(handleNonAssociationRelationship(relazione, _base));
+					}
+				}
+			});
 		}
 
 		return out;
 
 	}
+	
 
 	private static StringBuilder handleAssociationRelationship(IModelElement _base, IRelationship relazione) {
 		StringBuilder out = new StringBuilder();
@@ -875,18 +976,18 @@ public class ClassInfo {
 					// System.out.println(_base+" TTTTTTTTT "+ association.getAggregationKind());
 					out.append("\n- ").append(
 							association.getAggregationKind() == "none" && association.getAggregationKind() != null
-									? messages.getString("class.association.aggregationkind")
+							? messages.getString("class.association.aggregationkind")
 									: messages.getString("empty"));
 
 					out.append(DirectionRelationship(relazione, _base));
 
 					out.append(" ").append(association.getModelElement().getName()).append(" ")
-							.append(messages.getString("class.association.multiplicity")).append(" ")
-							.append(association.getMultiplicity()).append(" ")
-							.append(messages.getString("conjunction.end")).append(" ")
-							.append(association.getOppositeEnd().getModelElement().getName()).append(" ")
-							.append(messages.getString("class.association.multiplicity")).append(" ")
-							.append(((IAssociationEnd) association.getOppositeEnd()).getMultiplicity());
+					.append(messages.getString("class.association.multiplicity")).append(" ")
+					.append(association.getMultiplicity()).append(" ")
+					.append(messages.getString("conjunction.end")).append(" ")
+					.append(association.getOppositeEnd().getModelElement().getName()).append(" ")
+					.append(messages.getString("class.association.multiplicity")).append(" ")
+					.append(((IAssociationEnd) association.getOppositeEnd()).getMultiplicity());
 				}
 			}
 		}

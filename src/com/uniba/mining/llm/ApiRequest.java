@@ -25,6 +25,9 @@ public class ApiRequest {
 	@JsonProperty("requirements")
 	private String requirements;
 
+	@JsonProperty("user")
+	private String user;
+
 	private String query;
 
 	/**
@@ -35,17 +38,19 @@ public class ApiRequest {
 	 * @param queryId
 	 * @param diagramAsText
 	 * @param requirements
+	 * @param user
 	 * @param query
 	 */
 	public ApiRequest(String sessionId, String projectId, 
 			String diagramId, String queryId, String diagramAsText, 
-			String requirements, String query) {
+			String requirements, String user, String query) {
 		this.sessionId = sessionId;
 		this.projectId = projectId;
 		this.diagramId = diagramId;
 		this.queryId = queryId;
 		this.diagramAsText = diagramAsText;
 		this.requirements = requirements;
+		this.user = user;
 		this.query = query;
 	}
 
@@ -97,6 +102,14 @@ public class ApiRequest {
 
 	public void setRequirements(String requirements) {
 		this.requirements = requirements;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUsername(String username) {
+		this.user = user;
 	}
 
 	public String getQuery() {

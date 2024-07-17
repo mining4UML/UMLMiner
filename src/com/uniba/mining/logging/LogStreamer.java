@@ -34,15 +34,15 @@ public class LogStreamer {
 	private static final String USER_HOME = System.getProperty("user.home");
 
 	private static final Path logsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
-			"logs", USER_NAME);
+			"logs");
 	private static final Path modelsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
-			"models", USER_NAME);
+			"models");
 	private static final Path reportsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
-			"reports", USER_NAME);
+			"reports");
 	private static final Path conversationsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
-			"conversations", USER_NAME);
+			"conversations");
 	private static final Path requirementsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
-			"requirements", USER_NAME);
+			"requirements");
 	private static final Logger logger = new Logger(LogStreamer.class);
 	private static final XesXmlParser xesXmlParser = new XesXmlParser();
 	private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
@@ -97,6 +97,10 @@ public class LogStreamer {
 
 	public static Path getRequirementsDirectory() {
 		return requirementsDirectory;
+	}
+	
+	public static String getUsername() {
+		return USER_NAME;
 	}
 
 

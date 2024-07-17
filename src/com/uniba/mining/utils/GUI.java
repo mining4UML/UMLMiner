@@ -272,6 +272,14 @@ public class GUI {
     	return discoverImage;
     }
     
-    
+    /**
+     * 
+     * @return An image icon
+     */
+    public static ImageIcon getImageIcon(String iconName) {
+        String discoverImagePath = String.join("/", Config.ICONS_PATH, iconName);
+ 		ImageIcon discoverImage = GUI.loadImage(discoverImagePath, "Icon", 1f); 
+    	return discoverImage;
+    }
     
 }

@@ -6,7 +6,7 @@ public class TestLLM {
     public static void main(String[] args) {
         // Creazione di un oggetto ApiRequest con i dati appropriati
         ApiRequest request = new ApiRequest("s1", "p1", "d1", "q1", "Un diagramma descritto come testo.", 
-        		"requisiti", "Qual è il significato di questo diagramma?");
+        		"requisiti", "username", "Qual è il significato di questo diagramma?");
 
         // Creazione di un oggetto RestClient
         RestClient client = new RestClient();

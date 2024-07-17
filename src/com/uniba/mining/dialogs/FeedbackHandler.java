@@ -25,15 +25,12 @@ import com.uniba.mining.feedback.ConversationsSerializer;
 import com.uniba.mining.feedback.ErrorUtils;
 import com.uniba.mining.feedback.FileUtilities;
 import com.uniba.mining.feedback.LimitedTextField;
-import com.uniba.mining.llm.ApiRequest;
-import com.uniba.mining.llm.ApiResponse;
-import com.uniba.mining.llm.RestClient;
+import com.uniba.mining.llm.RequestHandler;
 import com.uniba.mining.logging.LogStreamer;
 import com.uniba.mining.plugin.Config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The {@code FeedbackHandler} class is responsible for managing
@@ -196,18 +193,53 @@ public class FeedbackHandler {
 			}
 		});
 
+//		conversationList.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				if (SwingUtilities.isRightMouseButton(e)) {
+//					int index = conversationList.locationToIndex(e.getPoint());
+//					if (index > -1) {
+//						conversationList.setSelectedIndex(index);
+//						showPopupMenu(e);
+//					}
+//				}
+//			}
+//		});
+		
+		
+		conversationList.setCellRenderer(new ConversationListCellRenderer());
+
 		conversationList.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (SwingUtilities.isRightMouseButton(e)) {
-					int index = conversationList.locationToIndex(e.getPoint());
-					if (index > -1) {
-						conversationList.setSelectedIndex(index);
-						showPopupMenu(e);
-					}
-				}
-			}
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        JList<Conversation> list = (JList<Conversation>) e.getSource();
+		        int index = list.locationToIndex(e.getPoint());
+		        if (index > -1) {
+		            Rectangle cellBounds = list.getCellBounds(index, index);
+		            Point pointWithinCell = new Point(e.getX() - cellBounds.x, e.getY() - cellBounds.y);
+		            
+		            ConversationListCellRenderer renderer = (ConversationListCellRenderer) list.getCellRenderer();
+		            Component component = renderer.getListCellRendererComponent(
+		                    list, 
+		                    list.getModel().getElementAt(index), 
+		                    index, 
+		                    list.isSelectedIndex(index), 
+		                    list.hasFocus()
+		            );
+
+		            if (component instanceof JPanel) {
+		                JPanel panel = (JPanel) component;
+		                Component iconComponent = panel.getComponent(1); // L'icona dovrebbe essere il secondo componente
+		                if (iconComponent.getBounds().contains(pointWithinCell) && SwingUtilities.isLeftMouseButton(e)) {
+		                    // L'icona è stata cliccata con il tasto sinistro del mouse
+		                    list.setSelectedIndex(index);
+		                    showPopupMenu(e);
+		                }
+		            }
+		        }
+		    }
 		});
+
 
 		initQueryButtons();
 		initRequirements();
@@ -239,7 +271,7 @@ public class FeedbackHandler {
 		requirementsTextArea.setPreferredSize(new Dimension(200, requirementsTextArea.getPreferredSize().height)); // Set default width
 		// Set default text for when no requirements are found
 		requirementsTextArea.setText("Requirements NOT Found");
-		
+
 		previewRequirements = new JLabel();
 		previewRequirements.setText("Requirements Preview");
 
@@ -249,7 +281,7 @@ public class FeedbackHandler {
 		// Add a right margin to previewRequirements
 		previewRequirements.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));// margin right
 
-		
+
 		printReqFound(); // Call method to update the text area content
 	}
 
@@ -394,113 +426,28 @@ public class FeedbackHandler {
 	}
 
 	/**
-	 * Send and get response from the server
-	 * 
-	 * @param conversation
-	 * @return Return the obtained response
-	 * @throws ConnectException
-	 * @throws IOException
-	 */
-	private String sendRequestAndGetResponse(Conversation conversation) throws ConnectException, IOException {
-		// Creazione del dialogo di attesa
-		JDialog dialog = createWaitDialog();
-		AtomicReference<String> responseRef = new AtomicReference<>();
-		AtomicReference<Exception> exceptionRef = new AtomicReference<>();
-
-		// Creazione e avvio di un SwingWorker per gestire la richiesta al server
-		SwingWorker<String, Void> worker = new SwingWorker<>() {
-			@Override
-			protected String doInBackground() throws Exception {
-				// Effettua la richiesta al server e ottiene la risposta
-				String diagramId = conversation.getDiagramId();
-				Path path = LogStreamer.getRequirementsDirectory();
-				String requirements = FileUtilities.loadFileContent(diagramId, path);
-				System.out.println(requirements);
-				ApiRequest request = new ApiRequest(conversation.getSessionId(), projectId, diagramId,
-						conversation.getQueryId(), conversation.getDiagramAsText(), 
-						requirements, conversation.getQuery());
-				RestClient client = new RestClient();
-				ApiResponse response = client.sendRequest(request);
-				responseRef.set(response.getAnswer());
-				return response.getAnswer();
-			}
-
-			@Override
-			protected void done() {
-				try {
-					get(); // Ottieni il risultato della richiesta e gestisci le eccezioni
-				} catch (Exception e) {
-					exceptionRef.set(e); // Memorizza l'eccezione
-				} finally {
-					dialog.dispose(); // Chiude il dialogo di attesa
-				}
-			}
-		};
-
-		worker.execute(); // Avvia il lavoro in background
-
-		// Mostra il dialogo di attesa in modo modale
-		dialog.setVisible(true);
-
-		// Controlla se c'è stata un'eccezione e rilanciala
-		if (exceptionRef.get() != null) {
-			Exception e = exceptionRef.get();
-			if (e instanceof ConnectException) {
-				throw (ConnectException) e;
-			} else if (e instanceof IOException) {
-				throw (IOException) e;
-			} else {
-				throw new RuntimeException(e); // Per altre eccezioni non previste
-			}
-		}
-
-		// Restituisci la risposta ottenuta
-		return responseRef.get();
-	}
-
-	/**
-	 * Creates a modal JDialog that displays a "Please wait" message with a loading
-	 * animation. The dialog is centered on the screen and does not allow resizing
-	 * or closing via the close button. A Timer is used to animate ellipsis in the
-	 * message to indicate processing.
+	 * Handles the feedback process by sending a request to the server and obtaining a response.
 	 *
-	 * @return A JDialog instance configured with a loading message and animation.
+	 * <p>This method creates an instance of {@link RequestHandler} with the provided conversation 
+	 * details and the current project ID. It then calls the {@link RequestHandler#sendRequestAndGetResponse()}
+	 * method to perform the request and retrieve the response from the server. If an exception occurs 
+	 * during this process, it is caught and a detailed error message is displayed using 
+	 * {@link ErrorUtils#showDetailedErrorMessage(Exception)}.
+	 *
+	 * @param conversation the {@link Conversation} object containing the details of the current conversation,
+	 *                     including session ID, diagram ID, query ID, diagram text, and query text.
+	 * @return the response from the server as a {@link String}, or {@code null} if an exception occurs.
+	 * @throws IOException if an I/O error occurs during the request process.
 	 */
-	private JDialog createWaitDialog() {
-		JDialog dialog = new JDialog((Frame) null, "Please wait", true);
-		JLabel label = new JLabel("Processing, please wait");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		dialog.getContentPane().add(label);
-		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dialog.setSize(300, 100);
-		dialog.setLocationRelativeTo(null); // Centra il dialogo sullo schermo
-		dialog.setResizable(false); // Disabilita l'icona di ingrandimento
-
-		// Rimuove il pulsante di chiusura dalla finestra di dialogo
-		dialog.setUndecorated(true);
-		dialog.getRootPane().setWindowDecorationStyle(JRootPane.PLAIN_DIALOG);
-
-		// Creazione di un timer per aggiornare il testo del label con i puntini
-		// sospensivi
-		Timer timer = new Timer(500, e -> {
-			String text = label.getText();
-			if (text.endsWith("...")) {
-				label.setText("Processing, please wait");
-			} else {
-				label.setText(text + ".");
-			}
-		});
-		timer.start();
-
-		// Interrompi il timer quando il dialogo viene chiuso
-		dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-			public void windowClosed(java.awt.event.WindowEvent windowEvent) {
-				timer.stop();
-			}
-		});
-
-		return dialog;
+	
+	public String handleFeedback(Conversation conversation) {
+		try {
+			RequestHandler requestHandler = new RequestHandler(projectId, conversation);
+			return requestHandler.sendRequestAndGetResponse();
+		} catch (IOException e) {
+			ErrorUtils.showDetailedErrorMessage(e);
+		}
+		return null;
 	}
 
 	private void updateConversation(String inputText, String sessionId)
@@ -533,7 +480,7 @@ public class FeedbackHandler {
 				String answer = prefixAnswer + inputText;
 				currentConversation.appendMessage(answer, true);
 
-				String response = sendRequestAndGetResponse(currentConversation);
+				String response = handleFeedback(currentConversation);
 				appendToPane(answer);
 				if (response != null)
 					appendToPane(response);
@@ -849,7 +796,7 @@ public class FeedbackHandler {
 				GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", e1.getMessage());
 			}
 		});
-		
+
 		// Pannello sinistro contiene il pulsante "New Chat" e la lista delle
 		// conversazioni
 		JPanel leftPanel = new JPanel(new BorderLayout());
@@ -860,7 +807,7 @@ public class FeedbackHandler {
 		leftPanel.add(conversationLabel, BorderLayout.NORTH);
 
 		mainPanel.add(leftPanel, BorderLayout.WEST);
-		
+
 		// Right panel contains the conversationTitleField, outputPane, and inputField
 		JPanel rightPanel = new JPanel(new BorderLayout());
 

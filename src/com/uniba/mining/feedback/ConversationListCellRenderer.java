@@ -52,7 +52,7 @@ public class ConversationListCellRenderer extends JPanel implements ListCellRend
         iconLabel = new JLabel();
 
         // Carica l'icona (modifica il percorso in base alla tua icona)
-        menuIcon = GUI.getImageIcon("Down-icon18.png");
+        menuIcon = GUI.getImageIcon("ellipsis_icon.png");
         iconLabel.setIcon(menuIcon);
 
         add(textLabel, BorderLayout.CENTER);

@@ -127,10 +127,11 @@ public class FeedbackHandler {
 		conversationTitleField.setEditable(false);
 		conversationTitleField.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
 		conversationTitleField.setForeground(new Color(34, 139, 34)); // Verde scuro
-		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta
-		// in grassetto
+		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in grassetto
 		// Imposta il colore di sfondo della casella di testo a quello del panel
 		conversationTitleField.setBackground(UIManager.getColor("Panel.background"));
+		// elimina il bordo
+		conversationTitleField.setBorder(null);
 
 		newChatButton = new JButton("New Chat");
 		newChatButton.setForeground(Color.BLUE);
@@ -193,51 +194,51 @@ public class FeedbackHandler {
 			}
 		});
 
-//		conversationList.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				if (SwingUtilities.isRightMouseButton(e)) {
-//					int index = conversationList.locationToIndex(e.getPoint());
-//					if (index > -1) {
-//						conversationList.setSelectedIndex(index);
-//						showPopupMenu(e);
-//					}
-//				}
-//			}
-//		});
-		
-		
+		//		conversationList.addMouseListener(new MouseAdapter() {
+		//			@Override
+		//			public void mouseClicked(MouseEvent e) {
+		//				if (SwingUtilities.isRightMouseButton(e)) {
+		//					int index = conversationList.locationToIndex(e.getPoint());
+		//					if (index > -1) {
+		//						conversationList.setSelectedIndex(index);
+		//						showPopupMenu(e);
+		//					}
+		//				}
+		//			}
+		//		});
+
+
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
 
 		conversationList.addMouseListener(new MouseAdapter() {
-		    @Override
-		    public void mouseClicked(MouseEvent e) {
-		        JList<Conversation> list = (JList<Conversation>) e.getSource();
-		        int index = list.locationToIndex(e.getPoint());
-		        if (index > -1) {
-		            Rectangle cellBounds = list.getCellBounds(index, index);
-		            Point pointWithinCell = new Point(e.getX() - cellBounds.x, e.getY() - cellBounds.y);
-		            
-		            ConversationListCellRenderer renderer = (ConversationListCellRenderer) list.getCellRenderer();
-		            Component component = renderer.getListCellRendererComponent(
-		                    list, 
-		                    list.getModel().getElementAt(index), 
-		                    index, 
-		                    list.isSelectedIndex(index), 
-		                    list.hasFocus()
-		            );
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				JList<Conversation> list = (JList<Conversation>) e.getSource();
+				int index = list.locationToIndex(e.getPoint());
+				if (index > -1) {
+					Rectangle cellBounds = list.getCellBounds(index, index);
+					Point pointWithinCell = new Point(e.getX() - cellBounds.x, e.getY() - cellBounds.y);
 
-		            if (component instanceof JPanel) {
-		                JPanel panel = (JPanel) component;
-		                Component iconComponent = panel.getComponent(1); // L'icona dovrebbe essere il secondo componente
-		                if (iconComponent.getBounds().contains(pointWithinCell) && SwingUtilities.isLeftMouseButton(e)) {
-		                    // L'icona è stata cliccata con il tasto sinistro del mouse
-		                    list.setSelectedIndex(index);
-		                    showPopupMenu(e);
-		                }
-		            }
-		        }
-		    }
+					ConversationListCellRenderer renderer = (ConversationListCellRenderer) list.getCellRenderer();
+					Component component = renderer.getListCellRendererComponent(
+							list, 
+							list.getModel().getElementAt(index), 
+							index, 
+							list.isSelectedIndex(index), 
+							list.hasFocus()
+							);
+
+					if (component instanceof JPanel) {
+						JPanel panel = (JPanel) component;
+						Component iconComponent = panel.getComponent(1); // L'icona dovrebbe essere il secondo componente
+						if (iconComponent.getBounds().contains(pointWithinCell) && SwingUtilities.isLeftMouseButton(e)) {
+							// L'icona è stata cliccata con il tasto sinistro del mouse
+							list.setSelectedIndex(index);
+							showPopupMenu(e);
+						}
+					}
+				}
+			}
 		});
 
 
@@ -257,9 +258,6 @@ public class FeedbackHandler {
 
 	}
 
-	/**
-	 * 
-	 */
 	private void initRequirements() {
 		requirementsTextArea = new JTextArea();
 		//requirementsTextArea.setForeground(Color.RED); // Set text color to red
@@ -284,6 +282,7 @@ public class FeedbackHandler {
 
 		printReqFound(); // Call method to update the text area content
 	}
+
 
 	private void printReqFound() {
 		if (getDiagram() != null) {
@@ -439,7 +438,7 @@ public class FeedbackHandler {
 	 * @return the response from the server as a {@link String}, or {@code null} if an exception occurs.
 	 * @throws IOException if an I/O error occurs during the request process.
 	 */
-	
+
 	public String handleFeedback(Conversation conversation) {
 		try {
 			RequestHandler requestHandler = new RequestHandler(projectId, conversation);
@@ -549,9 +548,15 @@ public class FeedbackHandler {
 	 */
 	private void showPopupMenu(MouseEvent e) {
 		JPopupMenu popupMenu = new JPopupMenu();
-		JMenuItem renameItem = new JMenuItem("Rename");
+
+		JMenuItem renameItem = new JMenuItem("Rename...");
+		renameItem.setIcon(GUI.getImageIcon("ellipsis_icon.png"));
+
 		JMenuItem deleteItem = new JMenuItem("Delete");
-		JMenuItem exportItem = new JMenuItem("Export as Text");
+		deleteItem.setIcon(GUI.getImageIcon("delete.png"));
+
+		JMenuItem exportItem = new JMenuItem("Export as TxT");
+		exportItem.setIcon(GUI.getImageIcon("txt.png"));
 
 		renameItem.addActionListener(new ActionListener() {
 			@Override
@@ -821,6 +826,8 @@ public class FeedbackHandler {
 
 		// Add requirementsTextArea to the east region in a JScrollPane
 		JScrollPane requirementsScrollPane = new JScrollPane(requirementsTextArea);
+		requirementsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); // Set vertical scroll policy
+	    requirementsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Set horizontal scroll policy
 		rightPanel.add(requirementsScrollPane, BorderLayout.EAST);
 
 		// Add outputPane in a JScrollPane to the center region

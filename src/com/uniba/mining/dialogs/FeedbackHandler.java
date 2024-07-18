@@ -17,16 +17,15 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.nio.file.Path;
 
 import com.uniba.mining.feedback.Conversation;
 import com.uniba.mining.feedback.ConversationListCellRenderer;
 import com.uniba.mining.feedback.ConversationsSerializer;
 import com.uniba.mining.feedback.ErrorUtils;
-import com.uniba.mining.feedback.FileUtilities;
 import com.uniba.mining.feedback.LimitedTextField;
+import com.uniba.mining.feedback.QueryButtons;
+import com.uniba.mining.feedback.RequirementsTextArea;
 import com.uniba.mining.llm.RequestHandler;
-import com.uniba.mining.logging.LogStreamer;
 import com.uniba.mining.plugin.Config;
 
 import java.util.ArrayList;
@@ -60,8 +59,7 @@ public class FeedbackHandler {
 	private JButton newChatButton;
 	private JLabel conversationLabel;
 	private JTextField conversationTitleField;
-	private JLabel previewRequirements;
-	private JTextArea requirementsTextArea = new JTextArea();
+	private RequirementsTextArea requirementsTextArea;
 	private String projectId;
 	private IDiagramUIModel diagram;
 	// Counter to track the total number of conversations
@@ -73,10 +71,7 @@ public class FeedbackHandler {
 	private static JPanel panel;
 
 	// Pulsanti per query predefinite
-	private JButton addButton;
-	private JButton improvementsButton;
-	private JButton issuesButton;
-	private JButton explainButton;
+	private QueryButtons queryButtons;
 
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
@@ -134,20 +129,24 @@ public class FeedbackHandler {
 		conversationTitleField.setBorder(null);
 
 		newChatButton = new JButton("New Chat");
-		newChatButton.setForeground(Color.BLUE);
-		// newChatButton.setFocusPainted(false);
-		// newChatButton.setBorderPainted(false);
-		// newChatButton.setOpaque(true);
-
+		// Imposta il colore del testo a bianco
+		//newChatButton.setForeground(Color.WHITE);
+		// Imposta il colore di sfondo come quello usato in Eclipse per i pulsanti attivi
+		//Color eclipseButtonBackground = UIManager.getColor("Button.select");
+		//newChatButton.setBackground(eclipseButtonBackground);
+		// Assicurati che il colore di sfondo sia visibile
+		//newChatButton.setFocusPainted(false);
+		//newChatButton.setBorderPainted(false);
+		//newChatButton.setOpaque(false);
 		// Imposta le dimensioni preferite del pulsante
-		Dimension buttonSize = new Dimension(50, 30); // Larghezza: 100px, Altezza: 30px
+		Dimension buttonSize = new Dimension(20, 20);
 		newChatButton.setPreferredSize(buttonSize);
-		newChatButton.setToolTipText("Start a new chat for this diagram");
+		newChatButton.setToolTipText("Start a new feedback conversation for this diagram");
 
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
 
 		// Crea l'etichetta
-		conversationLabel = new JLabel("Conversation List");
+		conversationLabel = new JLabel("Feedback List");
 		conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
 		conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
 		conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in
@@ -163,7 +162,7 @@ public class FeedbackHandler {
 				if (inputField.getText().equals(PLACEHOLDER)) {
 					inputField.setText("");
 				}
-				printReqFound();
+				requirementsTextArea.printReqFound(getDiagram());
 			}
 
 			@Override
@@ -186,7 +185,7 @@ public class FeedbackHandler {
 						// Mostra il pannello di feedback solo se la dimensione è minore di 2
 						showFeedbackPanel(Application.getDiagram());
 					} else
-						printReqFound();
+						requirementsTextArea.printReqFound(getDiagram());
 					createNewChat();
 				} catch (Exception e1) {
 					ErrorUtils.showDetailedErrorMessage(e1);
@@ -242,8 +241,10 @@ public class FeedbackHandler {
 		});
 
 
-		initQueryButtons();
-		initRequirements();
+		//initQueryButtons();
+		queryButtons = new QueryButtons(inputField,PLACEHOLDER);
+		requirementsTextArea = new RequirementsTextArea(getDiagram());
+		//initRequirements();
 
 		addFocusListenerToOutputPane();
 
@@ -256,79 +257,6 @@ public class FeedbackHandler {
 		// popupMenu.add(clearItem);
 		outputPane.setComponentPopupMenu(popupMenu);
 
-	}
-
-	private void initRequirements() {
-		requirementsTextArea = new JTextArea();
-		//requirementsTextArea.setForeground(Color.RED); // Set text color to red
-		//Font boldFont = requirementsTextArea.getFont().deriveFont(Font.BOLD); // Create bold font
-		//requirementsTextArea.setFont(boldFont); // Set text area font to bold
-		requirementsTextArea.setEditable(false); // Make the text area non-editable
-		requirementsTextArea.setLineWrap(true); // Enable line wrapping
-		requirementsTextArea.setWrapStyleWord(true); // Wrap at word boundaries
-		requirementsTextArea.setPreferredSize(new Dimension(200, requirementsTextArea.getPreferredSize().height)); // Set default width
-		// Set default text for when no requirements are found
-		requirementsTextArea.setText("Requirements NOT Found");
-
-		previewRequirements = new JLabel();
-		previewRequirements.setText("Requirements Preview");
-
-		previewRequirements.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
-		previewRequirements.setForeground(new Color(34, 139, 34)); // Verde scuro
-		previewRequirements.setFont(previewRequirements.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta
-		// Add a right margin to previewRequirements
-		previewRequirements.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));// margin right
-
-
-		printReqFound(); // Call method to update the text area content
-	}
-
-
-	private void printReqFound() {
-		if (getDiagram() != null) {
-			String diagramId= getDiagram().getId();
-			Path path = LogStreamer.getRequirementsDirectory();
-			if (FileUtilities.doesFileExist(diagramId, path))
-				try {
-					requirementsTextArea.setText(FileUtilities.loadFileContent(diagramId, path));
-				} catch (IOException e) {
-					ErrorUtils.showDetailedErrorMessage(e);
-					requirementsTextArea.setText("Requirements NOT found");
-				}
-			else
-				requirementsTextArea.setText("Requirements NOT found");
-		}
-		else
-			requirementsTextArea.setText("Requirements NOT found");
-	}
-
-	//	public void setReqFoundLabel(String text) {
-	//		requirementsTextArea.setText(text);
-	//	}
-
-	/**
-	 * Query Buttons initialization
-	 */
-	private void initQueryButtons() {
-		addButton = new JButton("Add Contents");
-		addButton.setToolTipText(Config.FEEDBACK_BUTTON_ADD);
-		addButton.setForeground(Color.BLUE);
-		addButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_ADD));
-
-		improvementsButton = new JButton("Improvements");
-		improvementsButton.setToolTipText(Config.FEEDBACK_BUTTON_IMROVEMENT);
-		improvementsButton.setForeground(Color.BLUE);
-		improvementsButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_IMROVEMENT));
-
-		issuesButton = new JButton("Issues");
-		issuesButton.setToolTipText(Config.FEEDBACK_BUTTON_ISSUES);
-		issuesButton.setForeground(Color.BLUE);
-		issuesButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_ISSUES));
-
-		explainButton = new JButton("Explain");
-		explainButton.setToolTipText(Config.FEEDBACK_BUTTON_EXPLAIN);
-		explainButton.setForeground(Color.BLUE);
-		explainButton.addActionListener(e -> handleButtonClick(Config.FEEDBACK_BUTTON_EXPLAIN));
 	}
 
 	private static void addDocumentListener(JTextField textField, JLabel label) {
@@ -358,7 +286,7 @@ public class FeedbackHandler {
 		});
 	}
 
-	private void handleButtonClick(String text) {
+	public void handleButtonClick(String text) {
 		inputField.setText(text);
 		inputField.postActionEvent();
 		inputField.setText(PLACEHOLDER);
@@ -404,7 +332,7 @@ public class FeedbackHandler {
 				if (!Application.getDiagram().equals(getDiagram())) {
 					showFeedbackPanel(Application.getDiagram());
 				} else
-					printReqFound();
+					requirementsTextArea.printReqFound(getDiagram());
 			}
 
 			// Metodo chiamato quando il focus viene perso sull'outputPane
@@ -723,7 +651,7 @@ public class FeedbackHandler {
 		}
 		Application.getViewManager().showMessagePaneComponent(panelId, title, panel);
 		forceUpdateView();
-		printReqFound();
+		requirementsTextArea.printReqFound(getDiagram());
 	}
 
 	/**
@@ -819,15 +747,15 @@ public class FeedbackHandler {
 		// Panel to hold conversationTitleField and previewRequirements
 		JPanel northPanel = new JPanel(new BorderLayout());
 		northPanel.add(conversationTitleField, BorderLayout.CENTER);
-		northPanel.add(previewRequirements, BorderLayout.EAST);
+		northPanel.add(requirementsTextArea.getPreviewRequirements(), BorderLayout.EAST);
 
 		// Add the north panel to the right panel
 		rightPanel.add(northPanel, BorderLayout.NORTH);
 
 		// Add requirementsTextArea to the east region in a JScrollPane
-		JScrollPane requirementsScrollPane = new JScrollPane(requirementsTextArea);
+		JScrollPane requirementsScrollPane = new JScrollPane(requirementsTextArea.getRequirementsTextArea());
 		requirementsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); // Set vertical scroll policy
-	    requirementsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Set horizontal scroll policy
+		requirementsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Set horizontal scroll policy
 		rightPanel.add(requirementsScrollPane, BorderLayout.EAST);
 
 		// Add outputPane in a JScrollPane to the center region
@@ -846,10 +774,11 @@ public class FeedbackHandler {
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 		buttonPanel.add(createHelpLabel());
-		buttonPanel.add(addButton);
-		buttonPanel.add(improvementsButton);
-		buttonPanel.add(issuesButton);
-		buttonPanel.add(explainButton);
+		buttonPanel = queryButtons.addButtons(buttonPanel);
+		//		buttonPanel.add(addButton);
+		//		buttonPanel.add(improvementsButton);
+		//		buttonPanel.add(issuesButton);
+		//		buttonPanel.add(explainButton);
 
 		inputAndButtonPanel.add(buttonPanel, gbcButtonPanel); // Aggiungi buttonPanel con i vincoli
 

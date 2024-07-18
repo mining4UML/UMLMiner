@@ -83,7 +83,7 @@ public class RequirementsTextArea {
 		JScrollPane requirementsScrollPane = new JScrollPane(requirementsTextArea);
 		requirementsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); // Set vertical scroll policy
 		requirementsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Set horizontal scroll policy
-		rightPanel.add(requirementsScrollPane, BorderLayout.EAST);
+		rightPanel.add(requirementsScrollPane, BorderLayout.CENTER);
 		return rightPanel;
 	}
 

@@ -57,7 +57,7 @@ public class FeedbackHandler {
 	private DefaultListModel<Conversation> conversationListModel;
 	private JList<Conversation> conversationList;
 	private JButton newChatButton;
-	private JLabel conversationLabel;
+	//private JLabel conversationLabel;
 	private JTextField conversationTitleField;
 	private RequirementsTextArea requirementsTextArea;
 	private String projectId;
@@ -101,7 +101,7 @@ public class FeedbackHandler {
 		inputField.setText(PLACEHOLDER);
 		inputField.setBackground(Color.WHITE);
 		inputField.setBorder(BorderFactory.createLineBorder(Color.BLUE));
-
+		
 		String text = String.format("%d / %d %s", inputField.getText().length(), LimitedTextField.LIMIT,
 				suffixCountLabel);
 		charCountLabel = new JLabel(text);
@@ -112,6 +112,7 @@ public class FeedbackHandler {
 		outputPane = new JTextPane();
 		outputPane.setEditable(false);
 		outputPane.setPreferredSize(new Dimension(400, 200));
+		inputField.setPreferredSize(new Dimension (outputPane.getWidth(),inputField.getPreferredSize().height));
 		document = outputPane.getStyledDocument();
 
 		conversationListModel = new DefaultListModel<>();
@@ -138,17 +139,23 @@ public class FeedbackHandler {
 		//newChatButton.setBorderPainted(false);
 		//newChatButton.setOpaque(false);
 		// Imposta le dimensioni preferite del pulsante
-		Dimension buttonSize = new Dimension(20, 20);
+		// Rimuovi il bordo del pulsante e il contenuto del testo
+        newChatButton.setBorderPainted(false);
+        newChatButton.setContentAreaFilled(false);
+        newChatButton.setFocusPainted(false);
+		Dimension buttonSize = new Dimension(24, 24);
+		ImageIcon icon = GUI.getImageIcon("chat-add-icon.png");
+		newChatButton.setIcon(icon);
 		newChatButton.setPreferredSize(buttonSize);
 		newChatButton.setToolTipText("Start a new feedback conversation for this diagram");
 
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
 
 		// Crea l'etichetta
-		conversationLabel = new JLabel("Feedback List");
-		conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
-		conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
-		conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in
+//		conversationLabel = new JLabel("Conversation List");
+//		conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
+//		conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
+//		conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in
 		// grassetto
 
 		inputField.addFocusListener(new FocusListener() {
@@ -732,30 +739,30 @@ public class FeedbackHandler {
 		// Pannello sinistro contiene il pulsante "New Chat" e la lista delle
 		// conversazioni
 		JPanel leftPanel = new JPanel(new BorderLayout());
-		leftPanel.add(newChatButton, BorderLayout.SOUTH);
+		leftPanel.add(newChatButton, BorderLayout.NORTH);
 		JScrollPane listScrollPane = new JScrollPane(conversationList);
 		listScrollPane.setPreferredSize(new Dimension(200, 200));
 		leftPanel.add(listScrollPane, BorderLayout.CENTER);
-		leftPanel.add(conversationLabel, BorderLayout.NORTH);
+		//leftPanel.add(conversationLabel, BorderLayout.NORTH);
 
 		mainPanel.add(leftPanel, BorderLayout.WEST);
 
 		// Right panel contains the conversationTitleField, outputPane, and inputField
-		JPanel rightPanel = new JPanel(new BorderLayout());
+		JPanel centralPanel = new JPanel(new BorderLayout());
 
 		// Panel to hold conversationTitleField and previewRequirements
 		JPanel northPanel = new JPanel(new BorderLayout());
 		northPanel.add(conversationTitleField, BorderLayout.CENTER);
-		northPanel.add(requirementsTextArea.getPreviewRequirements(), BorderLayout.EAST);
+		//northPanel.add(requirementsTextArea.getPreviewRequirements(), BorderLayout.EAST);
 
 		// Add the north panel to the right panel
-		rightPanel.add(northPanel, BorderLayout.NORTH);
+		centralPanel.add(northPanel, BorderLayout.NORTH);
 		
 		// Add requirementsTextArea to the east region in a JScrollPane
-		rightPanel = requirementsTextArea.addRTextArea(rightPanel);
+		//rightPanel = requirementsTextArea.addRTextArea(rightPanel);
 
 		// Add outputPane in a JScrollPane to the center region
-		rightPanel.add(new JScrollPane(outputPane), BorderLayout.CENTER);
+		centralPanel.add(new JScrollPane(outputPane), BorderLayout.CENTER);
 
 		// Crea un nuovo pannello per inputField e buttonPanel con GridBagLayout
 		JPanel inputAndButtonPanel = new JPanel(new GridBagLayout());
@@ -793,9 +800,17 @@ public class FeedbackHandler {
 
 		inputAndButtonPanel.add(charCountLabel, gbcCharCountLabel); // Aggiungi charCountLabel con i vincoli
 
-		rightPanel.add(inputAndButtonPanel, BorderLayout.SOUTH);
+		centralPanel.add(inputAndButtonPanel, BorderLayout.SOUTH);
+		
+		mainPanel.add(centralPanel, BorderLayout.CENTER);
 
-		mainPanel.add(rightPanel, BorderLayout.CENTER);
+		// Crea il pannello destro e imposta il layout BorderLayout
+		JPanel rightPanel = new JPanel(new BorderLayout());
+		rightPanel.add(requirementsTextArea.getPreviewRequirements(), BorderLayout.NORTH);
+		// Add requirementsTextArea to the east region in a JScrollPane
+		rightPanel = requirementsTextArea.addRTextArea(rightPanel);
+		// Aggiungi il pannello destro al pannello principale nella parte est
+		mainPanel.add(rightPanel, BorderLayout.EAST);
 
 		panel.add(mainPanel, BorderLayout.CENTER);
 

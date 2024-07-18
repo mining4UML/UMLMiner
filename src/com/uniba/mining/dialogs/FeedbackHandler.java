@@ -69,7 +69,6 @@ public class FeedbackHandler {
 	private static FeedbackHandler instance;
 
 	private static JPanel panel;
-
 	// Pulsanti per query predefinite
 	private QueryButtons queryButtons;
 
@@ -751,12 +750,9 @@ public class FeedbackHandler {
 
 		// Add the north panel to the right panel
 		rightPanel.add(northPanel, BorderLayout.NORTH);
-
+		
 		// Add requirementsTextArea to the east region in a JScrollPane
-		JScrollPane requirementsScrollPane = new JScrollPane(requirementsTextArea.getRequirementsTextArea());
-		requirementsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); // Set vertical scroll policy
-		requirementsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Set horizontal scroll policy
-		rightPanel.add(requirementsScrollPane, BorderLayout.EAST);
+		rightPanel = requirementsTextArea.addRTextArea(rightPanel);
 
 		// Add outputPane in a JScrollPane to the center region
 		rightPanel.add(new JScrollPane(outputPane), BorderLayout.CENTER);
@@ -775,10 +771,6 @@ public class FeedbackHandler {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 		buttonPanel.add(createHelpLabel());
 		buttonPanel = queryButtons.addButtons(buttonPanel);
-		//		buttonPanel.add(addButton);
-		//		buttonPanel.add(improvementsButton);
-		//		buttonPanel.add(issuesButton);
-		//		buttonPanel.add(explainButton);
 
 		inputAndButtonPanel.add(buttonPanel, gbcButtonPanel); // Aggiungi buttonPanel con i vincoli
 

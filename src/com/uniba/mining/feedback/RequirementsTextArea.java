@@ -1,5 +1,6 @@
 package com.uniba.mining.feedback;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -8,6 +9,8 @@ import java.nio.file.Path;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
@@ -68,6 +71,20 @@ public class RequirementsTextArea {
 	
 	public JTextArea getRequirementsTextArea() {
 		return requirementsTextArea;
+	}
+	
+	/**
+	 * Add requirementsTextArea to the east region in a JScrollPane
+	 * @param rightPanel
+	 * @return 
+	 */
+	public JPanel addRTextArea(JPanel rightPanel) {
+
+		JScrollPane requirementsScrollPane = new JScrollPane(requirementsTextArea);
+		requirementsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); // Set vertical scroll policy
+		requirementsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Set horizontal scroll policy
+		rightPanel.add(requirementsScrollPane, BorderLayout.EAST);
+		return rightPanel;
 	}
 
 }

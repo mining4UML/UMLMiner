@@ -42,6 +42,8 @@ public class RequirementsTextArea {
 		previewRequirements.setFont(previewRequirements.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta
 		// Add a right margin to previewRequirements
 		previewRequirements.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));// margin right
+		// Imposta la dimensione preferita a 24 pixel di altezza
+		previewRequirements.setPreferredSize(new Dimension(previewRequirements.getPreferredSize().width, 24));
 
 
 		printReqFound(diagram); // Call method to update the text area content

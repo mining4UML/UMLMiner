@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dom4j.Document;
+
 public class Conversation implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -20,6 +22,8 @@ public class Conversation implements Serializable {
 	private String query;
 	private List<String> queryList = new ArrayList<String>();
 
+	private transient Document diagramAsXML;
+
 	private List<String> responseList = new ArrayList<String>();
 	private String prefixAnswer;
 
@@ -30,10 +34,12 @@ public class Conversation implements Serializable {
 	 * @param projectId
 	 * @param diagramId
 	 * @param diagramAsText
+	 * @param diagramAsXML
 	 * @param query
 	 * @param prefixAnswer
 	 */
-	public Conversation(String sessionId, String projectId, String diagramId, String diagramAsText, String query,
+	public Conversation(String sessionId, String projectId, 
+			String diagramId, String diagramAsText, Document diagramAsXML, String query,
 			String prefixAnswer) {
 		this.sessionId = sessionId;
 		this.projectId = projectId;
@@ -47,6 +53,8 @@ public class Conversation implements Serializable {
 
 		this.diagramAsText = diagramAsText;
 		addDiagramAsText(diagramAsText);
+
+		this.diagramAsXML =  diagramAsXML;
 
 		this.query = query;
 		addQuery(query);
@@ -134,6 +142,15 @@ public class Conversation implements Serializable {
 	public void setDiagramAsText(String diagramAsText) {
 		this.diagramAsText = diagramAsText;
 		diagramAsTextList.add(diagramAsText);
+	}
+
+	// Getter e setter per diagramAsXML
+	public Document getDiagramAsXML() {
+		return diagramAsXML;
+	}
+
+	public void setDiagramAsXML(Document diagramAsXML) {
+		this.diagramAsXML = diagramAsXML;
 	}
 
 	// Getter e setter per query

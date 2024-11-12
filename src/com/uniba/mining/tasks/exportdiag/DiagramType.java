@@ -10,7 +10,7 @@ import com.vp.plugin.model.IProject;
  * pasqualeardimento
  */
 public enum DiagramType {
-	CLASS_DIAGRAM(ClassInfo.class),
+	CLASS_DIAGRAM(DiagramInfo.class),
 	USECASE_DIAGRAM(UseCaseInfo.class);
 	// Aggiungi altri tipi di diagrammi se necessario
 	// ...

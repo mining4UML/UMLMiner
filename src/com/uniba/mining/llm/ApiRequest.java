@@ -1,5 +1,11 @@
 package com.uniba.mining.llm;
 
+import java.io.StringWriter;
+
+import org.dom4j.Document;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -22,6 +28,9 @@ public class ApiRequest {
 	@JsonProperty("diagram_as_text")
 	private String diagramAsText;
 
+	@JsonProperty("diagram_as_xml")
+	private String diagramAsXML;
+
 	@JsonProperty("requirements")
 	private String requirements;
 
@@ -37,21 +46,38 @@ public class ApiRequest {
 	 * @param diagramId
 	 * @param queryId
 	 * @param diagramAsText
+	 * @param diagramAsXML
 	 * @param requirements
 	 * @param user
 	 * @param query
 	 */
 	public ApiRequest(String sessionId, String projectId, 
 			String diagramId, String queryId, String diagramAsText, 
+			Document diagramAsXML, 
 			String requirements, String user, String query) {
 		this.sessionId = sessionId;
 		this.projectId = projectId;
 		this.diagramId = diagramId;
 		this.queryId = queryId;
 		this.diagramAsText = diagramAsText;
+		this.diagramAsXML = convertDocumentToString(diagramAsXML);
 		this.requirements = requirements;
 		this.user = user;
 		this.query = query;
+	}
+
+	private String convertDocumentToString(Document doc) {
+		try {
+			StringWriter writer = new StringWriter();
+			OutputFormat format = OutputFormat.createPrettyPrint(); // puoi anche usare createCompactFormat()
+			XMLWriter xmlWriter = new XMLWriter(writer, format);
+			xmlWriter.write(doc);
+			xmlWriter.close();
+			return writer.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	// Getter e setter
@@ -94,6 +120,14 @@ public class ApiRequest {
 
 	public void setDiagramAsText(String diagramAsText) {
 		this.diagramAsText = diagramAsText;
+	}
+
+	public String getDiagramAsXml() {
+		return diagramAsXML;
+	}
+
+	public void setDiagramAsText(Document diagramAsXML) {
+		this.diagramAsXML = convertDocumentToString(diagramAsXML);
 	}
 
 	public String getRequirements() {

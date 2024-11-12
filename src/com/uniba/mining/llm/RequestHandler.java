@@ -92,6 +92,7 @@ public class RequestHandler {
 				diagramId,
 				conversation.getQueryId(),
 				conversation.getDiagramAsText(),
+				conversation.getDiagramAsXML(),
 				requirements,
 				user,
 				conversation.getQuery()

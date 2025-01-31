@@ -54,6 +54,7 @@ public class FeedbackHandler {
 	private LimitedTextField inputField;
 	private JLabel charCountLabel;
 	private static final String suffixCountLabel = Config.FEEDBACK_SUFFIX_COUNT_LABEL;
+	// panel with chat content
 	private JTextPane outputPane;
 	private StyledDocument document;
 	private DefaultListModel<Conversation> conversationListModel;
@@ -114,17 +115,23 @@ public class FeedbackHandler {
 		outputPane = new JTextPane();
 		outputPane.setEditable(false);
 		outputPane.setPreferredSize(new Dimension(400, 200));
-		outputPane.setBackground(new Color(240, 255, 255));
+		// white color
+		outputPane.setBackground(new Color(255, 255, 255));
 		inputField.setPreferredSize(new Dimension (outputPane.getWidth(),inputField.getPreferredSize().height));
 		document = outputPane.getStyledDocument();
 
 		conversationListModel = new DefaultListModel<>();
+
 		conversationList = new JList<>(conversationListModel);
+		conversationList.setBackground(new Color(225, 235, 245)); // Stesso colore LIGHT_BLUE
+		conversationList.setSelectionBackground(new Color(100, 150, 230)); // Stesso colore DARK_BLUE
+		conversationList.setSelectionForeground(Color.WHITE); // Testo bianco per la selezione
+
 
 		conversationTitleField = new JTextField();
 		conversationTitleField.setEditable(false);
 		conversationTitleField.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
-		conversationTitleField.setForeground(new Color(34, 139, 34)); // Verde scuro
+		//conversationTitleField.setForeground(new Color(34, 139, 34)); // Verde scuro
 		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in grassetto
 		// Imposta il colore di sfondo della casella di testo a quello del panel
 		conversationTitleField.setBackground(UIManager.getColor("Panel.background"));
@@ -204,18 +211,6 @@ public class FeedbackHandler {
 			}
 		});
 
-		//		conversationList.addMouseListener(new MouseAdapter() {
-		//			@Override
-		//			public void mouseClicked(MouseEvent e) {
-		//				if (SwingUtilities.isRightMouseButton(e)) {
-		//					int index = conversationList.locationToIndex(e.getPoint());
-		//					if (index > -1) {
-		//						conversationList.setSelectedIndex(index);
-		//						showPopupMenu(e);
-		//					}
-		//				}
-		//			}
-		//		});
 
 
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
@@ -254,8 +249,10 @@ public class FeedbackHandler {
 
 		//initQueryButtons();
 		queryButtons = new QueryButtons(inputField,PLACEHOLDER);
-		requirementsTextArea = new RequirementsTextArea(getDiagram());
+
 		//initRequirements();
+		requirementsTextArea = new RequirementsTextArea(getDiagram()); 
+
 
 		addFocusListenerToOutputPane();
 
@@ -269,6 +266,7 @@ public class FeedbackHandler {
 		outputPane.setComponentPopupMenu(popupMenu);
 
 	}
+	
 
 	private static void addDocumentListener(JTextField textField, JLabel label) {
 		textField.getDocument().addDocumentListener(new DocumentListener() {
@@ -800,14 +798,14 @@ public class FeedbackHandler {
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-		
+
 		// Aggiungi il testo descrittivo a sinistra del punto interrogativo
 		JLabel instructionLabel = new JLabel("Click or type for feedback: ");
 		buttonPanel.add(instructionLabel);
-		
+
 		buttonPanel = queryButtons.addButtons(buttonPanel);
 		buttonPanel.add(createHelpLabel());
-		
+
 		inputAndButtonPanel.add(buttonPanel, gbcButtonPanel); // Aggiungi buttonPanel con i vincoli
 
 		// Vincoli per inputField (sotto)
@@ -836,8 +834,43 @@ public class FeedbackHandler {
 		// Crea il pannello destro e imposta il layout BorderLayout
 		JPanel rightPanel = new JPanel(new BorderLayout());
 		rightPanel.add(requirementsTextArea.getPreviewRequirements(), BorderLayout.NORTH);
+		// Aggiungi l'etichetta "Requirements Preview" sopra l'area di testo (NORTH)
+		rightPanel.add(requirementsTextArea.getPreviewRequirements(), BorderLayout.NORTH);
+		// Aggiungi l'area di testo (CENTRO) usando addRTextArea
+		requirementsTextArea.addRTextArea(rightPanel);
+
+		// Crea un pannello per i pulsanti (usiamo FlowLayout per posizionarli affiancati)
+		JPanel buttonRightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+		// Crea il pulsante "Export as TXT"
+		JButton saveButton = new JButton("Export as TXT");
+		saveButton.setToolTipText("Click to export the diagram requirements as a text file");
+		saveButton.addActionListener(e -> requirementsTextArea.exportTextToFile());
+	
+
+		// Crea il pulsante "Load"
+		JButton loadButton = new JButton("Load Req.");
+		loadButton.setToolTipText("Click to load a text file with the diagram requirements.");
+		loadButton.addActionListener(e -> {
+			// Crea il FeedbackRequHandler
+			FeedbackRequHandler dialogHandler = new FeedbackRequHandler();
+			// Mostra il dialogo
+			Application.getViewManager().showDialog(dialogHandler);
+			// Impostiamo il callback che verrà eseguito quando il dialogo verrà chiuso
+			requirementsTextArea.printReqFound(diagram); 
+		});
+
+		// Aggiungi i pulsanti al pannello
+		buttonRightPanel.add(saveButton);
+		buttonRightPanel.add(loadButton);
+		
+		// Aggiungi il pannello dei pulsanti sotto l'area di testo (SOUTH) nel pannello destro
+		rightPanel.add(buttonRightPanel, BorderLayout.SOUTH);
+
+
+
 		// Add requirementsTextArea to the east region in a JScrollPane
-		rightPanel = requirementsTextArea.addRTextArea(rightPanel);
+		//rightPanel = requirementsTextArea.addRTextArea(rightPanel);
 
 		// Aggiungi il pannello destro al pannello principale nella parte est
 		mainPanel.add(rightPanel, BorderLayout.EAST);
@@ -870,15 +903,15 @@ public class FeedbackHandler {
 
 		return panel;
 	}
-	
+
 	private String buildTitle(String diagramTitle, String chatTitle) {
-	    if (diagramTitle == null || diagramTitle.isEmpty()) {
-	        diagramTitle = "Untitled Diagram";
-	    }
-	    if (chatTitle == null || chatTitle.isEmpty()) {
-	        chatTitle = "Untitled Chat";
-	    }
-	    return "Class Diagram: " + diagramTitle + " - Chat: " + chatTitle;
+		if (diagramTitle == null || diagramTitle.isEmpty()) {
+			diagramTitle = "Untitled Diagram";
+		}
+		if (chatTitle == null || chatTitle.isEmpty()) {
+			chatTitle = "Untitled Chat";
+		}
+		return "Class Diagram: " + diagramTitle + " - Chat: " + chatTitle;
 	}
 
 	public void loadSerializedConversations() {

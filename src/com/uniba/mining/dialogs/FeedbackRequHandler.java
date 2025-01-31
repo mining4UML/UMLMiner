@@ -16,6 +16,7 @@ public class FeedbackRequHandler implements IDialogHandler {
 	private IDialog dialog;
 	private JPanel rootPanel;
 	private DiagramUI diagramUI;
+	 private Runnable onDialogCloseCallback;  // Dichiarazione del campo
 
 	@Override
 	public boolean canClosed() {
@@ -42,21 +43,6 @@ public class FeedbackRequHandler implements IDialogHandler {
 	@Override
 	public void prepare(IDialog dialog) {
 		GUI.prepareDialog(dialog, Config.FEEDBACK_LABELREQU);
-//        this.dialog = dialog;
-//        dialog.setModal(true);
-//        dialog.setTitle("Feedback Request Handler");
-//        dialog.setResizable(false);
-//        dialog.pack();
-
-		// Configura il DiagramUI, se necessario
-		// diagramUI.init(); // Esempio di inizializzazione o caricamento del diagramma
-
-		// Esempio di altre configurazioni
-		// diagramUI.setCustomSettings(...); // Imposta altre configurazioni necessarie
-
-		// Esempio di inizializzazione o aggiornamento UI
-		// rootPanel.revalidate();
-		// rootPanel.repaint();
 	}
 
 	@Override

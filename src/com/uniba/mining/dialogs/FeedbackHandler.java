@@ -89,7 +89,7 @@ public class FeedbackHandler {
 	public void clearPanel(String diagramId) {
 		conversationListModel.removeAllElements();
 		conversationList.clearSelection();
-		conversationTitleField.setText(diagramId);
+		conversationTitleField.setText(buildTitle(null, diagramId));
 	}
 
 	public void clearPanel() {
@@ -381,7 +381,7 @@ public class FeedbackHandler {
 	public String handleFeedback(Conversation conversation) {
 		try {
 			RequestHandler requestHandler = new RequestHandler(projectId, conversation);
-			return requestHandler.sendRequestAndGetResponse();
+			return requestHandler.sendRequestAndGetResponse().getAnswer();
 		} catch (IOException e) {
 			ErrorUtils.showDetailedErrorMessage(e);
 		}
@@ -434,7 +434,7 @@ public class FeedbackHandler {
 				currentConversation.appendMessage(response, false);
 				// currentConversation.setResponse(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-				conversationTitleField.setText(getDiagramTitle() + currentConversation.getTitle());
+				conversationTitleField.setText(buildTitle(getDiagramTitle(), currentConversation.getTitle()));
 
 			}
 
@@ -620,7 +620,7 @@ public class FeedbackHandler {
 			if (newTitle != null && !newTitle.isEmpty()) {
 				selectedConversation.setTitle(newTitle);
 				// Aggiorna il testo nella casella di testo del titolo della conversazione
-				conversationTitleField.setText(getDiagramTitle() + newTitle);
+				conversationTitleField.setText(buildTitle(getDiagramTitle(), newTitle));
 				// Aggiorna la visualizzazione della lista delle conversazioni
 				conversationListModel.setElementAt(selectedConversation, conversationList.getSelectedIndex());
 				// serializeConversations();
@@ -800,9 +800,14 @@ public class FeedbackHandler {
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-		buttonPanel.add(createHelpLabel());
+		
+		// Aggiungi il testo descrittivo a sinistra del punto interrogativo
+		JLabel instructionLabel = new JLabel("Click or type for feedback: ");
+		buttonPanel.add(instructionLabel);
+		
 		buttonPanel = queryButtons.addButtons(buttonPanel);
-
+		buttonPanel.add(createHelpLabel());
+		
 		inputAndButtonPanel.add(buttonPanel, gbcButtonPanel); // Aggiungi buttonPanel con i vincoli
 
 		// Vincoli per inputField (sotto)
@@ -847,7 +852,8 @@ public class FeedbackHandler {
 			Conversation selectedConversation = conversationList.getSelectedValue();
 
 			if (selectedConversation != null) {
-				conversationTitleField.setText(getDiagramTitle() + selectedConversation.getTitle());
+				conversationTitleField.setText(
+						buildTitle(getDiagramTitle(), selectedConversation.getTitle()));
 				String conversationContent = selectedConversation.getConversationContent();
 				outputPane.setText("");
 				String[] lines = conversationContent.split("\n");
@@ -857,12 +863,22 @@ public class FeedbackHandler {
 
 				}
 			} else {
-				conversationTitleField.setText(getDiagramTitle());
+				conversationTitleField.setText(buildTitle(null,getDiagramTitle()));
 				outputPane.setText("");
 			}
 		});
 
 		return panel;
+	}
+	
+	private String buildTitle(String diagramTitle, String chatTitle) {
+	    if (diagramTitle == null || diagramTitle.isEmpty()) {
+	        diagramTitle = "Untitled Diagram";
+	    }
+	    if (chatTitle == null || chatTitle.isEmpty()) {
+	        chatTitle = "Untitled Chat";
+	    }
+	    return "Class Diagram: " + diagramTitle + " - Chat: " + chatTitle;
 	}
 
 	public void loadSerializedConversations() {

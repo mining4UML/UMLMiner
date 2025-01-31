@@ -21,9 +21,6 @@ import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IProject;
 
 import org.dom4j.*;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
-import org.dom4j.io.OutputFormat;
 
 /**
  * 
@@ -561,12 +558,13 @@ public class DiagramInfo {
 		Document xml = null;
 		// Obtain the ModelConvertionManager
 		IDiagramUIModel diagramA[] = {diagram};
+		final String FILEXML_PATH ="XmlDiagrams";
 		ModelConvertionManager convertionManager = ApplicationManager.instance().getModelConvertionManager(); 
-		File  file= new File("/Users/pasqualeardimento/Desktop/pasquale.XML");
-		convertionManager.exportXML(diagramA, file, true);
-		File fileName = new File("/Users/pasqualeardimento/Desktop/pasquale.XML/project.xml");
+		File  filePath= new File(FILEXML_PATH);
+		convertionManager.exportXML(diagramA, filePath, true);
 		try {
-			xml= new exportXMLCustomized().getCustomizedXML(fileName,true);
+			xml= new exportXMLCustomized().getCustomizedXML("project.xml",
+					diagram.getName(), filePath, true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

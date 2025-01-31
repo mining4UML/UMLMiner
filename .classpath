@@ -22,5 +22,6 @@
 	<classpathentry kind="lib" path="/Applications/Visual Paradigm.app/Contents/Resources/app/lib/openapi.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib"/>
 	<classpathentry exported="true" kind="lib" path="lib/json-20231013.jar"/>
+	<classpathentry kind="lib" path="/Users/pasqualeardimento/Downloads/jaxen-1.0-FCS.zip"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

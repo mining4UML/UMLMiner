@@ -28,7 +28,7 @@ public class RequestHandler {
 		this.conversation = conversation;
 	}
 
-	public String sendRequestAndGetResponse() throws ConnectException, IOException {
+	public ParsedResponse sendRequestAndGetResponse() throws ConnectException, IOException {
 		// Create the waiting dialog
 		JDialog dialog = createWaitDialog();
 		AtomicReference<String> responseRef = new AtomicReference<>();
@@ -76,7 +76,7 @@ public class RequestHandler {
 		}
 
 		// Return the obtained response
-		return responseRef.get();
+		return ResponseParser.parseResponse(responseRef.get());
 	}
 
 	private ApiRequest createApiRequest(Conversation conversation) throws IOException {

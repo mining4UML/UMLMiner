@@ -15,12 +15,15 @@ import java.util.Map;
 
 import java.nio.file.*;
 
+
 public class exportXMLCustomized {
 
 	// Metodo principale che rimuove nodi, elimina attributi specifici e aggiunge nuovi attributi
-	public Document getCustomizedXML(File inputFile, boolean save) throws Exception {
+	public Document getCustomizedXML(String SourceXmlName, 
+			String DestinationXmlName, File path, boolean save) throws Exception {
 		// Carica il file XML di input
 		SAXReader reader = new SAXReader();
+		File inputFile = new File(path+"/"+SourceXmlName);
 		Document doc = reader.read(inputFile);
 
 		// Rimuovi nodi specificati
@@ -50,10 +53,10 @@ public class exportXMLCustomized {
 
 		// Salva il documento aggiornato
 		if(save)
-			saveDocument(doc, "/Users/pasqualeardimento/Desktop/pasquale.XML/outputFile.xml");
+			saveDocument(doc, path+"/"+DestinationXmlName+".xml");
 
 		// cancella i file generati da VP 
-		deleteFilesExcept("/Users/pasqualeardimento/Desktop/pasquale.XML/", "outputFile.xml");
+		deleteFilesExcept(path.toString(), DestinationXmlName+".xml");
 		System.out.println("File XML modificato con successo, nodi specificati rimossi e attributi aggiunti.");
 		return doc;
 	}

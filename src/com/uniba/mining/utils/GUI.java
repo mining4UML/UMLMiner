@@ -9,9 +9,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.font.TextAttribute;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -225,6 +227,27 @@ public class GUI {
         fileChooser.setApproveButtonToolTipText(fullTitle);
         return fileChooser;
     }
+    
+    public static File[] showFileSelectionDialog(Window parent, File logsDir, String title) {
+    	String fullTitle = String.join(" - ", Config.PLUGIN_NAME, title);
+        
+    	JFileChooser fileChooser = viewManager.createJFileChooser();
+    	fileChooser.setCurrentDirectory(logsDir);
+    	fileChooser.setLocale(Locale.ENGLISH);
+    	fileChooser.setMultiSelectionEnabled(true);
+        fileChooser.setDialogTitle(fullTitle);
+        fileChooser.setApproveButtonToolTipText(fullTitle);
+        fileChooser.setApproveButtonText("Select");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        int result = (parent != null)
+            ? fileChooser.showOpenDialog(parent)
+            : fileChooser.showOpenDialog(null);
+
+        return (result == JFileChooser.APPROVE_OPTION) ? fileChooser.getSelectedFiles() : new File[0];
+    }
+    
+    
 
     public static JFileChooser createSelectFileChooser(String title, FileFilter... fileFilters) {
         return createSelectFileChooser(title, false, fileFilters);
@@ -246,6 +269,28 @@ public class GUI {
 
         return fileChooser;
     }
+    
+    public static JFileChooser createExportDirectoryChooser(String title) {
+        String fullTitle = String.join(" - ", Config.PLUGIN_NAME, title);
+        JFileChooser fileChooser = viewManager.createJFileChooser();
+
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fileChooser.setAcceptAllFileFilterUsed(false); // Opzionale: disabilita il filtro "tutti i file"
+		
+        
+        fileChooser.setLocale(Locale.ENGLISH);
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setName(fullTitle);
+        fileChooser.setDialogTitle(fullTitle);
+        fileChooser.setToolTipText(fullTitle);
+        fileChooser.setApproveButtonText("Export");
+        fileChooser.setApproveButtonToolTipText(title);
+
+        disableTextFields(fileChooser);
+
+        return fileChooser;
+    }
+    
 
     public static void showInformationMessageDialog(Component component, String title, String msg) {
         viewManager.showMessageDialog(component, msg, String.join(" - ", Config.PLUGIN_NAME, title),

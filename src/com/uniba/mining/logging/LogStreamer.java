@@ -98,7 +98,7 @@ public class LogStreamer {
 	public static Path getRequirementsDirectory() {
 		return requirementsDirectory;
 	}
-	
+
 	public static String getUsername() {
 		return USER_NAME;
 	}
@@ -159,12 +159,28 @@ public class LogStreamer {
 
 	public static int countLogs() {
 		if (logsDirectory != null && logsDirectory.toFile().exists()) {
-			return logsDirectory.toFile().listFiles(LogStreamer::isLogFile).length;
-		} 
-		else return 0;
+			// Specifica esplicitamente FilenameFilter per evitare ambiguità
+			File[] logFiles = logsDirectory.toFile().listFiles((File dir, String name) -> {
+				File file = new File(dir, name);
+				return LogStreamer.isLogFile(file);
+			});
+			return logFiles != null ? logFiles.length : 0;
+		} else {
+			return 0;
+		}
 	}
 
+
 	public static void exportZip(Path filePath, File... files) {
+
+//		String fileName = String.join("-", "logs", Application.getStringTimestamp()) + ZIP_EXTENSION;
+//
+//		// Aggiungi l'estensione .zip al nome del file
+//		if (!filePath.toString().endsWith(".zip")) {
+//			//filePath = Paths.get(filePath.toString() + ".zip");
+//			filePath = filePath.resolve(fileName);
+//		}
+
 		try (OutputStream outputStream = new FileOutputStream(Files.createFile(filePath).toFile());
 				ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
 
@@ -188,10 +204,23 @@ public class LogStreamer {
 		}
 	}
 
-	public static void exportLogs(Path directoryPath) {
+	public static void exportLogs(Path directoryPath, File... selectedFiles) {
 		String fileName = String.join("-", "logs", Application.getStringTimestamp()) + ZIP_EXTENSION;
 		Path filePath = directoryPath.resolve(fileName);
-
-		exportZip(filePath, logsDirectory.toFile().listFiles(LogStreamer::isLogFile));
+		exportZip(filePath, selectedFiles);
 	}
+
+
+	//	public static void exportLogs(Path directoryPath) {
+	//		String fileName = String.join("-", "logs", Application.getStringTimestamp()) + ZIP_EXTENSION;
+	//		Path filePath = directoryPath.resolve(fileName);
+	//
+	//		exportZip(filePath, logsDirectory.toFile().listFiles(LogStreamer::isLogFile));
+	//	}
+
+	public static boolean isLogFile(File file) {
+		return file.isFile() && file.getName().toLowerCase().endsWith(".xes");
+	}
+
+
 }

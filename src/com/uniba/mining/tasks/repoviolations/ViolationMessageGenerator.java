@@ -1,45 +1,65 @@
 package com.uniba.mining.tasks.repoviolations;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.function.BiFunction;
 import javax.swing.JTextArea;
 
 public class ViolationMessageGenerator {
 
-	public static boolean processCSV(String filePath, JTextArea resultTextArea) {
-		boolean atLeastOneRow= false;
-		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				String[] fields = line.split(";");
-				if (fields.length >= 8 && "violation".equals(fields[3].trim())) {
-					String activities = getField(fields, 2);
-					String activityName = getField(fields,4);
-					String diagramName = getField(fields, 6);
-					String umlElementType = getField(fields, 8);
-					String umlElementName = getField(fields, 9);
-					String propertyName = getField(fields, 10);
-					String propertyValue = getField(fields, 11);
-					String RelationshipFrom = getField(fields, 12);
-					String RelationshipTo = getField(fields, 13);
+	public static File processCSV(File inputFile) {
+	    // Crea un file temporaneo per l'output nella stessa cartella dell'input
+	    File outputFile = new File(inputFile.getParent(), "temp_" + inputFile.getName());
 
-					String constraint = getField(fields, 1);
+	    try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+	         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
 
-					String message = generateMessage(constraint, activities, 
-							activityName, diagramName, umlElementType, umlElementName, propertyName, 
-							propertyValue, RelationshipFrom, RelationshipTo);
-					System.out.println(message);
-					resultTextArea.append(message + "\n");
-					atLeastOneRow= true;					
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return atLeastOneRow;
+	        String line;
+	        boolean atLeastOneRow = false;
+
+	        while ((line = reader.readLine()) != null) {
+	            String[] fields = line.split(";");
+	            if (fields.length >= 8 && "violation".equals(fields[3].trim())) {
+	                String activities = getField(fields, 2);
+	                String activityName = getField(fields, 4);
+	                String diagramName = getField(fields, 6);
+	                String umlElementType = getField(fields, 8);
+	                String umlElementName = getField(fields, 9);
+	                String propertyName = getField(fields, 10);
+	                String propertyValue = getField(fields, 11);
+	                String relationshipFrom = getField(fields, 12);
+	                String relationshipTo = getField(fields, 13);
+
+	                String constraint = getField(fields, 1);
+
+	                String message = generateMessage(constraint, activities, 
+	                        activityName, diagramName, umlElementType, umlElementName, 
+	                        propertyName, propertyValue, relationshipFrom, relationshipTo);
+
+	                // Scrive il messaggio nel file di output
+	                writer.write(message);
+	                writer.newLine();
+	                atLeastOneRow = true;
+	            }
+	        }
+
+	        // Se almeno una riga è stata scritta, restituisce il file elaborato
+	        return atLeastOneRow ? outputFile : null;
+
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return null;
+	    }
 	}
+
+
+	    private static String getField(String[] fields, int index) {
+	        return (index < fields.length) ? fields[index].trim() : "";
+	    }
 
 	public static String generateMessage(String constraint, String... fields) {
 		BiFunction<String, String, String> messageGenerator = null;
@@ -332,9 +352,6 @@ public class ViolationMessageGenerator {
 		return message.toString();
 	}
 
-	private static String getField(String[] fields, int index) {
-		return index < fields.length && !fields[index].trim().isEmpty() ? fields[index].trim() : "";
-	}
 
 	private static String[] extractActivityParts(String activities) {
 		return activities.replaceAll("\\[|\\]", "").split(",");

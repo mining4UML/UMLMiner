@@ -1,16 +1,23 @@
 package com.uniba.mining.tasks.generator;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.uniba.mining.logging.LogExtractor;
+import com.uniba.mining.tasks.exportdiag.DiagramInfo;
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.DiagramManager;
+import com.vp.plugin.ProjectManager;
 import com.vp.plugin.diagram.IClassDiagramUIModel;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.diagram.shape.IClassUIModel;
@@ -25,7 +32,9 @@ import com.vp.plugin.model.IParameter;
 import com.vp.plugin.model.IProject;
 import com.vp.plugin.model.factory.IModelElementFactory;
 
-import netscape.javascript.JSException;
+import org.dom4j.Document;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 /**
  * 
@@ -121,98 +130,6 @@ public class DiagramCombinations {
 		return mandatoryClasses;
 	}
 
-	// private List<ClassExt> extractOptionalClasses(JSONObject jsonDiagram) {
-	// List<ClassExt> optionalClasses = new ArrayList<>();
-	// JSONArray jsonClasses = jsonDiagram.getJSONArray("classi");
-	//
-	// for (int i = 0; i < jsonClasses.length(); i++) {
-	// JSONObject jsonClass = jsonClasses.getJSONObject(i);
-	// IClass newClass = buildClass(jsonDiagram, jsonClass, "optional");
-	// // JSONObject jsonClass = jsonClasses.getJSONObject(i);
-	// //
-	// // if ( ! jsonClass.getBoolean("optional") ) {
-	// // System.out.println("Optional: "+jsonClass.get("nome"));
-	// // IClass newClass = createClassFromJson(jsonClass);
-	// //
-	// // System.out.println("Mandatory: "+jsonClass.get("nome"));
-	// // //for (IClass currentClass : classes) {
-	// //
-	// // // Aggiungi attributi
-	// // System.out.println(newClass.getName());
-	// // JSONArray jsonAttributes = getJsonClassByName(jsonDiagram,
-	// newClass.getName()).optJSONArray("attributi");
-	// // if (jsonAttributes != null) {
-	// // for (int j = 0; j < jsonAttributes.length(); j++) {
-	// // JSONObject jsonAttribute = jsonAttributes.getJSONObject(j);
-	// // IAttribute attribute = IModelElementFactory.instance().createAttribute();
-	// // attribute.setName(jsonAttribute.getString("nome"));
-	// // attribute.setType(jsonAttribute.getString("tipo"));
-	// // attribute.setVisibility(IAttribute.VISIBILITY_PRIVATE);
-	// // newClass.addAttribute(attribute);
-	// // }
-	// // }
-	// //
-	// // // Aggiungi operazioni
-	// // JSONArray jsonOperations = getJsonClassByName(jsonDiagram,
-	// newClass.getName()).optJSONArray("operazioni");
-	// // if (jsonOperations != null) {
-	// // for (int k = 0; k < jsonOperations.length(); k++) {
-	// // JSONObject jsonOperation = jsonOperations.getJSONObject(k);
-	// // IOperation operation = IModelElementFactory.instance().createOperation();
-	// // operation.setName(jsonOperation.getString("nome"));
-	// // operation.setVisibility(IOperation.VISIBILITY_PUBLIC);
-	// // operation.setReturnType(jsonOperation.getString("tipoRitorno"));
-	// //
-	// // // Aggiungi parametri
-	// // JSONArray jsonParameters = jsonOperation.getJSONArray("parametri");
-	// // for (int l = 0; l < jsonParameters.length(); l++) {
-	// // JSONObject jsonParameter = jsonParameters.getJSONObject(l);
-	// // IParameter parameter = IModelElementFactory.instance().createParameter();
-	// // parameter.setName(jsonParameter.getString("nome"));
-	// // parameter.setType(jsonParameter.getString("tipo"));
-	// // operation.addParameter(parameter);
-	// // }
-	// //
-	// // newClass.addOperation(operation);
-	// // }
-	// // }
-	// //
-	// // // Aggiungi costruttori
-	// // JSONArray jsonConstructors = getJsonClassByName(jsonDiagram,
-	// newClass.getName())
-	// // .optJSONArray("costruttori");
-	// // if (jsonConstructors != null) {
-	// // for (int m = 0; m < jsonConstructors.length(); m++) {
-	// // JSONObject jsonConstructor = jsonConstructors.getJSONObject(m);
-	// // IOperation constructor =
-	// IModelElementFactory.instance().createOperation();
-	// // constructor.setName(newClass.getName());
-	// // constructor.setVisibility(IOperation.VISIBILITY_PUBLIC);
-	// // constructor.setReturnType(typeVoid);
-	// //
-	// // // Aggiungi parametri
-	// // JSONArray jsonParametersConstructor =
-	// jsonConstructor.getJSONArray("parametri");
-	// // for (int n = 0; n < jsonParametersConstructor.length(); n++) {
-	// // JSONObject jsonParameter = jsonParametersConstructor.getJSONObject(n);
-	// // IParameter parameter = IModelElementFactory.instance().createParameter();
-	// // parameter.setName(jsonParameter.getString("nome"));
-	// // parameter.setType(jsonParameter.getString("tipo"));
-	// // constructor.addParameter(parameter);
-	// // }
-	// //
-	// // newClass.addOperation(constructor);
-	// // }
-	// // }
-	//
-	//
-	// if (newClass!= null)
-	// optionalClasses.add(newClass);
-	// }
-	//
-	// return optionalClasses;
-	// }
-
 	private ClassExt buildClass(JSONObject jsonDiagram, JSONObject jsonClass, String value) {
 		// JSONArray jsonClasses = jsonDiagram.getJSONArray("classi");
 
@@ -223,85 +140,6 @@ public class DiagramCombinations {
 		// System.out.println(newClass.getClass());
 
 		System.out.println("Mandatory: " + jsonClass.get("nome"));
-		// for (IClass currentClass : classes) {
-
-		// Aggiungi attributi
-		// System.out.println(newClass.getName());
-		// JSONArray jsonAttributes = jsonClass.optJSONArray("attributi");
-		// System.out.println("Numero di attributi:"+jsonAttributes.length());
-		// if (jsonAttributes != null) {
-		// for (int j = 0; j < jsonAttributes.length(); j++) {
-		// JSONObject jsonAttribute = jsonAttributes.getJSONObject(j);
-		// //IAttribute attribute = IModelElementFactory.instance().createAttribute();
-		// // lo creo per questa classe e non per l'intero progetto
-		// IAttribute attribute = newClass.createAttribute();
-		// attribute.setName(jsonAttribute.getString("nome"));
-		// attribute.setType(jsonAttribute.getString("tipo"));
-		// attribute.setVisibility(IAttribute.VISIBILITY_PRIVATE);
-		// //newClass.addAttribute(attribute);
-		// System.out.println("*** " + attribute.getName());
-		// }
-		// }
-		//
-		// System.out.println(newClass.getName()+" "+newClass.attributeCount());
-		//
-		//
-		//
-		// // Aggiungi operazioni
-		// JSONArray jsonOperations = getJsonClassByName(jsonDiagram,
-		// newClass.getName()).optJSONArray("operazioni");
-		// if (jsonOperations != null) {
-		// for (int k = 0; k < jsonOperations.length(); k++) {
-		// JSONObject jsonOperation = jsonOperations.getJSONObject(k);
-		// //IOperation operation = IModelElementFactory.instance().createOperation();
-		// IOperation operation = newClass.createOperation();
-		// operation.setName(jsonOperation.getString("nome"));
-		// operation.setVisibility(IOperation.VISIBILITY_PUBLIC);
-		// operation.setReturnType(jsonOperation.getString("tipoRitorno"));
-		//
-		// // Aggiungi parametri
-		// JSONArray jsonParameters = jsonOperation.getJSONArray("parametri");
-		// for (int l = 0; l < jsonParameters.length(); l++) {
-		// JSONObject jsonParameter = jsonParameters.getJSONObject(l);
-		// //IParameter parameter = IModelElementFactory.instance().createParameter();
-		// IParameter parameter = operation.createParameter();
-		// parameter.setName(jsonParameter.getString("nome"));
-		// parameter.setType(jsonParameter.getString("tipo"));
-		// operation.addParameter(parameter);
-		// }
-		//
-		// //newClass.addOperation(operation);
-		// }
-		// }
-		//
-		// // Aggiungi costruttori
-		// JSONArray jsonConstructors = getJsonClassByName(jsonDiagram,
-		// newClass.getName())
-		// .optJSONArray("costruttori");
-		// if (jsonConstructors != null) {
-		// for (int m = 0; m < jsonConstructors.length(); m++) {
-		// JSONObject jsonConstructor = jsonConstructors.getJSONObject(m);
-		// //IOperation constructor = IModelElementFactory.instance().createOperation();
-		// IOperation constructor =newClass.createOperation();
-		// constructor.setName(newClass.getName());
-		// constructor.setVisibility(IOperation.VISIBILITY_PUBLIC);
-		// constructor.setReturnType(typeVoid);
-		//
-		// // Aggiungi parametri
-		// JSONArray jsonParametersConstructor =
-		// jsonConstructor.getJSONArray("parametri");
-		// for (int n = 0; n < jsonParametersConstructor.length(); n++) {
-		// JSONObject jsonParameter = jsonParametersConstructor.getJSONObject(n);
-		// //IParameter parameter = IModelElementFactory.instance().createParameter();
-		// IParameter parameter = constructor.createParameter();
-		// parameter.setName(jsonParameter.getString("nome"));
-		// parameter.setType(jsonParameter.getString("tipo"));
-		// constructor.addParameter(parameter);
-		// }
-		//
-		// //newClass.addOperation(constructor);
-		// }
-		// }
 
 		System.out.println(newClass.getName() + " " + newClass.attributeCount());
 
@@ -351,6 +189,11 @@ public class DiagramCombinations {
 		// Estrai il nome del package dal JSON (se presente)
 		String packageName = jsonDiagram.optString("package", "");
 
+
+		// provo a creare un nuovo progetto - 06 febbario 2025
+		ProjectManager projectManager = ApplicationManager.instance().getProjectManager();
+		projectManager.newProject();
+
 		// create blank class diagram
 		DiagramManager diagramManager = ApplicationManager.instance().getDiagramManager();
 		IClassDiagramUIModel diagram = (IClassDiagramUIModel) diagramManager
@@ -365,18 +208,22 @@ public class DiagramCombinations {
 		IModelElement outerPackageElement = (IModelElement) outerPackage;
 		// assegno il nome all'elemento di modello
 
-		String diagramPackageName = packageName.lastIndexOf('.') != -1
-				? packageName.substring(0, packageName.lastIndexOf('.')) + index
-				: packageName + index;
+//		String diagramPackageName = packageName.lastIndexOf('.') != -1
+//				? packageName.substring(0, packageName.lastIndexOf('.')) + index
+//						: packageName + index;
+		
+		String diagramPackageName = "default";
 
 		// non va bene se la sintassi del package non presenta il punto
 		// String diagramPackageName = packageName.substring(0,
 		// packageName.lastIndexOf('.'))+"pasquale"+index;
 		outerPackageElement.setName(diagramPackageName);
 
-		String basePackageName = packageName.lastIndexOf('.') != -1
-				? packageName.substring(packageName.lastIndexOf('.')) + index
-				: packageName + index;
+//		String basePackageName = packageName.lastIndexOf('.') != -1
+//				? packageName.substring(packageName.lastIndexOf('.')) + index
+//						: packageName + index;
+		
+		String basePackageName = "default";
 
 		// String basePackageName =
 		// packageName.substring(packageName.lastIndexOf('.'))+index;
@@ -399,27 +246,39 @@ public class DiagramCombinations {
 		// set to automatic calculate the initial caption position
 		basePackageShape.setRequestResetCaption(true);
 
+		List<IClass> newClasses = new ArrayList<>();
+		Map<IClass, IClass> classMapping = new HashMap<>(); // Per tenere traccia delle classi copiate
+
 		for (IClass currentClass : classes) {
 			System.out.println(currentClass.getName());
 
-			// metto in relazione di parent-child gli elementi
-			packageElement.addChild(currentClass);
+			// Creazione della nuova classe
+			IClass newClass = copyClass(currentClass);
+			newClasses.add(newClass);
+			classMapping.put(currentClass, newClass); // Salvo la corrispondenza
+
+			// Aggiungo la nuova classe al package
+			packageElement.addChild(newClass);
 
 			// Crea la forma della classe nel diagramma
-			IClassUIModel classShape = (IClassUIModel) diagramManager.createDiagramElement(diagram, currentClass);
+			IClassUIModel classShape = (IClassUIModel) diagramManager.createDiagramElement(diagram, newClass);
 			classShape.setBounds(100, 200, 100, 70);
 			basePackageShape.addChild(classShape);
 			classShape.setRequestResetCaption(true);
 			classShape.fitSize();
+
+			LogExtractor.addDiagramUIModel(newClass, diagram);
 		}
 
-		// Cicla attraverso le classi per aggiungere relazioni definite nel JSON
-		for (IClass currentClass : classes) {
-			// Esegui il metodo aggiornato per aggiungere le relazioni
-			RelationshipGenerator.addRelationsFromJson(diagramManager, diagram, basePackageShape, classes, jsonDiagram,
-					currentClass);
-		}
+		// Aggiungere le relazioni alle nuove classi
+		for (IClass originalClass : classes) {
+			IClass newCurrentClass = classMapping.get(originalClass); // Trova la copia
 
+			if (newCurrentClass != null) {
+				// Usa le nuove classi invece delle vecchie
+				RelationshipGenerator.addRelationsFromJson(diagramManager, diagram, basePackageShape, newClasses, jsonDiagram, newCurrentClass);
+			}
+		}
 		// dovrebbe servire a ridefinire il layout in base all'effettivo contenuto
 		basePackageShape.fitSize();
 
@@ -438,20 +297,86 @@ public class DiagramCombinations {
 		// Show up the diagram
 		diagramManager.openDiagram(diagram);
 		diagramManager.layout(diagram, DiagramManager.LAYOUT_AUTO);
+		
+		File storageDir = ApplicationManager.instance().getWorkspaceLocation();
+
+		File projectFile = new File(storageDir,"Student-" + index + ".vpp");
+		// provo a salvare questo progetto
+		
+		// Esporta il diagramma in formato XML
+		Document xmlDiagram = DiagramInfo.exportAsXML(diagram);
+		
+		// Salva il documento XML usando il percorso del file e il nome del diagramma
+		saveXMLDocument(xmlDiagram, projectFile.getParent(), "Student-" + index);
+		
+		if (xmlDiagram != null) {
+		    System.out.println("Diagramma esportato con successo in formato XML.");
+		} else {
+		    System.err.println("Errore nell'esportazione del diagramma XML.");
+		}
+		
+		projectManager.saveProjectAs(projectFile);
+	}
+	
+	
+	private static void saveXMLDocument(Document xmlDiagram, String projectPath, String diagramName) {
+	    try {
+	        // Percorso del file XML nella stessa directory del progetto
+	        File xmlFile = Paths.get(projectPath, diagramName + ".xml").toFile();
+	        
+	        // Crea un oggetto OutputFormat per formattare l'XML in modo leggibile
+	        OutputFormat format = OutputFormat.createPrettyPrint();
+	        
+	        // Crea un oggetto XMLWriter per scrivere il documento XML su file
+	        XMLWriter writer = new XMLWriter(new FileOutputStream(xmlFile), format);
+	        
+	        // Scrive il documento XML su file
+	        writer.write(xmlDiagram);
+	        
+	        // Chiude lo scrittore
+	        writer.close();
+
+	        System.out.println("Diagramma XML salvato in: " + xmlFile.getAbsolutePath());
+	    } catch (Exception e) {
+	        System.err.println("Errore nel salvataggio dell'XML: " + e.getMessage());
+	    }
+	}
+	
+
+	private IClass copyClass(IClass currentClass) {
+		// Crea una nuova classe
+		IClass newClass = IModelElementFactory.instance().createClass();
+
+		// Copia il nome
+		newClass.setName(currentClass.getName());
+
+		// Copia gli attributi
+		for (IAttribute attr : currentClass.toAttributeArray()) {
+			IAttribute newAttr = IModelElementFactory.instance().createAttribute();
+			newAttr.setName(attr.getName());
+			newAttr.setType((String) attr.getType());
+			newClass.addAttribute(newAttr);
+		}
+
+		// Copia le operazioni/metodi
+		for (IOperation op : currentClass.toOperationArray()) {
+			IOperation newOp = IModelElementFactory.instance().createOperation();
+			newOp.setName(op.getName());
+			newOp.setReturnType((String) op.getReturnType());
+
+			for (IParameter param : op.toParameterArray()) {
+				IParameter newParam = IModelElementFactory.instance().createParameter();
+				newParam.setName(param.getName());
+				newParam.setType((String) param.getType());
+				newOp.addParameter(newParam);
+			}
+
+			newClass.addOperation(newOp);
+		}
+
+		return newClass;
 	}
 
-	// private JSONObject getJsonClassByName(JSONObject jsonDiagram, String
-	// className) {
-	// JSONArray jsonClasses = jsonDiagram.getJSONArray("classi");
-	// for (int i = 0; i < jsonClasses.length(); i++) {
-	// JSONObject jsonClass = jsonClasses.getJSONObject(i);
-	// if (jsonClass.getString("nome").equals(className)) {
-	// return jsonClass;
-	// }
-	// }
-	// return new JSONObject(); // Restituisce un oggetto vuoto se la classe non è
-	// trovata
-	// }
 
 	private IClass createClassFromJson(JSONObject jsonClass) {
 		IClass newClass = IModelElementFactory.instance().createClass();
@@ -471,7 +396,7 @@ public class DiagramCombinations {
 					for (int j = 0; j < jsonAttributes.length(); j++) {
 						JSONObject jsonAttribute = jsonAttributes.optJSONObject(j);
 						if (jsonAttribute != null) {
-							IAttribute attribute = newClass.createAttribute();
+							IAttribute attribute = IModelElementFactory.instance().createAttribute();//newClass.createAttribute();
 							attribute.setName(jsonAttribute.getString("nome"));
 							attribute.setType(jsonAttribute.getString("tipo"));
 							attribute.setVisibility(IAttribute.VISIBILITY_PRIVATE);
@@ -490,8 +415,8 @@ public class DiagramCombinations {
 				jsonOperations = jsonClass.getJSONArray("operazioni");
 				for (int k = 0; k < jsonOperations.length(); k++) {
 					JSONObject jsonOperation = jsonOperations.getJSONObject(k);
-					// IOperation operation = IModelElementFactory.instance().createOperation();
-					IOperation operation = newClass.createOperation();
+					IOperation operation = IModelElementFactory.instance().createOperation();
+					//IOperation operation = newClass.createOperation();
 					operation.setName(jsonOperation.getString("nome"));
 					operation.setVisibility(IOperation.VISIBILITY_PUBLIC);
 					operation.setReturnType(jsonOperation.getString("tipoRitorno"));
@@ -500,8 +425,8 @@ public class DiagramCombinations {
 					JSONArray jsonParameters = jsonOperation.getJSONArray("parametri");
 					for (int l = 0; l < jsonParameters.length(); l++) {
 						JSONObject jsonParameter = jsonParameters.getJSONObject(l);
-						// IParameter parameter = IModelElementFactory.instance().createParameter();
-						IParameter parameter = operation.createParameter();
+						IParameter parameter = IModelElementFactory.instance().createParameter();
+						//IParameter parameter = operation.createParameter();
 						parameter.setName(jsonParameter.getString("nome"));
 						parameter.setType(jsonParameter.getString("tipo"));
 						operation.addParameter(parameter);
@@ -581,28 +506,5 @@ public class DiagramCombinations {
 			return "{}"; // Restituisci un oggetto JSON vuoto in caso di errore
 		}
 	}
-
-	// private void loadDataType() {
-	// IProject project =
-	// ApplicationManager.instance().getProjectManager().getProject();
-	// IModelElement[] datatypes =
-	// project.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_DATA_TYPE);
-	// if (datatypes != null && datatypes.length > 0) {
-	// for (int i = 0; i < datatypes.length; i++) {
-	// if ("int".equals(datatypes[i].getName())) {
-	// typeInt = (IDataType) datatypes[i];
-	// }
-	// if ("boolean".equals(datatypes[i].getName())) {
-	// typeBoolean = (IDataType) datatypes[i];
-	// }
-	// if ("string".equals(datatypes[i].getName())) {
-	// typeString = (IDataType) datatypes[i];
-	// }
-	// if ("void".equals(datatypes[i].getName())) {
-	// typeVoid = (IDataType) datatypes[i];
-	// }
-	// }
-	// }
-	// }
 
 }

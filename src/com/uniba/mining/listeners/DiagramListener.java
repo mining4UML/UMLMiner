@@ -48,15 +48,21 @@ public class DiagramListener implements IDiagramListener2 {
 		String diagramElementId = diagramElement.getId();
 		IModelElement modelElement = diagramElement.getModelElement();
 
-		modelElements.put(diagramElementId, modelElement);
-		LogExtractor.addDiagramUIModel(modelElement, diagramUIModel);
+		if(modelElement != null) {
+			modelElements.put(diagramElementId, modelElement);
+			LogExtractor.addDiagramUIModel(modelElement, diagramUIModel);
 
-		logger.info("%s element added to the diagram", modelElement.getModelType());
-		LogActivity logActivity = LogExtractor.extractLogActivity(ActionType.ADD, modelElement);
-		Application.scheduleSubmit(() -> {
-			Logger.createEvent(logActivity, modelElement);
-			diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
-		});
+			logger.info("%s element added to the diagram", modelElement.getModelType());
+			LogActivity logActivity = LogExtractor.extractLogActivity(ActionType.ADD, modelElement);
+			Application.scheduleSubmit(() -> {
+				Logger.createEvent(logActivity, modelElement);
+				diagramElement.addDiagramElementListener(new DiagramElementListener(diagramElement));
+			});
+		}
+		else {
+			logger.info("%s Element was not added to the diagram!!!");
+			System.out.println("modelElement null!");
+		}
 
 		// FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram());
 

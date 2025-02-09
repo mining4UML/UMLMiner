@@ -257,16 +257,16 @@ public class ViolationMessageGenerator {
 	private static String generateAlternatePrecedenceMessage(String activityA, String activityB, String[] fields) {
 		return generateCommonMessage("Alternate Precedence", fields) +
 				"Violation description: "+
-				"Each time "+ activityA + " occurs, it is preceded by" + (activityB != null ? activityB : "") +
-				" and no other "+ activityA + "can recur in between\n" ;
+				"Each time "+ activityA + " occurs it is preceded by" + (activityB != null ? activityB : "") +
+				" and no other "+ activityA + " can recur in between\n" ;
 	}
 
 
 	private static String generateAlternateResponseMessage(String activityA, String activityB, String[] fields) {
 		return generateCommonMessage("Alternate Precedence", fields) +
 				"Violation description: "+
-				"Each time "+ activityA + " occurs, then " + (activityB != null ? activityB : "") +
-				" occurs afterwards before "+ activityA + "recurs\n" ;
+				"Each time "+ activityA + " occurs then " + (activityB != null ? activityB : "") +
+				" occurs afterwards before "+ activityA + " recurs\n" ;
 	}
 
 
@@ -280,7 +280,7 @@ public class ViolationMessageGenerator {
 	private static String generateChainPrecedenceMessage(String activityA, String activityB, String[] fields) {
 		return generateCommonMessage("Chain Precedence", fields) +
 				"Violation description: "+
-				"Eahc time"+ activityA + " occurs then" + (activityB != null ? activityB : "") +
+				"Each time"+ activityA + " occurs then" + (activityB != null ? activityB : "") +
 				" occurs immediately beforehand\n" ;
 	}
 	private static String generateChainResponseMessage(String activityA, String activityB, String[] fields) {

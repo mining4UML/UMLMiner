@@ -11,14 +11,16 @@
 			<!-- Definisci un menu nella barra dei menu -->		
 			<menu id="Toolbar" label="%actions.toolbar.label"
 				ribbonPath="Help" />
-			<!--<action id="ProcessDiscovery" actionType="generalAction" label="%actions.ProcessDiscovery.label" 
+			<action id="ProcessDiscovery" actionType="generalAction" label="%actions.ProcessDiscovery.label" 
 				tooltip="%actions.ProcessDiscovery.label" icon="assets/icons/spaceman.png" 
 				style="normal" ribbonPath="Toolbar/#"> <actionController class="com.uniba.mining.actions.ProcessDiscoveryActionController" 
-				/> </action> <action id="ConformanceChecking" actionType="generalAction" 
+				/> 
+			</action> <action id="ConformanceChecking" actionType="generalAction" 
 				label="%actions.ConformanceChecking.label" tooltip="%actions.ConformanceChecking.label" 
 				icon="assets/icons/checklist.png" style="normal" ribbonPath="Toolbar/Discovery"> 
 				<actionController class="com.uniba.mining.actions.ConformanceCheckingActionController" 
-				/> </action> -->
+				/>
+			</action>
 			<action id="ExportLogs" actionType="generalAction"
 				label="%actions.ExportLogs.label"
 				tooltip="%actions.ExportLogs.label" icon="assets/icons/book.png"

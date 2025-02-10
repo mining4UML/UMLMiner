@@ -279,7 +279,7 @@ public class ViolationsRepoHandler extends JFrame {
 
             for (String fileName : selectedValues) {
                 File fileToProcess = new File(selectedDirectory, fileName); // File di input
-                File processedFile = ViolationMessageGenerator.processCSV(fileToProcess); // Elabora il file
+                File processedFile = ViolationMessageGenerator.processCSV(fileToProcess,saveDirectory); // Elabora il file
 
                 if (processedFile == null) {
                     GUI.showErrorMessageDialog(this, "Processing Error", "File " + fileName + " is not compliant.");

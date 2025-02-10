@@ -11,9 +11,9 @@ import javax.swing.JTextArea;
 
 public class ViolationMessageGenerator {
 
-	public static File processCSV(File inputFile) {
+	public static File processCSV(File inputFile, File outputFile) {
 	    // Crea un file temporaneo per l'output nella stessa cartella dell'input
-	    File outputFile = new File(inputFile.getParent(), "temp_" + inputFile.getName());
+	    outputFile = new File(outputFile.getParent(), inputFile.getName());
 
 	    try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 	         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
@@ -51,6 +51,7 @@ public class ViolationMessageGenerator {
 	        return atLeastOneRow ? outputFile : null;
 
 	    } catch (IOException e) {
+	    	// inserire messaggio di errore specializzato
 	        e.printStackTrace();
 	        return null;
 	    }

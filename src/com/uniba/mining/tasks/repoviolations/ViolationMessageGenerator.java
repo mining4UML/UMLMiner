@@ -13,7 +13,7 @@ public class ViolationMessageGenerator {
 
 	public static File processCSV(File inputFile, File outputFile) {
 	    // Crea un file temporaneo per l'output nella stessa cartella dell'input
-	    outputFile = new File(outputFile.getParent(), inputFile.getName());
+	    outputFile = new File(outputFile, inputFile.getName());
 
 	    try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 	         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {

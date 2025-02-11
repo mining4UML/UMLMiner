@@ -18,7 +18,7 @@ public class ExportViolationsController implements VPActionController {
     public void performAction(VPAction vpAction) {
     	
     	ViolationsRepoHandler gui = new ViolationsRepoHandler();
-    	gui.main(null);
+    	//gui.main(null);
 
 //        if (LogStreamer.countLogs() == 0) {
 //            GUI.showWarningMessageDialog(viewManager.getRootFrame(), ACTION_NAME, "No logs found.");

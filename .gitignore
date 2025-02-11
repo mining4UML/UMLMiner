@@ -4,3 +4,4 @@ lib/logs
 .vscode
 ext.properties
 logs
+.classpath

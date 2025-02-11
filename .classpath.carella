@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/openapi.jar"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/lib/rum-0.6.10-lib.jar"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/lib/resources.jar"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/lib/json-20231013.jar"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/lib/jaxen-1.0-FCS.jar"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/lib/dom4j-core.jar"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/lib/jackson-core-2.18.2.jar"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/lib/jackson-annotations-2.18.2.jar"/>
+	<classpathentry kind="lib" path="c:/Users/Alessandro/AppData/Roaming/VisualParadigm/plugins/UMLMiner/lib/jackson-databind-2.18.2.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

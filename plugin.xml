@@ -3,7 +3,7 @@
 	class="com.uniba.mining.plugin.MiningPlugin">
 
 	<runtime>
-		<library path="lib/rum-0.6.10-lib.jar" relativePath="true" />
+		<library path="lib" relativePath="true" />
 	</runtime>
 
 	<actionSets>

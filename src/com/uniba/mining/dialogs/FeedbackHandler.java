@@ -25,6 +25,7 @@ import com.uniba.mining.feedback.ErrorUtils;
 import com.uniba.mining.feedback.LimitedTextField;
 import com.uniba.mining.feedback.QueryButtons;
 import com.uniba.mining.feedback.RequirementsTextArea;
+import com.uniba.mining.llm.ParsedResponse;
 import com.uniba.mining.llm.RequestHandler;
 import com.uniba.mining.plugin.Config;
 
@@ -379,6 +380,7 @@ public class FeedbackHandler {
 	public String handleFeedback(Conversation conversation) {
 		try {
 			RequestHandler requestHandler = new RequestHandler(projectId, conversation);
+			ParsedResponse risposta = requestHandler.sendRequestAndGetResponse();
 			return requestHandler.sendRequestAndGetResponse().getAnswer();
 		} catch (IOException e) {
 			ErrorUtils.showDetailedErrorMessage(e);

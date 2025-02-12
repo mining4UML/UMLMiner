@@ -24,89 +24,99 @@ import com.vp.plugin.view.IDialog;
 import com.vp.plugin.view.IDialogHandler;
 
 public class ConfigureExternalDialogHandler implements IDialogHandler {
-    private JPanel rootPanel;
+	private JPanel rootPanel;
+	private IDialog dialog; // Riferimento alla finestra di dialogo
 
-    private Component getHeaderPanel() {
-        JPanel headerPanel = new JPanel();
+	private Component getHeaderPanel() {
+		JPanel headerPanel = new JPanel();
+		return headerPanel;
+	}
 
-        return headerPanel;
-    }
+	private Component getContentPanel() {
+		JPanel contentPanel = new JPanel();
+		List<Component> externalToolComponents = new ArrayList<>();
 
-    private Component getContentPanel() {
-        JPanel contentPanel = new JPanel();
-        List<Component> externalToolComponents = new ArrayList<>();
+		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
+		for (ExternalTool externalTool : ExternalTool.values()) {
+			String externalToolPath = Config.getExternalToolPath(externalTool);
+			String externalToolIconPath = String.join("/", Config.ICONS_PATH,
+					externalTool.getName().toLowerCase() + ".png");
+			ImageIcon externalToolImageIcon = GUI.loadImage(externalToolIconPath, externalTool.getName() + " icon", 25,
+					25);
+			JLabel externalToolLabel = GUI.createLabel(externalTool.getName(), externalToolImageIcon);
+			JTextField externalToolTextField = new JTextField(
+					Objects.requireNonNullElse(externalToolPath, "No path selected"), 25);
+			Box externalToolInputBox = new Box(BoxLayout.PAGE_AXIS);
+			JButton externalToolSelectButton = new JButton("Select");
+			Box externalToolBox = new Box(BoxLayout.LINE_AXIS);
 
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
-        for (ExternalTool externalTool : ExternalTool.values()) {
-            String externalToolPath = Config.getExternalToolPath(externalTool);
-            String externalToolIconPath = String.join("/", Config.ICONS_PATH,
-                    externalTool.getName().toLowerCase() + ".png");
-            ImageIcon externalToolImageIcon = GUI.loadImage(externalToolIconPath, externalTool.getName() + " icon", 25,
-                    25);
-            JLabel externalToolLabel = GUI.createLabel(externalTool.getName(), externalToolImageIcon);
-            JTextField externalToolTextField = new JTextField(
-                    Objects.requireNonNullElse(externalToolPath, "No path selected"), 25);
-            Box externalToolInputBox = new Box(BoxLayout.PAGE_AXIS);
-            JButton externalToolSelectButton = new JButton("Select");
-            Box externalToolBox = new Box(BoxLayout.LINE_AXIS);
+			externalToolTextField.setEnabled(false);
+			externalToolLabel.setLabelFor(externalToolTextField);
+			externalToolLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+			externalToolTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
+			externalToolInputBox.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+			externalToolSelectButton.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 
-            externalToolTextField.setEnabled(false);
-            externalToolLabel.setLabelFor(externalToolTextField);
-            externalToolLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            externalToolTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
-            externalToolInputBox.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-            externalToolSelectButton.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-            externalToolSelectButton.addActionListener(e -> {
-                JFileChooser fileChooser = GUI.createSelectFileChooser(
-                        String.format("Select %s path", externalTool.getName()),
-                        ExternalTool.getExternalToolExecutableFileFilter(),
-                        ExternalTool.getExternalToolBashFileFilter(), ExternalTool.getExternalToolJarFileFilter());
+			// Modifica: Chiudere la finestra dopo la selezione del file
+			externalToolSelectButton.addActionListener(e -> {
+				JFileChooser fileChooser = GUI.createSelectFileChooser(
+						String.format("Select %s path", externalTool.getName()),
+						ExternalTool.getExternalToolExecutableFileFilter(),
+						ExternalTool.getExternalToolBashFileFilter(), ExternalTool.getExternalToolJarFileFilter());
 
-                if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
-                    String filePath = fileChooser.getSelectedFile().getAbsolutePath();
-                    Config.setExternalToolPath(externalTool, filePath);
-                    externalToolTextField.setText(filePath);
-                }
-            });
-            GUI.addAll(externalToolInputBox, GUI.DEFAULT_PADDING, externalToolLabel, externalToolTextField);
-            GUI.addAll(externalToolBox, GUI.DEFAULT_PADDING, externalToolInputBox, externalToolSelectButton);
-            externalToolComponents.add(externalToolBox);
-        }
+				if (fileChooser.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
+					String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+					Config.setExternalToolPath(externalTool, filePath);
+					externalToolTextField.setText(filePath);
+					
+					// Mostra un messaggio di conferma
+			        GUI.showInformationMessageDialog(rootPanel, "Configuration", "The path has been successfully set!");
 
-        GUI.addAll(contentPanel, GUI.HIGH_PADDING, externalToolComponents.toArray(Component[]::new));
+					// Chiudi la finestra di dialogo dopo la selezione
+					if (dialog != null) {
+						dialog.close();
+					}
+				}
+			});
 
-        return contentPanel;
-    }
+			GUI.addAll(externalToolInputBox, GUI.DEFAULT_PADDING, externalToolLabel, externalToolTextField);
+			GUI.addAll(externalToolBox, GUI.DEFAULT_PADDING, externalToolInputBox, externalToolSelectButton);
+			externalToolComponents.add(externalToolBox);
+		}
 
-    private Component getActionsPanel() {
-        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		GUI.addAll(contentPanel, GUI.HIGH_PADDING, externalToolComponents.toArray(Component[]::new));
 
-        return actionsPanel;
-    }
+		return contentPanel;
+	}
 
-    @Override
-    public boolean canClosed() {
-        return true;
-    }
+	private Component getActionsPanel() {
+		JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		return actionsPanel;
+	}
 
-    @Override
-    public Component getComponent() {
-        rootPanel = new JPanel(new BorderLayout());
+	@Override
+	public boolean canClosed() {
+		return true;
+	}
 
-        rootPanel.add(getHeaderPanel(), BorderLayout.PAGE_START);
-        rootPanel.add(getContentPanel(), BorderLayout.CENTER);
-        rootPanel.add(getActionsPanel(), BorderLayout.PAGE_END);
-        return rootPanel;
-    }
+	@Override
+	public Component getComponent() {
+		rootPanel = new JPanel(new BorderLayout());
 
-    @Override
-    public void prepare(IDialog dialog) {
-        GUI.prepareDialog(dialog, ConfigureExternalActionController.ACTION_NAME);
-    }
+		rootPanel.add(getHeaderPanel(), BorderLayout.PAGE_START);
+		rootPanel.add(getContentPanel(), BorderLayout.CENTER);
+		rootPanel.add(getActionsPanel(), BorderLayout.PAGE_END);
+		return rootPanel;
+	}
 
-    @Override
-    public void shown() {
-        // Empty
-    }
+	@Override
+	public void prepare(IDialog dialog) {
+		this.dialog = dialog; // Salviamo il riferimento alla finestra di dialogo
+		GUI.prepareDialog(dialog, ConfigureExternalActionController.ACTION_NAME);
+	}
 
+	@Override
+	public void shown() {
+		// Empty
+	}
 }

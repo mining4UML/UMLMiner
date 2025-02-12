@@ -54,8 +54,6 @@ public class DiagramCombinations {
 	}
 
 	public boolean generateAllDiagramCombinations() {
-		boolean generated = false;
-
 		// Carica il file JSON
 		String jsonString = loadJsonFromFile(file);
 		JSONObject jsonDiagram = new JSONObject(jsonString);
@@ -67,9 +65,8 @@ public class DiagramCombinations {
 		List<IClass> mand = new ArrayList<>(), opt = new ArrayList<>();
 
 		for (ClassExt classe : mandatoryClasses) {
-			if (worker.isCancelled()) {  
-				System.out.println("Process interrupted, stopping class extraction...");
-				return false;
+			if (isProcessCancelled()) {
+			    return false;
 			}
 			if (classe.getOptional()) {
 				opt.add(classe.getClasse());
@@ -85,9 +82,8 @@ public class DiagramCombinations {
 		List<List<IClass>> diagramCombinations = generateDiagramCombinations(mand, opt);
 
 		for (List<IClass> combination : diagramCombinations) {
-			if (worker.isCancelled()) {
-				System.out.println("Process interrupted before processing combinations.");
-				return false;
+			if (isProcessCancelled()) {
+			    return false;
 			}
 			for (IClass clazz : combination) {
 				System.out.println(clazz.getName());
@@ -97,9 +93,8 @@ public class DiagramCombinations {
 
 		// Generazione dei diagrammi
 		for (int i = 0; i < diagramCombinations.size(); i++) {
-			if (worker.isCancelled()) {
-				System.out.println("Process interrupted before generating diagrams.");
-				return false;
+			if (isProcessCancelled()) {
+			    return false;
 			}
 
 			List<IClass> currentCombination = diagramCombinations.get(i);
@@ -114,9 +109,14 @@ public class DiagramCombinations {
 
 		return true;
 	}
-
-
-
+	
+	private boolean isProcessCancelled() {
+	    if (worker.isCancelled()) {
+	        System.out.println("Process interrupted.");
+	        return true;
+	    }
+	    return false;
+	}
 
 	private List<ClassExt> extractMandatoryClasses(JSONObject jsonDiagram) {
 		List<ClassExt> mandatoryClasses = new ArrayList<>();

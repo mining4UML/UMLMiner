@@ -46,11 +46,11 @@ public class ClassDiagramHandler extends JDialog {
 			@Override
 			protected void done() {
 				try {
-					if (isCancelled()) {
-						System.out.println("Process was cancelled.");
-						GUI.showInformationMessageDialog(viewManager.getRootFrame(), ACTION_NAME, "Process interrupted.");
-						return;
-					}
+//					if (isCancelled()) {
+//						System.out.println("Process was cancelled.");
+//						GUI.showInformationMessageDialog(viewManager.getRootFrame(), ACTION_NAME, "Process interrupted.");
+//						return;
+//					}
 
 					boolean success = get();
 					dialog.dispose(); 

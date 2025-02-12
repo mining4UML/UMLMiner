@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.SwingWorker;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,22 +44,19 @@ import org.dom4j.io.XMLWriter;
  */
 
 public class DiagramCombinations {
-
 	private String file;
-	// private IDataType typeInt = null;
-	// private IDataType typeString = null;
-	// private IDataType typeBoolean = null;
 	private IDataType typeVoid = null;
+	private SwingWorker<?, ?> worker; // Riferimento al SwingWorker
 
-	public DiagramCombinations(String file) {
+	public DiagramCombinations(String file, SwingWorker<?, ?> worker) {
 		this.file = file;
-
+		this.worker = worker;
 	}
 
 	public boolean generateAllDiagramCombinations() {
 		boolean generated = false;
 
-		// Carica il tuo file JSON
+		// Carica il file JSON
 		String jsonString = loadJsonFromFile(file);
 		JSONObject jsonDiagram = new JSONObject(jsonString);
 
@@ -65,50 +64,59 @@ public class DiagramCombinations {
 		List<ClassExt> mandatoryClasses = extractMandatoryClasses(jsonDiagram);
 		System.out.println("Numero complessivo classi:" + mandatoryClasses.size());
 
-		for (ClassExt classe : mandatoryClasses) {
-			System.out.print(classe.getClasse().getName() + "--");
-		}
-
-		List<IClass> mand = new ArrayList<IClass>(), opt = new ArrayList<IClass>();
+		List<IClass> mand = new ArrayList<>(), opt = new ArrayList<>();
 
 		for (ClassExt classe : mandatoryClasses) {
+			if (worker.isCancelled()) {  
+				System.out.println("Process interrupted, stopping class extraction...");
+				return false;
+			}
 			if (classe.getOptional()) {
 				opt.add(classe.getClasse());
-			} else
+			} else {
 				mand.add(classe.getClasse());
-
+			}
 		}
+
 		System.out.println("Numero mandatory:" + mand.size());
 		System.out.println("Numero optional:" + opt.size());
-
-		// Estrai le classi obbligatorie dal JSON
-		// List<IClass> optionalClasses = extractOptionalClasses(jsonDiagram);
-		// System.out.println(optionalClasses.size());
 
 		// Genera tutte le combinazioni di diagrammi
 		List<List<IClass>> diagramCombinations = generateDiagramCombinations(mand, opt);
 
 		for (List<IClass> combination : diagramCombinations) {
+			if (worker.isCancelled()) {
+				System.out.println("Process interrupted before processing combinations.");
+				return false;
+			}
 			for (IClass clazz : combination) {
 				System.out.println(clazz.getName());
 			}
 			System.out.println("----"); // Separatore tra combinazioni
 		}
 
-		// Stampa le combinazioni
+		// Generazione dei diagrammi
 		for (int i = 0; i < diagramCombinations.size(); i++) {
+			if (worker.isCancelled()) {
+				System.out.println("Process interrupted before generating diagrams.");
+				return false;
+			}
+
 			List<IClass> currentCombination = diagramCombinations.get(i);
 			System.out.println(currentCombination.size());
 
-			// Chiamare il metodo per generare il diagramma utilizzando la combinazione
-			// corrente
-			if (currentCombination.size() > 0)
+			if (currentCombination.size() > 0) {
 				System.out.println("Numero di classi:" + currentCombination.size());
-			generateClassDiagramFromClasses(jsonDiagram, currentCombination, i);
+			}
 
+			generateClassDiagramFromClasses(jsonDiagram, currentCombination, i);
 		}
+
 		return true;
 	}
+
+
+
 
 	private List<ClassExt> extractMandatoryClasses(JSONObject jsonDiagram) {
 		List<ClassExt> mandatoryClasses = new ArrayList<>();
@@ -182,6 +190,10 @@ public class DiagramCombinations {
 	}
 
 	private void generateClassDiagramFromClasses(JSONObject jsonDiagram, List<IClass> classes, int index) {
+		if (worker.isCancelled()) {
+			System.out.println("Process interrupted before generating a class diagram.");
+			return;
+		}	
 		// Extract JSON content
 		String jsonString = loadJsonFromFile(file);
 		jsonDiagram = new JSONObject(jsonString);
@@ -208,10 +220,10 @@ public class DiagramCombinations {
 		IModelElement outerPackageElement = (IModelElement) outerPackage;
 		// assegno il nome all'elemento di modello
 
-//		String diagramPackageName = packageName.lastIndexOf('.') != -1
-//				? packageName.substring(0, packageName.lastIndexOf('.')) + index
-//						: packageName + index;
-		
+		//		String diagramPackageName = packageName.lastIndexOf('.') != -1
+		//				? packageName.substring(0, packageName.lastIndexOf('.')) + index
+		//						: packageName + index;
+
 		String diagramPackageName = "default";
 
 		// non va bene se la sintassi del package non presenta il punto
@@ -219,10 +231,10 @@ public class DiagramCombinations {
 		// packageName.lastIndexOf('.'))+"pasquale"+index;
 		outerPackageElement.setName(diagramPackageName);
 
-//		String basePackageName = packageName.lastIndexOf('.') != -1
-//				? packageName.substring(packageName.lastIndexOf('.')) + index
-//						: packageName + index;
-		
+		//		String basePackageName = packageName.lastIndexOf('.') != -1
+		//				? packageName.substring(packageName.lastIndexOf('.')) + index
+		//						: packageName + index;
+
 		String basePackageName = "default";
 
 		// String basePackageName =
@@ -297,51 +309,51 @@ public class DiagramCombinations {
 		// Show up the diagram
 		diagramManager.openDiagram(diagram);
 		diagramManager.layout(diagram, DiagramManager.LAYOUT_AUTO);
-		
+
 		File storageDir = ApplicationManager.instance().getWorkspaceLocation();
 
 		File projectFile = new File(storageDir,"Student-" + index + ".vpp");
 		// provo a salvare questo progetto
-		
+
 		// Esporta il diagramma in formato XML
 		Document xmlDiagram = DiagramInfo.exportAsXML(diagram);
-		
+
 		// Salva il documento XML usando il percorso del file e il nome del diagramma
 		saveXMLDocument(xmlDiagram, projectFile.getParent(), "Student-" + index);
-		
+
 		if (xmlDiagram != null) {
-		    System.out.println("Diagramma esportato con successo in formato XML.");
+			System.out.println("Diagramma esportato con successo in formato XML.");
 		} else {
-		    System.err.println("Errore nell'esportazione del diagramma XML.");
+			System.err.println("Errore nell'esportazione del diagramma XML.");
 		}
-		
+
 		projectManager.saveProjectAs(projectFile);
 	}
-	
-	
-	private static void saveXMLDocument(Document xmlDiagram, String projectPath, String diagramName) {
-	    try {
-	        // Percorso del file XML nella stessa directory del progetto
-	        File xmlFile = Paths.get(projectPath, diagramName + ".xml").toFile();
-	        
-	        // Crea un oggetto OutputFormat per formattare l'XML in modo leggibile
-	        OutputFormat format = OutputFormat.createPrettyPrint();
-	        
-	        // Crea un oggetto XMLWriter per scrivere il documento XML su file
-	        XMLWriter writer = new XMLWriter(new FileOutputStream(xmlFile), format);
-	        
-	        // Scrive il documento XML su file
-	        writer.write(xmlDiagram);
-	        
-	        // Chiude lo scrittore
-	        writer.close();
 
-	        System.out.println("Diagramma XML salvato in: " + xmlFile.getAbsolutePath());
-	    } catch (Exception e) {
-	        System.err.println("Errore nel salvataggio dell'XML: " + e.getMessage());
-	    }
+
+	private static void saveXMLDocument(Document xmlDiagram, String projectPath, String diagramName) {
+		try {
+			// Percorso del file XML nella stessa directory del progetto
+			File xmlFile = Paths.get(projectPath, diagramName + ".xml").toFile();
+
+			// Crea un oggetto OutputFormat per formattare l'XML in modo leggibile
+			OutputFormat format = OutputFormat.createPrettyPrint();
+
+			// Crea un oggetto XMLWriter per scrivere il documento XML su file
+			XMLWriter writer = new XMLWriter(new FileOutputStream(xmlFile), format);
+
+			// Scrive il documento XML su file
+			writer.write(xmlDiagram);
+
+			// Chiude lo scrittore
+			writer.close();
+
+			System.out.println("Diagramma XML salvato in: " + xmlFile.getAbsolutePath());
+		} catch (Exception e) {
+			System.err.println("Errore nel salvataggio dell'XML: " + e.getMessage());
+		}
 	}
-	
+
 
 	private IClass copyClass(IClass currentClass) {
 		// Crea una nuova classe

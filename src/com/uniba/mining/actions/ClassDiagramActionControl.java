@@ -30,21 +30,7 @@ public class ClassDiagramActionControl implements VPActionController {
 		// Export Dialog
 		ExportDialog expo = new ExportDialog();
 		boolean next = expo.fileChooser(ACTION_NAME,"json","JSON");
-//		if (next){
-//			Path path = expo.getSelectedFile().toPath();
-//			String file = path.toString();
-//			DiagramCombinations generateDiagrams = new DiagramCombinations(file);
-//			//JOptionPane.showMessageDialog(null, "Processing", "Elaborazione", JOptionPane.INFORMATION_MESSAGE);
-//
-//			ClassDiagramHandler handler = new ClassDiagramHandler(file, "aaa");
-//			if(generateDiagrams.generateAllDiagramCombinations()) {
-//				//processing.dispose();
-//				GUI.showInformationMessageDialog(viewManager.getRootFrame(), ACTION_NAME, "Diagrams successfully generated.");
-//			}
-//			else
-//				GUI.showErrorMessageDialog(viewManager.getRootFrame(), ACTION_NAME, "Error. Some problems in diagrams generations.");
-//
-//		}
+
 		if (next) {
 			new ClassDiagramHandler(ACTION_NAME, expo);
 		}

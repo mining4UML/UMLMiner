@@ -8,41 +8,34 @@
 
 	<actionSets>
 		<actionSet id="%actions.id">
-			<!-- Definisci un menu nella barra dei menu -->		
+			<!-- Definisci un menu nella barra dei menu -->
 			<menu id="Toolbar" label="%actions.toolbar.label"
 				ribbonPath="Help" />
-			<action id="ProcessDiscovery" actionType="generalAction" label="%actions.ProcessDiscovery.label" 
-				tooltip="%actions.ProcessDiscovery.label" icon="assets/icons/spaceman.png" 
-				style="normal" ribbonPath="Toolbar/#"> <actionController class="com.uniba.mining.actions.ProcessDiscoveryActionController" 
-				/> 
-			</action> <action id="ConformanceChecking" actionType="generalAction" 
-				label="%actions.ConformanceChecking.label" tooltip="%actions.ConformanceChecking.label" 
-				icon="assets/icons/checklist.png" style="normal" ribbonPath="Toolbar/Discovery"> 
-				<actionController class="com.uniba.mining.actions.ConformanceCheckingActionController" 
-				/>
-			</action>
-			<action id="ExportLogs" actionType="generalAction"
-				label="%actions.ExportLogs.label"
-				tooltip="%actions.ExportLogs.label" icon="assets/icons/book.png"
-				style="normal" ribbonPath="Toolbar/#">
+			<action id="ProcessDiscovery" actionType="generalAction"
+				label="%actions.ProcessDiscovery.label"
+				tooltip="%actions.ProcessDiscovery.label"
+				icon="assets/icons/spaceman.png" style="normal"
+				ribbonPath="Toolbar/#">
 				<actionController
-					class="com.uniba.mining.actions.ExportLogsActionController" />
+					class="com.uniba.mining.actions.ProcessDiscoveryActionController" />
 			</action>
-			<action id="ExportInfo" actionType="generalAction"
-				label="%actions.ExportInfo.label"
-				tooltip="%actions.ExportInfo.label" icon="assets/icons/icon.png"
-				style="normal" ribbonPath="Toolbar/ExportLogs">
+			<action id="ConformanceChecking" actionType="generalAction"
+				label="%actions.ConformanceChecking.label"
+				tooltip="%actions.ConformanceChecking.label"
+				icon="assets/icons/checklist.png" style="normal"
+				ribbonPath="Toolbar/ProcessDiscovery">
 				<actionController
-					class="com.uniba.mining.actions.ExportInfoActionController" />
+					class="com.uniba.mining.actions.ConformanceCheckingActionController" />
 			</action>
 			<action id="Violations" actionType="generalAction"
 				label="%actions.Violations.label"
 				tooltip="%actions.Violations.label"
 				icon="assets/icons/violation.png" style="normal"
-				ribbonPath="Toolbar/ExportInfo">
+				ribbonPath="Toolbar/ConformanceChecking">
 				<actionController
 					class="com.uniba.mining.actions.ExportViolationsController" />
 			</action>
+
 			<!-- creazione di un sottomenu -->
 			<menu id="External" label="%actions.External.miner"
 				ribbonPath="Toolbar/Violations" icon="assets/icons/spaceman.png" />
@@ -63,32 +56,47 @@
 				<actionController
 					class="com.uniba.mining.actions.ConfigureExternalActionController" />
 			</action>
+			<action id="ExportLogs" actionType="generalAction"
+				label="%actions.ExportLogs.label"
+				tooltip="%actions.ExportLogs.label" icon="assets/icons/book.png"
+				style="normal" ribbonPath="Toolbar/External">
+				<actionController
+					class="com.uniba.mining.actions.ExportLogsActionController" />
+			</action>
+			<action id="ExportInfo" actionType="generalAction"
+				label="%actions.ExportInfo.label"
+				tooltip="%actions.ExportInfo.label" icon="assets/icons/icon.png"
+				style="normal" ribbonPath="Toolbar/ExportLogs">
+				<actionController
+					class="com.uniba.mining.actions.ExportInfoActionController" />
+			</action>
+
 			<!-- sottomenu per feedback -->
+			<!--
 			<menu id="Feedback" label="%actions.Feedback.label"
-			     tooltip="%actions.Feedback.tooltip"
-				ribbonPath="Toolbar/ConfigureExternal" icon="assets/icons/feedback.png" />
-			<action id="FeedbackChat"
-				actionType="generalAction" label="%actions.Feedback.label"
-				tooltip="%actions.Feedback.tooltip" style="normal"
-				icon="assets/icons/feedback.png"
-				ribbonPath="Toolbar/Feedback/#">
+				tooltip="%actions.Feedback.tooltip" ribbonPath="Toolbar/ExportInfo"
+				icon="assets/icons/feedback.png" /> -->
+			<action id="FeedbackChat" actionType="generalAction"
+				label="%actions.Feedback.label" tooltip="%actions.Feedback.tooltip"
+				style="normal" icon="assets/icons/feedback.png"
+				ribbonPath="Toolbar/ExportInfo">
 				<actionController
 					class="com.uniba.mining.actions.FeedbackActionController" />
 			</action>
-			<action id="FeedbackRequirements"
-				actionType="generalAction" label="%actions.Feedback.labelRequ"
+			<!--  <action id="FeedbackRequirements" actionType="generalAction"
+				label="%actions.Feedback.labelRequ"
 				tooltip="%actions.Feedback.tooltipRequ" style="normal"
 				icon="assets/icons/requirement.png"
 				ribbonPath="Toolbar/Feedback/FeedbackChat">
 				<actionController
 					class="com.uniba.mining.actions.FeedbackRequActionController" />
-			</action>
-			
+			</action>-->
+
 			<action id="ClassDiagramActionControl"
 				actionType="generalAction" label="Class Diagram Auto-Gen"
 				tooltip="Automatic Class Diagrams Creation via JSON file"
 				style="normal" icon="assets/icons/class.png"
-				ribbonPath="Toolbar/ClassFeedbackActionControl">
+				ribbonPath="Toolbar/FeedbackChat">
 				<actionController
 					class="com.uniba.mining.actions.ClassDiagramActionControl" />
 			</action>

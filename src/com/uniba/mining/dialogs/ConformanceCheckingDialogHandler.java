@@ -4,17 +4,23 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.Box;
@@ -32,6 +38,7 @@ import javax.swing.JTextField;
 import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XAttribute;
+import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
@@ -58,6 +65,7 @@ import controller.conformance.ConformanceMethod;
 import task.conformance.ActivityConformanceType;
 import task.conformance.ConformanceStatisticType;
 import task.conformance.ConformanceTaskResult;
+import task.conformance.ConformanceTaskResultDetail;
 import task.conformance.ConformanceTaskResultGroup;
 import util.LogUtils;
 import util.ModelExporter;
@@ -77,6 +85,8 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
     private File selectedModelFile;
     private File selectedLogFile;
     private ConformanceTaskResult conformanceTaskResult;
+    
+    private XConceptExtension xce = XConceptExtension.instance();	
 
     private Component getHeaderPanel() {
         final String selectButtonText = "Select";
@@ -389,6 +399,137 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
         }
         return null;
     }
+    
+    
+    private List<Map<String, String>> exportReport() {
+		List<ConformanceTaskResultGroup> results = optionsGroupComboBox.getSelectedItem().equals("Traces")
+				? conformanceTaskResult.getResultsGroupedByTrace()
+						: conformanceTaskResult.getResultsGroupedByConstraint();
+
+		List<Map<String, String>> reportData = new ArrayList<>();
+
+		for (ConformanceTaskResultGroup resultGroup : results) {
+			for (ConformanceTaskResultDetail groupDetail : resultGroup.getGroupDetails()) {
+				for (int i = 0; i < groupDetail.getActivityConformanceTypes().size(); i++) {
+					ActivityConformanceType acType = groupDetail.getActivityConformanceTypes().get(i);
+					if (acType.getType() == ActivityConformanceType.Type.FULFILLMENT
+							|| acType.getType() == ActivityConformanceType.Type.VIOLATION
+							|| acType.getType() == ActivityConformanceType.Type.INSERTION
+							|| acType.getType() == ActivityConformanceType.Type.DELETION
+							|| acType.getType() == ActivityConformanceType.Type.DATA_DIFFERENCE) {
+
+						Map<String, String> reportRow = new LinkedHashMap<>();
+						reportRow.put("Trace", groupDetail.getTraceName());
+
+						String constraintAll = groupDetail.getConstraint().replace("\n", "");
+						int indexOfColons = constraintAll.indexOf(":");
+						String constraint = constraintAll.substring(0, indexOfColons);
+						String activities = constraintAll.substring(indexOfColons + 1).replace("[]", "");
+
+						reportRow.put("Constraint", constraint);
+						reportRow.put("Activities", activities);
+						reportRow.put("Result type", acType.getType().toString().toLowerCase());
+						reportRow.put("Activity name", xce.extractName(groupDetail.getXtrace().get(i)));
+						reportRow.put("Activity index", Integer.toString(i + 1));
+
+						XAttributeMap map = groupDetail.getXtrace().get(i).getAttributes();
+						Map<String, String> valori = populateMap(map);
+
+						reportRow.put("DiagramName", valori.getOrDefault("DiagramName", ""));
+						reportRow.put("DiagramType", valori.getOrDefault("diagramType", ""));
+						reportRow.put("UMLElementType", valori.getOrDefault("UMLElementType", ""));
+						reportRow.put("UMLElementName", valori.getOrDefault("UMLElementName", ""));
+						reportRow.put("PropertyName", valori.getOrDefault("PropertyName", ""));
+						reportRow.put("PropertyValue", valori.getOrDefault("PropertyValue", ""));
+						reportRow.put("RelationshipFrom", valori.getOrDefault("RelationshipFrom", ""));
+						reportRow.put("RelationshipTo", valori.getOrDefault("RelationshipTo", ""));
+
+						reportData.add(reportRow);
+					}
+				}
+			}
+		}
+		return reportData;
+	}
+
+
+	private File saveReportToFile(List<Map<String, String>> reportData, String fileName) {
+		if (reportData.isEmpty()) {
+			System.out.println("Nessun dato da esportare.");
+			return null;
+		}
+
+		Path reportsDir = LogStreamer.getReportsDirectory();
+		Path filePath = reportsDir.resolve(fileName + "_violations_report.csv");
+		File file = filePath.toFile();
+
+		try (FileWriter writer = new FileWriter(file);
+				BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+
+			// Scrive l'intestazione del CSV
+			String header = String.join(",", reportData.get(0).keySet());
+			bufferedWriter.write(header);
+			bufferedWriter.newLine();
+
+			// Scrive i dati riga per riga
+			for (Map<String, String> row : reportData) {
+				String line = row.values().stream()
+						.map(value -> "\"" + value.replace("\"", "\"\"") + "\"") // Escape per il CSV
+						.collect(Collectors.joining(","));
+				bufferedWriter.write(line);
+				bufferedWriter.newLine();
+			}
+
+			return file;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+
+	private static Map<String,String> populateMap(XAttributeMap map) {
+
+		Set<Entry<String, XAttribute>> mappa =  map.entrySet();
+
+		Map<String,String> valori = new HashMap<String,String>();
+
+		for (Entry<String, XAttribute> elemento : mappa) {
+			if (elemento.getKey().equals("DiagramName")) {
+				valori.put("DiagramName", elemento.getValue().toString());
+			}
+			else if (elemento.getKey().equals("UMLElementType")) {
+				valori.put("UMLElementType", elemento.getValue().toString());	
+			}
+			else if (elemento.getKey().equals("UMLElementName")) {
+				valori.put("UMLElementName", elemento.getValue().toString());
+
+			}
+			else if (elemento.getKey().equals("DiagramType")) {
+				valori.put("diagramType", elemento.getValue().toString());
+
+			}
+			else if (elemento.getKey().equals("PropertyName")) {
+				valori.put("PropertyName", elemento.getValue().toString());
+
+			}
+			else if (elemento.getKey().equals("PropertyValue")) {
+				valori.put("PropertyValue", elemento.getValue().toString());
+			}
+			else if (elemento.getKey().equals("RelationshipFrom")) {
+				valori.put("RelationshipFrom", elemento.getValue().toString());
+			}
+			else if (elemento.getKey().equals("RelationshipTo")) {
+				valori.put("RelationshipTo", elemento.getValue().toString());
+			}
+		}
+		return valori;
+
+	}
+    
+    
+    
+    
 
     private Map<ReplayableActivityDefinition, XEventClass> getActivityMapping(File xmlFile) {
         ActivityMappingReplayerTask activityMappingReplayerTask = new ActivityMappingReplayerTask();
@@ -499,14 +640,34 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
                     Path filePath = directoryPath
                             .resolve(String.join("-", "conformance", selectedLogFileNameWithoutExtension,
                                     Application.getStringTimestamp()) + LogStreamer.ZIP_EXTENSION);
-                    File[] files = conformanceMethod == ConformanceMethod.ANALYZER
-                            ? new File[] { exportCsvData(), exportFulfilledLog(), exportViolatedLog() }
-                            : new File[] { exportCsvData(), exportFulfilledLog(), exportViolatedLog(),
-                                    exportAlignedLog() };
-                    LogStreamer.exportZip(filePath, files);
-                    GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
-                            "Report successfully created and exported.");
+
+                    // Genera report standard
+                    File csvReport = exportCsvData();
+                    File fulfilledLog = exportFulfilledLog();
+                    File violatedLog = exportViolatedLog();
+                    File alignedLog = (conformanceMethod == ConformanceMethod.REPLAYER) ? exportAlignedLog() : null;
+
+                    // Genera il report delle violazioni
+                    List<Map<String, String>> reportData = exportReport();
+                    File violationReport = saveReportToFile(reportData, selectedLogFileNameWithoutExtension);
+
+                    // Costruisce l'array dei file da zippare
+                    List<File> reportFiles = new ArrayList<>();
+                    if (csvReport != null) reportFiles.add(csvReport);
+                    if (fulfilledLog != null) reportFiles.add(fulfilledLog);
+                    if (violatedLog != null) reportFiles.add(violatedLog);
+                    if (alignedLog != null) reportFiles.add(alignedLog);
+                    if (violationReport != null) reportFiles.add(violationReport);
+
+                    // Creazione dello ZIP con tutti i report generati
+                    if (!reportFiles.isEmpty()) {
+                        LogStreamer.exportZip(filePath, reportFiles.toArray(new File[0]));
+
+                        GUI.showInformationMessageDialog(rootPanel, ConformanceCheckingActionController.ACTION_NAME,
+                                "Report successfully created and exported: " + filePath);
+                    }
                 });
+
             }
         });
 

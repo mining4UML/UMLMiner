@@ -79,55 +79,77 @@ public class ViolationsRepoHandler extends JFrame {
 	}
 
 	private boolean loadCSVFiles() {
-		listModel.clear();
-		csvFiles = new ArrayList<>();
+	    listModel.clear();
+	    csvFiles = new ArrayList<>();
 
-		File violationsDirectory = LogStreamer.getReportsDirectory().toFile();
-		File[] files = violationsDirectory.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
-		if (files != null) {
-			for (File file : files) {
-				csvFiles.add(file);
-				listModel.addElement(file.getName());
-			}
-		}
-		return !csvFiles.isEmpty();
+	    File violationsDirectory = LogStreamer.getReportsDirectory().toFile();
+	    File[] files = violationsDirectory.listFiles((dir, name) -> 
+	        name.toLowerCase().endsWith("_violations_report.csv")
+	    );
+
+	    if (files != null) {
+	        for (File file : files) {
+	            csvFiles.add(file);
+	            listModel.addElement(file.getName());
+	        }
+	    }
+	    return !csvFiles.isEmpty();
 	}
+
 
 	private void processSelectedFiles() {
-		List<String> selectedValues = fileList.getSelectedValuesList();
-		if (selectedValues.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "No files selected for processing.", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
+	    List<String> selectedValues = fileList.getSelectedValuesList();
+	    if (selectedValues.isEmpty()) {
+	        JOptionPane.showMessageDialog(this, "No files selected for processing.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
 
-		JFileChooser dirChooser = new JFileChooser();
-		dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int result = dirChooser.showSaveDialog(this);
+	    JFileChooser dirChooser = new JFileChooser();
+	    dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	    int result = dirChooser.showSaveDialog(this);
 
-		if (result == JFileChooser.APPROVE_OPTION) {
-			File saveDirectory = dirChooser.getSelectedFile();
+	    if (result == JFileChooser.APPROVE_OPTION) {
+	        File saveDirectory = dirChooser.getSelectedFile();
 
-			for (String fileName : selectedValues) {
-				File fileToProcess = new File(LogStreamer.getReportsDirectory().toFile(), fileName);
-				File processedFile = ViolationMessageGenerator.processCSV(fileToProcess, saveDirectory);
+	        if (saveDirectory == null) {
+	            saveDirectory = dirChooser.getCurrentDirectory();
+	        }
 
-				if (processedFile == null) {
-					GUI.showErrorMessageDialog(this, "Processing Error", "File " + fileName + " is not compliant.");
-					continue;
-				}
+	        // 🔹 Controlliamo se il nome della cartella appare due volte alla fine del percorso
+	        String correctedPath = saveDirectory.getAbsolutePath();
+	        String dirName = saveDirectory.getName();
 
-				File outputFile = new File(saveDirectory, "FINAL-" + fileName);
-				if (!processedFile.renameTo(outputFile)) {
-					JOptionPane.showMessageDialog(this, "Error saving file: " + fileName, "Error", JOptionPane.ERROR_MESSAGE);
-					continue;
-				}
-			}
+	        if (correctedPath.endsWith("/" + dirName + "/" + dirName)) {
+	            correctedPath = correctedPath.substring(0, correctedPath.lastIndexOf("/" + dirName));
+	            saveDirectory = new File(correctedPath);
+	        }
 
-			JOptionPane.showMessageDialog(this, "Selected files processed and saved!", "Success", JOptionPane.INFORMATION_MESSAGE);
-			dispose();
-			processButton.setEnabled(false);
-			fileList.clearSelection();
-			selectAllCheckBox.setSelected(false);
-		}
+	        System.out.println("Corrected saveDirectory: " + saveDirectory.getAbsolutePath());
+
+	        for (String fileName : selectedValues) {
+	            File fileToProcess = new File(LogStreamer.getReportsDirectory().toFile(), fileName);
+	            System.out.println("fileToProcess: " + fileToProcess.getAbsolutePath());
+	            File processedFile = ViolationMessageGenerator.processCSV(fileToProcess, saveDirectory);
+
+	            if (processedFile == null) {
+	                GUI.showErrorMessageDialog(this, "Processing Error", "File " + fileName + " is not compliant.");
+	                continue;
+	            }
+
+	            File outputFile = new File(saveDirectory, "FINAL-" + fileName);
+	            if (!processedFile.renameTo(outputFile)) {
+	                JOptionPane.showMessageDialog(this, "Error saving file: " + fileName, "Error", JOptionPane.ERROR_MESSAGE);
+	                continue;
+	            }
+	        }
+
+	        JOptionPane.showMessageDialog(this, "Selected files processed and saved!", "Success", JOptionPane.INFORMATION_MESSAGE);
+	        dispose();
+	        processButton.setEnabled(false);
+	        fileList.clearSelection();
+	        selectAllCheckBox.setSelected(false);
+	    }
 	}
+
+
 }

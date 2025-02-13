@@ -3,6 +3,7 @@ package com.uniba.mining.tasks.repoviolations;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,55 +13,90 @@ import javax.swing.JTextArea;
 public class ViolationMessageGenerator {
 
 	public static File processCSV(File inputFile, File outputFile) {
-	    // Crea un file temporaneo per l'output nella stessa cartella dell'input
-	    outputFile = new File(outputFile, inputFile.getName());
+		// Crea un file temporaneo per l'output nella stessa cartella dell'input
+		outputFile = new File(outputFile, inputFile.getName());
 
-	    try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-	         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+		System.out.println("inputFile: " + inputFile.getName() + " " + inputFile.getAbsolutePath());
+		System.out.println("outputFile: " + outputFile.getName() + " " + outputFile.getAbsolutePath());
 
-	        String line;
-	        boolean atLeastOneRow = false;
+		try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+				BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
 
-	        while ((line = reader.readLine()) != null) {
-	            String[] fields = line.split(";");
-	            if (fields.length >= 8 && "violation".equals(fields[3].trim())) {
-	                String activities = getField(fields, 2);
-	                String activityName = getField(fields, 4);
-	                String diagramName = getField(fields, 6);
-	                String umlElementType = getField(fields, 8);
-	                String umlElementName = getField(fields, 9);
-	                String propertyName = getField(fields, 10);
-	                String propertyValue = getField(fields, 11);
-	                String relationshipFrom = getField(fields, 12);
-	                String relationshipTo = getField(fields, 13);
+			String line;
+			boolean atLeastOneRow = false;
+			int lineNumber = 0;
 
-	                String constraint = getField(fields, 1);
+			while ((line = reader.readLine()) != null) {
+				lineNumber++;
 
-	                String message = generateMessage(constraint, activities, 
-	                        activityName, diagramName, umlElementType, umlElementName, 
-	                        propertyName, propertyValue, relationshipFrom, relationshipTo);
+				try {
+					String[] fields = line.split(",");
+					//System.out.println("fields: "+fields.toString());
+					
+					System.out.println(fields[3]+ " " +fields[3].trim()+ " fields.length >= 8: "+fields.length);
 
-	                // Scrive il messaggio nel file di output
-	                writer.write(message);
-	                writer.newLine();
-	                atLeastOneRow = true;
-	            }
-	        }
+					//if (fields.length >= 8 && "violation".equals(fields[3].trim())) {
+					if (fields.length >= 8) {
+						System.out.println("violation detected");
+						String activities = getField(fields, 2).replaceAll("^\"|\"$", "");
+						String activityName = getField(fields, 4).replaceAll("^\"|\"$", "");
+						String diagramName = getField(fields, 6).replaceAll("^\"|\"$", "");
+						String umlElementType = getField(fields, 8).replaceAll("^\"|\"$", "");
+						String umlElementName = getField(fields, 9).replaceAll("^\"|\"$", "");
+						String propertyName = getField(fields, 10).replaceAll("^\"|\"$", "");
+						String propertyValue = getField(fields, 11).replaceAll("^\"|\"$", "");
+						String relationshipFrom = getField(fields, 12).replaceAll("^\"|\"$", "");
+						String relationshipTo = getField(fields, 13).replaceAll("^\"|\"$", "");
+						String constraint = getField(fields, 1).replaceAll("^\"|\"$", "");
+						
+						System.out.println("constraint: "+constraint);
 
-	        // Se almeno una riga è stata scritta, restituisce il file elaborato
-	        return atLeastOneRow ? outputFile : null;
+						String message = generateMessage(constraint, activities, 
+								activityName, diagramName, umlElementType, umlElementName, 
+								propertyName, propertyValue, relationshipFrom, relationshipTo);
 
-	    } catch (IOException e) {
-	    	// inserire messaggio di errore specializzato
-	        e.printStackTrace();
-	        return null;
-	    }
+						// Scrive il messaggio nel file di output
+						writer.write(message);
+						System.out.println("message: " + message);
+						writer.newLine();
+						atLeastOneRow = true;
+						System.out.println("avvaloro atLeastOneRow");
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {
+					System.err.println("ERROR: ArrayIndexOutOfBoundsException at line " + lineNumber + " - " + e.getMessage());
+					e.printStackTrace();
+				} catch (Exception e) {
+					System.err.println("ERROR: Exception at line " + lineNumber + " - " + e.getMessage());
+					e.printStackTrace();
+				}
+			}
+
+			// Se almeno una riga è stata scritta, restituisce il file elaborato
+			System.out.println("Valore di atLeastOneRow: "+atLeastOneRow);
+			return atLeastOneRow ? outputFile : null;
+
+		} catch (FileNotFoundException e) {
+			System.err.println("ERROR: File not found - " + inputFile.getAbsolutePath());
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.err.println("ERROR: IO Exception while processing file - " + inputFile.getAbsolutePath());
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			System.err.println("ERROR: SecurityException - Cannot access file: " + inputFile.getAbsolutePath());
+			e.printStackTrace();
+		} catch (Exception e) {
+			System.err.println("ERROR: Unexpected exception while processing file: " + inputFile.getAbsolutePath());
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 
-	    private static String getField(String[] fields, int index) {
-	        return (index < fields.length) ? fields[index].trim() : "";
-	    }
+
+	private static String getField(String[] fields, int index) {
+		return (index < fields.length) ? fields[index].trim() : "";
+	}
 
 	public static String generateMessage(String constraint, String... fields) {
 		BiFunction<String, String, String> messageGenerator = null;
@@ -306,7 +342,7 @@ public class ViolationMessageGenerator {
 		return generateCommonMessage("Precedence", fields) +
 				"Violation description: "+
 				activityA + " occurs if preceded by" + (activityB != null ? activityB : "") 
-				 + "\n" ;
+				+ "\n" ;
 	}
 	private static String generateRespondedExistenceMessage(String activityA, String activityB, String[] fields) {
 		return generateCommonMessage("Responded Existence", fields) +
@@ -324,7 +360,7 @@ public class ViolationMessageGenerator {
 		return generateCommonMessage("Succession", fields) +
 				"Violation description: "+
 				activityA + " occurs if and only if it is followed by" + (activityB != null ? activityB : "") +
-				 "\n" ;
+				"\n" ;
 	}
 
 

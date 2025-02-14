@@ -9,16 +9,6 @@ import java.util.Random;
 
 public class JsonGenerator {
 
-    public static void main(String[] args) {
-        // Numero desiderato di classi nel JSON
-        int numClasses = 5;
-
-        // Genera il JSON con classi casuali
-        JSONObject jsonDiagram = generateRandomJsonDiagram(numClasses);
-
-        // Salva il JSON su un file
-        saveJsonToFile(jsonDiagram, "output.json");
-    }
 
     private static JSONObject generateRandomJsonDiagram(int numClasses) {
         JSONObject jsonDiagram = new JSONObject();

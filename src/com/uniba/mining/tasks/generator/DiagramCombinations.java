@@ -111,12 +111,13 @@ public class DiagramCombinations {
 	}
 	
 	private boolean isProcessCancelled() {
-	    if (worker.isCancelled()) {
+	    if (worker != null && worker.isCancelled()) {
 	        System.out.println("Process interrupted.");
 	        return true;
 	    }
 	    return false;
 	}
+
 
 	private List<ClassExt> extractMandatoryClasses(JSONObject jsonDiagram) {
 		List<ClassExt> mandatoryClasses = new ArrayList<>();
@@ -143,7 +144,9 @@ public class DiagramCombinations {
 
 		// for (int i = 0; i < jsonClasses.length(); i++) {
 		// JSONObject jsonClass = jsonClasses.getJSONObject(i);
-		IClass newClass = createClassFromJson(jsonClass);
+		//IClass newClass = createClassFromJson(jsonClass);
+		ClassExt myClassExt = createClassFromJson(jsonClass); 
+		IClass newClass = myClassExt.getClasse(); // Ottieni la classe UML corretta
 		// IClass newClass = IModelElementFactory.instance().createClass();
 		// System.out.println(newClass.getClass());
 
@@ -152,7 +155,7 @@ public class DiagramCombinations {
 		System.out.println(newClass.getName() + " " + newClass.attributeCount());
 
 		try {
-			ClassExt newClassExt = new ClassExt(jsonClass.getBoolean(value), newClass);
+			ClassExt newClassExt = new ClassExt(newClass, jsonClass.getBoolean(value));
 			System.out.println(newClassExt.getClasse().getName() + " " + newClassExt.getClasse().attributeCount());
 			return newClassExt;
 		} catch (JSONException ex) {
@@ -390,95 +393,85 @@ public class DiagramCombinations {
 	}
 
 
-	private IClass createClassFromJson(JSONObject jsonClass) {
-		IClass newClass = IModelElementFactory.instance().createClass();
-		// String id = newClass.getId();
+	private ClassExt createClassFromJson(JSONObject jsonClass) {
+	    // Creiamo una nuova classe UML
+	    IClass newClass = IModelElementFactory.instance().createClass();
+	    
+	    // Costruisci il nome completo della classe includendo il package
+	    String name = jsonClass.getString("nome").isEmpty() ? "nomeClasse" : jsonClass.getString("nome");
+	    newClass.setName(name);
 
-		// Costruisci il nome completo della classe includendo il package
-		String name = jsonClass.getString("nome").isEmpty() ? "nomeClasse" : jsonClass.getString("nome");
-		newClass.setName(name);
+	    // Verifica se la classe è opzionale
+	    boolean isOptional = jsonClass.optBoolean("opzionale", false);
+	    ClassExt classExt = new ClassExt(newClass, isOptional);
 
-		System.out.println("\n*****\n*****\n");
+	    // Processa gli attributi
+	    if (jsonClass.has("attributi")) {
+	        JSONArray jsonAttributes = jsonClass.getJSONArray("attributi");
+	        for (int j = 0; j < jsonAttributes.length(); j++) {
+	            JSONObject jsonAttribute = jsonAttributes.getJSONObject(j);
+	            IAttribute attribute = IModelElementFactory.instance().createAttribute();
+	            attribute.setName(jsonAttribute.getString("nome"));
+	            attribute.setType(jsonAttribute.getString("tipo"));
+	            attribute.setVisibility(IAttribute.VISIBILITY_PRIVATE);
+	            newClass.addAttribute(attribute);
+	        }
+	    }
 
-		if (jsonClass.has("attributi")) {
-			Object attributiObj = jsonClass.get("attributi");
-			if (attributiObj instanceof JSONArray) {
-				JSONArray jsonAttributes = (JSONArray) attributiObj;
-				if (!jsonAttributes.isEmpty()) {
-					for (int j = 0; j < jsonAttributes.length(); j++) {
-						JSONObject jsonAttribute = jsonAttributes.optJSONObject(j);
-						if (jsonAttribute != null) {
-							IAttribute attribute = IModelElementFactory.instance().createAttribute();//newClass.createAttribute();
-							attribute.setName(jsonAttribute.getString("nome"));
-							attribute.setType(jsonAttribute.getString("tipo"));
-							attribute.setVisibility(IAttribute.VISIBILITY_PRIVATE);
-							// aggiunge come figlio
-							newClass.addAttribute(attribute);
-						}
-					}
-				}
-			}
-		}
+	    // Processa le operazioni
+	    if (jsonClass.has("operazioni")) {
+	        JSONArray jsonOperations = jsonClass.getJSONArray("operazioni");
+	        for (int k = 0; k < jsonOperations.length(); k++) {
+	            JSONObject jsonOperation = jsonOperations.getJSONObject(k);
+	            IOperation operation = IModelElementFactory.instance().createOperation();
+	            operation.setName(jsonOperation.getString("nome"));
+	            operation.setVisibility(IOperation.VISIBILITY_PUBLIC);
+	            operation.setReturnType(jsonOperation.getString("tipoRitorno"));
 
-		// Extract operations from JSON
-		if (jsonClass.has("operazioni")) {
-			JSONArray jsonOperations = jsonClass.getJSONArray("operazioni");
-			if (!jsonOperations.isEmpty()) {
-				jsonOperations = jsonClass.getJSONArray("operazioni");
-				for (int k = 0; k < jsonOperations.length(); k++) {
-					JSONObject jsonOperation = jsonOperations.getJSONObject(k);
-					IOperation operation = IModelElementFactory.instance().createOperation();
-					//IOperation operation = newClass.createOperation();
-					operation.setName(jsonOperation.getString("nome"));
-					operation.setVisibility(IOperation.VISIBILITY_PUBLIC);
-					operation.setReturnType(jsonOperation.getString("tipoRitorno"));
+	            // Controlla se l'operazione è opzionale
+	            boolean isOperationOptional = jsonOperation.optBoolean("opzionale", false);
+	            classExt.setOperationOptional(operation, isOperationOptional);
 
-					// Extract parameters from JSON
-					JSONArray jsonParameters = jsonOperation.getJSONArray("parametri");
-					for (int l = 0; l < jsonParameters.length(); l++) {
-						JSONObject jsonParameter = jsonParameters.getJSONObject(l);
-						IParameter parameter = IModelElementFactory.instance().createParameter();
-						//IParameter parameter = operation.createParameter();
-						parameter.setName(jsonParameter.getString("nome"));
-						parameter.setType(jsonParameter.getString("tipo"));
-						operation.addParameter(parameter);
-					}
+	            // Aggiunge parametri all'operazione
+	            JSONArray jsonParameters = jsonOperation.getJSONArray("parametri");
+	            for (int l = 0; l < jsonParameters.length(); l++) {
+	                JSONObject jsonParameter = jsonParameters.getJSONObject(l);
+	                IParameter parameter = IModelElementFactory.instance().createParameter();
+	                parameter.setName(jsonParameter.getString("nome"));
+	                parameter.setType(jsonParameter.getString("tipo"));
+	                operation.addParameter(parameter);
+	            }
 
-					// aggiunge come figlio
-					newClass.addOperation(operation);
-				}
-			}
-		}
+	            // Aggiunge l'operazione alla classe
+	            newClass.addOperation(operation);
+	        }
+	    }
 
-		// Extract constructors from JSON
-		JSONArray jsonConstructors = jsonClass.optJSONArray("costruttori");
-		if (jsonConstructors != null) {
-			for (int m = 0; m < jsonConstructors.length(); m++) {
-				JSONObject jsonConstructor = jsonConstructors.getJSONObject(m);
-				// IOperation constructor = IModelElementFactory.instance().createOperation();
-				IOperation constructor = newClass.createOperation();
-				constructor.setName(jsonClass.getString("nome"));
-				constructor.setVisibility(IOperation.VISIBILITY_PUBLIC);
-				constructor.setReturnType(typeVoid);
+	    // Processa i costruttori
+	    if (jsonClass.has("costruttori")) {
+	        JSONArray jsonConstructors = jsonClass.getJSONArray("costruttori");
+	        for (int m = 0; m < jsonConstructors.length(); m++) {
+	            JSONObject jsonConstructor = jsonConstructors.getJSONObject(m);
+	            IOperation constructor = IModelElementFactory.instance().createOperation();
+	            constructor.setName(newClass.getName());
+	            constructor.setVisibility(IOperation.VISIBILITY_PUBLIC);
+	            constructor.setReturnType("void");
 
-				// Extract parameters from JSON
-				JSONArray jsonParametersConstructor = jsonConstructor.getJSONArray("parametri");
-				for (int n = 0; n < jsonParametersConstructor.length(); n++) {
-					JSONObject jsonParameter = jsonParametersConstructor.getJSONObject(n);
-					// IParameter parameter = IModelElementFactory.instance().createParameter();
-					IParameter parameter = constructor.createParameter();
-					parameter.setName(jsonParameter.getString("nome"));
-					parameter.setType(jsonParameter.getString("tipo"));
-					// aggiunge come figlio
-					constructor.addParameter(parameter);
-				}
+	            // Aggiunge parametri al costruttore
+	            JSONArray jsonParametersConstructor = jsonConstructor.getJSONArray("parametri");
+	            for (int n = 0; n < jsonParametersConstructor.length(); n++) {
+	                JSONObject jsonParameter = jsonParametersConstructor.getJSONObject(n);
+	                IParameter parameter = IModelElementFactory.instance().createParameter();
+	                parameter.setName(jsonParameter.getString("nome"));
+	                parameter.setType(jsonParameter.getString("tipo"));
+	                constructor.addParameter(parameter);
+	            }
 
-				// aggiunge come figlio
-				newClass.addOperation(constructor);
-			}
-		}
+	            newClass.addOperation(constructor);
+	        }
+	    }
 
-		return newClass;
+	    return classExt;
 	}
 
 	private List<List<IClass>> generateDiagramCombinations(List<IClass> mandatoryClasses,
@@ -518,5 +511,92 @@ public class DiagramCombinations {
 			return "{}"; // Restituisci un oggetto JSON vuoto in caso di errore
 		}
 	}
+	
+	private IClassDiagramUIModel createNewDiagram(List<IClass> classCombination) {
+	    // Ottieni il gestore dei diagrammi
+	    DiagramManager diagramManager = ApplicationManager.instance().getDiagramManager();
+
+	    // Crea un nuovo diagramma delle classi
+	    IClassDiagramUIModel diagram = (IClassDiagramUIModel) diagramManager
+	            .createDiagram(DiagramManager.DIAGRAM_TYPE_CLASS_DIAGRAM);
+	    
+	    // Aggiungi le classi al diagramma
+	    for (IClass clazz : classCombination) {
+	        diagramManager.createDiagramElement(diagram, clazz);
+	    }
+
+	    return diagram;
+	}
+
+	private void finalizeDiagram(IClassDiagramUIModel diagram) {
+	    try {
+	        // Ottiene il Project Manager di Visual Paradigm
+	        ProjectManager projectManager = ApplicationManager.instance().getProjectManager();
+	        IProject project =  projectManager.getProject();
+	        
+	       
+
+	        // Salva il progetto in modo corretto
+	        projectManager.saveProjectAs(project.getProjectFile());
+
+	        // Attende un momento per garantire il completamento
+	        Thread.sleep(100);
+
+	    } catch (InterruptedException e) {
+	        Thread.currentThread().interrupt();
+	        System.err.println("Diagram finalization interrupted: " + e.getMessage());
+	    } catch (Exception e) {
+	        System.err.println("Error during diagram finalization: " + e.getMessage());
+	    }
+	}
+
+
+	private void generateAndSaveDiagrams(List<List<IClass>> diagramCombinations) {
+	    DiagramManager diagramManager = ApplicationManager.instance().getDiagramManager();
+	    int diagramCount = 0;
+
+	    for (List<IClass> classCombination : diagramCombinations) {
+	        // Controlla se il processo è stato interrotto
+	        if (isProcessCancelled()) {
+	            return;
+	        }
+
+	        System.out.println("Generating diagram " + (diagramCount + 1) + "...");
+
+	        // Crea un nuovo diagramma
+	        IClassDiagramUIModel newDiagram = createNewDiagram(classCombination);
+
+	        // Assicuriamoci che il diagramma sia completato prima di passare al successivo
+	        finalizeDiagram(newDiagram);
+
+	        // Salviamo il diagramma
+	        saveDiagram(newDiagram, "Diagram_" + diagramCount);
+	        diagramCount++;
+	    }
+
+	    System.out.println("All diagrams generated successfully!");
+	}
+
+	private void saveDiagram(IClassDiagramUIModel diagram, String diagramName) {
+	    try {
+	        // Imposta il nome del diagramma
+	        diagram.setName(diagramName);
+
+	        // Ottiene il Project Manager e il progetto attuale
+	        ProjectManager projectManager = ApplicationManager.instance().getProjectManager();
+	        IProject project = projectManager.getProject();
+
+	        // Salva il progetto dopo aver creato il diagramma
+	        projectManager.saveProjectAs(project.getProjectFile());
+
+	        System.out.println("Diagram saved: " + diagramName);
+	    } catch (Exception e) {
+	        System.err.println("Error saving diagram " + diagramName + ": " + e.getMessage());
+	    }
+	}
+
+
+	
+	
 
 }

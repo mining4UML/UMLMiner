@@ -19,19 +19,24 @@ public class ViolationMessageGenerator {
 
 	private static final String VIOLATION_NOT_RECOGNIZED = "Violation not recognized\n";
 
-	public static File processCSV(File inputFile, File outputFile) {
-		// Crea un file temporaneo per l'output nella stessa cartella dell'input
-		outputFile = new File(outputFile, inputFile.getName());
+	public static File processCSV(File inputFile, File outputFolder) {
+		// Crea il file di output con estensione .csv
+		File outputFile = new File(outputFolder, inputFile.getName().replace(".csv", "_processed.csv"));
 
-		System.out.println("inputFile: " + inputFile.getName() + " " + inputFile.getAbsolutePath());
-		System.out.println("outputFile: " + outputFile.getName() + " " + outputFile.getAbsolutePath());
+		System.out.println("Input File: " + inputFile.getAbsolutePath());
+		System.out.println("Output File: " + outputFile.getAbsolutePath());
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-				BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, false))) {
 
 			String line;
 			boolean atLeastOneRow = false;
 			int lineNumber = 0;
+
+			// Legge la prima riga (intestazione) e aggiunge la nuova colonna "Violation Description"
+			if ((line = reader.readLine()) != null) {
+				writer.write(line + ",\"Violation Description\"\n");
+			}
 
 			while ((line = reader.readLine()) != null) {
 				lineNumber++;
@@ -46,14 +51,18 @@ public class ViolationMessageGenerator {
 
 					String[] fieldsArray = fields.toArray(new String[0]);
 
-
-					//System.out.println("fields: "+fields.toString());
-
-					System.out.println(fieldsArray[3]+ " " +fieldsArray[3].trim()+ " fields.length >= 8: "+fieldsArray.length);
-
-					//if (fields.length >= 8 && "violation".equals(fields[3].trim())) {
 					if (fieldsArray.length >= 8) {
-						System.out.println("violation detected");
+						System.out.println("Processing line " + lineNumber);
+
+						String resultType = getField(fieldsArray, 3).trim(); // Prende il campo "Result Type"
+
+						// Se "Result Type" non è "violation", salta la riga
+						if (!"violation".equalsIgnoreCase(resultType)) {
+							System.out.println("Skipping line " + lineNumber + " (Result Type: " + resultType + ")");
+							continue;
+						}
+
+						String constraint = getField(fieldsArray, 1);
 						String activities = getField(fieldsArray, 2).replaceAll("^\"|\"$", "");
 						String activityName = getField(fieldsArray, 4).replaceAll("^\"|\"$", "");
 						String diagramName = getField(fieldsArray, 6).replaceAll("^\"|\"$", "");
@@ -63,24 +72,28 @@ public class ViolationMessageGenerator {
 						String propertyValue = getField(fieldsArray, 11).replaceAll("^\"|\"$", "");
 						String relationshipFrom = getField(fieldsArray, 12).replaceAll("^\"|\"$", "");
 						String relationshipTo = getField(fieldsArray, 13).replaceAll("^\"|\"$", "");
-						String constraint = getField(fieldsArray, 1).replaceAll("^\"|\"$", "");
 
-						System.out.println("constraint: "+constraint);
-
-						String message = generateMessage(constraint, activities, 
+						// Genera il messaggio di violazione
+						String fullMessage = generateMessage(constraint, activities, 
 								activityName, diagramName, umlElementType, umlElementName, 
 								propertyName, propertyValue, relationshipFrom, relationshipTo);
 
-						// Scrive il messaggio nel file di output
+						// Estrae solo la parte della descrizione della violazione
+						String violationDescription = extractViolationDescription(fullMessage);
 
-						if(!message.equals(VIOLATION_NOT_RECOGNIZED)) {
-							writer.write(message);
-							System.out.println("message: " + message);
-							writer.newLine();
-							atLeastOneRow = true;
-							System.out.println("avvaloro atLeastOneRow");
+						// Costruisce la riga per il nuovo CSV, aggiungendo solo il campo "Violation Description"
+						StringBuilder csvRow = new StringBuilder();
+						for (String field : fieldsArray) {
+							csvRow.append("\"").append(field.replace("\"", "\"\"")).append("\",");
 						}
+						csvRow.append("\"").append(violationDescription.replace("\"", "\"\"")).append("\"");
+
+						// Scrive la riga nel file CSV
+						writer.write(csvRow.toString());
+						writer.newLine();
+						atLeastOneRow = true;
 					}
+
 				} catch (ArrayIndexOutOfBoundsException e) {
 					System.err.println("ERROR: ArrayIndexOutOfBoundsException at line " + lineNumber + " - " + e.getMessage());
 					e.printStackTrace();
@@ -90,8 +103,7 @@ public class ViolationMessageGenerator {
 				}
 			}
 
-			// Se almeno una riga è stata scritta, restituisce il file elaborato
-			System.out.println("Valore di atLeastOneRow: "+atLeastOneRow);
+			System.out.println("Processing completed. Rows written: " + (atLeastOneRow ? "Yes" : "No"));
 			return atLeastOneRow ? outputFile : null;
 
 		} catch (FileNotFoundException e) {
@@ -110,6 +122,19 @@ public class ViolationMessageGenerator {
 
 		return null;
 	}
+
+
+	private static String extractViolationDescription(String message) {
+		// Cerca la parte che inizia con "Violation description:" e rimuove questa etichetta
+		String keyword = "Violation description:";
+		int index = message.indexOf(keyword);
+		if (index != -1) {
+			return message.substring(index + keyword.length()).trim();  // Rimuove il prefisso
+		}
+		return message; // Se non trova "Violation description:", restituisce il messaggio intero
+	}
+
+
 
 
 

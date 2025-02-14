@@ -7,10 +7,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.swing.JTextArea;
 
 public class ViolationMessageGenerator {
+
+	private static final String VIOLATION_NOT_RECOGNIZED = "Violation not recognized\n";
 
 	public static File processCSV(File inputFile, File outputFile) {
 		// Crea un file temporaneo per l'output nella stessa cartella dell'input
@@ -30,25 +37,34 @@ public class ViolationMessageGenerator {
 				lineNumber++;
 
 				try {
-					String[] fields = line.split(",");
+					List<String> fields = new ArrayList<>();
+					Matcher matcher = Pattern.compile("\"([^\"]*)\"|([^,]+)").matcher(line);
+
+					while (matcher.find()) {
+						fields.add(matcher.group(1) != null ? matcher.group(1) : matcher.group(2));
+					}
+
+					String[] fieldsArray = fields.toArray(new String[0]);
+
+
 					//System.out.println("fields: "+fields.toString());
-					
-					System.out.println(fields[3]+ " " +fields[3].trim()+ " fields.length >= 8: "+fields.length);
+
+					System.out.println(fieldsArray[3]+ " " +fieldsArray[3].trim()+ " fields.length >= 8: "+fieldsArray.length);
 
 					//if (fields.length >= 8 && "violation".equals(fields[3].trim())) {
-					if (fields.length >= 8) {
+					if (fieldsArray.length >= 8) {
 						System.out.println("violation detected");
-						String activities = getField(fields, 2).replaceAll("^\"|\"$", "");
-						String activityName = getField(fields, 4).replaceAll("^\"|\"$", "");
-						String diagramName = getField(fields, 6).replaceAll("^\"|\"$", "");
-						String umlElementType = getField(fields, 8).replaceAll("^\"|\"$", "");
-						String umlElementName = getField(fields, 9).replaceAll("^\"|\"$", "");
-						String propertyName = getField(fields, 10).replaceAll("^\"|\"$", "");
-						String propertyValue = getField(fields, 11).replaceAll("^\"|\"$", "");
-						String relationshipFrom = getField(fields, 12).replaceAll("^\"|\"$", "");
-						String relationshipTo = getField(fields, 13).replaceAll("^\"|\"$", "");
-						String constraint = getField(fields, 1).replaceAll("^\"|\"$", "");
-						
+						String activities = getField(fieldsArray, 2).replaceAll("^\"|\"$", "");
+						String activityName = getField(fieldsArray, 4).replaceAll("^\"|\"$", "");
+						String diagramName = getField(fieldsArray, 6).replaceAll("^\"|\"$", "");
+						String umlElementType = getField(fieldsArray, 8).replaceAll("^\"|\"$", "");
+						String umlElementName = getField(fieldsArray, 9).replaceAll("^\"|\"$", "");
+						String propertyName = getField(fieldsArray, 10).replaceAll("^\"|\"$", "");
+						String propertyValue = getField(fieldsArray, 11).replaceAll("^\"|\"$", "");
+						String relationshipFrom = getField(fieldsArray, 12).replaceAll("^\"|\"$", "");
+						String relationshipTo = getField(fieldsArray, 13).replaceAll("^\"|\"$", "");
+						String constraint = getField(fieldsArray, 1).replaceAll("^\"|\"$", "");
+
 						System.out.println("constraint: "+constraint);
 
 						String message = generateMessage(constraint, activities, 
@@ -56,11 +72,14 @@ public class ViolationMessageGenerator {
 								propertyName, propertyValue, relationshipFrom, relationshipTo);
 
 						// Scrive il messaggio nel file di output
-						writer.write(message);
-						System.out.println("message: " + message);
-						writer.newLine();
-						atLeastOneRow = true;
-						System.out.println("avvaloro atLeastOneRow");
+
+						if(!message.equals(VIOLATION_NOT_RECOGNIZED)) {
+							writer.write(message);
+							System.out.println("message: " + message);
+							writer.newLine();
+							atLeastOneRow = true;
+							System.out.println("avvaloro atLeastOneRow");
+						}
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {
 					System.err.println("ERROR: ArrayIndexOutOfBoundsException at line " + lineNumber + " - " + e.getMessage());
@@ -371,7 +390,7 @@ public class ViolationMessageGenerator {
 
 	private static String generateAltroTipoViolazioneMessage(String activityA, String activityB) {
 		// Logica per generare il messaggio per un altro tipo di violazione utilizzando 'activityA' e 'activityB'...
-		return "Violation not recognized\n";
+		return VIOLATION_NOT_RECOGNIZED;
 	}
 
 	private static String generateCommonMessage(String violationType, String... fields) {

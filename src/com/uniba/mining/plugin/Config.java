@@ -94,8 +94,8 @@ public class Config {
 					"- Encapsulation (Setters, Getters, public methods)\n" +
 					"- Inheritance structure (DIT, NOC, NumDesc)\n" +
 					"- Potential code smells or anti-patterns (e.g., missing accessors, data classes, deep inheritance)\n\n" +
-					"Provide actionable feedback citing specific metric values and class names where appropriate.";
-	// "At the end, include a complete report of all available metric values without omissions.";
+					"Provide actionable feedback citing specific metric values and class names where appropriate." +
+					"At the end, include a complete report of all available metric values without omissions.";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

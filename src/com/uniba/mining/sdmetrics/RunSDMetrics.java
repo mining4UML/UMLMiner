@@ -73,9 +73,9 @@ public class RunSDMetrics {
 
 		int exitCode = process.waitFor();
 		if (exitCode == 0) {
-			System.out.println("SDMetrics completato con successo. Risultati in: output/");
+			System.out.println("SDMetrics successfully completed. Results in: output/");
 		} else {
-			System.err.println("SDMetrics ha terminato con errore. Codice: " + exitCode);
+			System.err.println("SDMetrics finished with error. Error code: " + exitCode);
 		}
 	}
 	public static String readSdmetricsOutput(IDiagramUIModel diagram) {

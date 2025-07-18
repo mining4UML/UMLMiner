@@ -382,7 +382,8 @@ public class FeedbackHandler {
 		try {
 			RequestHandler requestHandler = new RequestHandler(projectId, conversation);
 			ParsedResponse risposta = requestHandler.sendRequestAndGetResponse();
-			return requestHandler.sendRequestAndGetResponse().getAnswer();
+			//return requestHandler.sendRequestAndGetResponse().getAnswer();
+			return risposta.getAnswer();
 		} catch (IOException e) {
 			ErrorUtils.showDetailedErrorMessage(e);
 		}

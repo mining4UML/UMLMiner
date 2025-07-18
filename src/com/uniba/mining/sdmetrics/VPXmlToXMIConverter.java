@@ -382,7 +382,7 @@ public class VPXmlToXMIConverter {
             writer.println("</xmi:XMI>");
         }
 
-        logger.info("✅ Conversione completata. File salvato in: " + xmiFile.getAbsolutePath());
+        logger.info("Conversione completata. File salvato in: " + xmiFile.getAbsolutePath());
         return xmiFile.getAbsolutePath();
     }
 }

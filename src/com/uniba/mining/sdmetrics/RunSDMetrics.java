@@ -24,11 +24,11 @@ public class RunSDMetrics {
 
 		// 3. Converti da XML a XMI
 		try {
-			System.out.println("▶️ Conversione del file XML in XMI...");
+			System.out.println("Conversione del file XML in XMI...");
 			VPXmlToXMIConverter.convertFromDocument(diagramAsXML, convertedXmi);
-			System.out.println("✅ Conversione completata: " + convertedXmi);
+			System.out.println("Conversione completata: " + convertedXmi);
 		} catch (Exception e) {
-			System.err.println("❌ Errore durante la conversione XML→XMI: " + e.getMessage());
+			System.err.println("Errore durante la conversione XML→XMI: " + e.getMessage());
 			return;
 		}
 
@@ -40,10 +40,12 @@ public class RunSDMetrics {
 		Path sdmetricsJarPath = LogStreamer.getSDMetricsDirectory().resolve("SDMetrics.jar");
 
 		if (!Files.exists(sdmetricsJarPath)) {
-			System.err.println("❌ SDMetrics.jar non trovato in: " + sdmetricsJarPath);
+			System.err.println("SDMetrics.jar not found in: " + sdmetricsJarPath);
 			// Puoi decidere se interrompere o provare a copiarlo da una risorsa embedded
 			copyJarFromResources(sdmetricsJarPath);
 		}
+		copyFileIfMissing("metamodel2.xml");
+		copyFileIfMissing("metrics2.xml");
 
 		String metamodel = sdmetricsDir.resolve("metamodel2.xml").toString();
 		String metrics = sdmetricsDir.resolve("metrics2.xml").toString();
@@ -71,9 +73,9 @@ public class RunSDMetrics {
 
 		int exitCode = process.waitFor();
 		if (exitCode == 0) {
-			System.out.println("✅ SDMetrics completato con successo. Risultati in: output/");
+			System.out.println("SDMetrics completato con successo. Risultati in: output/");
 		} else {
-			System.err.println("❌ SDMetrics ha terminato con errore. Codice: " + exitCode);
+			System.err.println("SDMetrics ha terminato con errore. Codice: " + exitCode);
 		}
 	}
 	public static String readSdmetricsOutput(IDiagramUIModel diagram) {
@@ -194,10 +196,10 @@ public class RunSDMetrics {
 
 		try {
 			Files.deleteIfExists(convertedXmi);
-			System.out.println("🗑️  File XMI eliminato: " + convertedXmi);
+			System.out.println("File XMI eliminato: " + convertedXmi);
 			return true;
 		} catch (IOException e) {
-			System.err.println("❌ Errore durante l'eliminazione del file XMI: " + e.getMessage());
+			System.err.println("Errore durante l'eliminazione del file XMI: " + e.getMessage());
 			return false;
 		}
 	}
@@ -211,7 +213,7 @@ public class RunSDMetrics {
 	        File jarFile = new File(rootPath + File.separator + "lib" + File.separator + "SDMetrics.jar");
 
 	        if (!jarFile.exists()) {
-	            System.err.println("❌ SDMetrics.jar non trovato in: " + jarFile.getAbsolutePath());
+	            System.err.println("SDMetrics.jar non trovato in: " + jarFile.getAbsolutePath());
 	            return;
 	        }
 
@@ -220,13 +222,37 @@ public class RunSDMetrics {
 
 	        // Copia il file nella destinazione
 	        Files.copy(jarFile.toPath(), destinationPath);
-	        System.out.println("✅ SDMetrics.jar copiato in: " + destinationPath);
+	        System.out.println("SDMetrics.jar copiato in: " + destinationPath);
 
 	    } catch (IOException e) {
-	        System.err.println("❌ Errore durante la copia di SDMetrics.jar: " + e.getMessage());
+	        System.err.println("Errore durante la copia di SDMetrics.jar: " + e.getMessage());
 	    }
 	}
 
+	private static void copyFileIfMissing(String fileName) {
+	    try {
+	        String rootPath = Application.getPluginInfo("UMLMiner").getPluginDir().getAbsolutePath();
+	        File sourceFile = new File(rootPath + File.separator + "assets" 
+	        + File.separator + "sdmetrics"+ File.separator + fileName);
+	        Path destinationPath = LogStreamer.getSDMetricsDirectory().resolve(fileName);
+
+	        if (Files.exists(destinationPath)) {
+	            return; // Già presente
+	        }
+
+	        if (!sourceFile.exists()) {
+	            System.err.println(fileName + " not found in: " + sourceFile.getAbsolutePath());
+	            return;
+	        }
+
+	        Files.createDirectories(destinationPath.getParent());
+	        Files.copy(sourceFile.toPath(), destinationPath);
+	        System.out.println(fileName + " copied in: " + destinationPath);
+
+	    } catch (IOException e) {
+	        System.err.println("Errore durante la copia di " + fileName + ": " + e.getMessage());
+	    }
+	}
 
 
 

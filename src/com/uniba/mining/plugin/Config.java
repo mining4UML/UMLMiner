@@ -60,7 +60,7 @@ public class Config {
 	public static final String FEEDBACK_LABELREQU= pluginProperties
 			.getProperty("actions.Feedback.labelRequ");
 
-	
+
 
 	public static final String FEEDBACK_NODIAGRAM_OPENED= pluginProperties.getProperty("dialogs.feedback.nodiagraopened");
 	public static final String DIALOG_FEEDBACK_MESSAGE_PLACEHOLDER = pluginProperties.getProperty("dialogs.feedback.placeholder");
@@ -73,7 +73,7 @@ public class Config {
 	public static final String FEEDBACK_PREFIX_ANSWER = pluginProperties.getProperty("dialogs.feedback.prefixAnswer");
 	public static final String FEEDBACK_TITLE = pluginProperties.getProperty("plugin.name") + " - "
 			+ pluginProperties.getProperty("dialogs.feedback.name");
-	
+
 	public static final String FEEDBACK_SUFFIX_COUNT_LABEL = pluginProperties
 			.getProperty("dialogs.feedback.suffixCountLabel");
 
@@ -81,20 +81,21 @@ public class Config {
 			.getProperty("dialogs.feedback.label.characters");
 
 	public static final String PLUGIN_WINDOWS_SEPARATOR = " - ";
-	
+
 	public static final String FEEDBACK_BUTTON_MODELING = "Provide feedback on the modeling process";
 	public static final String FEEDBACK_BUTTON_QUALITY = "Provide feedback on the design quality";
 
-	
+
 	public static final String QUALITYPROMPT = 
-		    "You are an expert in object-oriented software design.\n" +
-		    "Based on the following Obbject Oriented summaries, analyze the quality of the UML class diagram.\n" +
-		    "Focus on the following aspects using the metric values:\n\n" +
-		    "- Class size and complexity (NumAttr, NumOps)\n" +
-		    "- Encapsulation (Setters, Getters, public methods)\n" +
-		    "- Inheritance structure (DIT, NOC, NumDesc)\n" +
-		    "- Potential code smells or anti-patterns (e.g., missing accessors, data classes, deep inheritance)\n\n" +
-		    "Please provide actionable feedback, citing specific metric values or class names where appropriate.";
+			"You are an expert in object-oriented software design.\n" +
+					"Based on the following Object-Oriented metrics summaries, analyze the quality of the UML class diagram.\n" +
+					"Focus on the following aspects using the metric values:\n\n" +
+					"- Class size and complexity (NumAttr, NumOps)\n" +
+					"- Encapsulation (Setters, Getters, public methods)\n" +
+					"- Inheritance structure (DIT, NOC, NumDesc)\n" +
+					"- Potential code smells or anti-patterns (e.g., missing accessors, data classes, deep inheritance)\n\n" +
+					"Provide actionable feedback citing specific metric values and class names where appropriate.";
+	// "At the end, include a complete report of all available metric values without omissions.";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

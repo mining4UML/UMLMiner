@@ -1,6 +1,5 @@
 package com.uniba.mining.plugin;
 
-import com.uniba.mining.dialogs.FeedbackHandler;
 import com.uniba.mining.listeners.ProjectListener;
 import com.uniba.mining.logging.Logger;
 import com.uniba.mining.utils.Application;

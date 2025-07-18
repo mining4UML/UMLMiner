@@ -43,6 +43,10 @@ public class LogStreamer {
 			"conversations");
 	private static final Path requirementsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
 			"requirements");
+	private static final Path xmiDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, 
+			"xmi");
+	private static final Path sdmetricsDirectory = Paths.get(USER_HOME, Config.PLUGIN_NAME, "sdmetrics");
+	private static final Path sdmetricsOutputDirectory = sdmetricsDirectory.resolve("output");
 	private static final Logger logger = new Logger(LogStreamer.class);
 	private static final XesXmlParser xesXmlParser = new XesXmlParser();
 	private static final XesXmlSerializer xesXmlSerializer = new XesXmlSerializer();
@@ -70,6 +74,12 @@ public class LogStreamer {
 				Files.createDirectories(reportsDirectory);
 			if (Files.notExists(conversationsDirectory))
 				Files.createDirectories(conversationsDirectory);
+			if (Files.notExists(sdmetricsDirectory))
+			    Files.createDirectories(sdmetricsDirectory);
+			if (Files.notExists(sdmetricsOutputDirectory))
+			    Files.createDirectories(sdmetricsOutputDirectory);
+			if (Files.notExists(xmiDirectory))
+				Files.createDirectories(xmiDirectory);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -87,6 +97,19 @@ public class LogStreamer {
 		return modelsDirectory;
 	}
 
+	public static Path getXMIDirectory() {
+		return xmiDirectory;
+	}
+	
+	public static Path getSDMetricsDirectory() {
+	    return sdmetricsDirectory;
+	}
+
+	public static Path getSDMetricsOutputDirectory() {
+	    return sdmetricsOutputDirectory;
+	}
+
+	
 	public static Path getReportsDirectory() {
 		return reportsDirectory;
 	}

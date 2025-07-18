@@ -81,6 +81,20 @@ public class Config {
 			.getProperty("dialogs.feedback.label.characters");
 
 	public static final String PLUGIN_WINDOWS_SEPARATOR = " - ";
+	
+	public static final String FEEDBACK_BUTTON_MODELING = "Provide feedback on the modeling process";
+	public static final String FEEDBACK_BUTTON_QUALITY = "Provide feedback on the design quality";
+
+	
+	public static final String QUALITYPROMPT = 
+		    "You are an expert in object-oriented software design.\n" +
+		    "Based on the following Obbject Oriented summaries, analyze the quality of the UML class diagram.\n" +
+		    "Focus on the following aspects using the metric values:\n\n" +
+		    "- Class size and complexity (NumAttr, NumOps)\n" +
+		    "- Encapsulation (Setters, Getters, public methods)\n" +
+		    "- Inheritance structure (DIT, NOC, NumDesc)\n" +
+		    "- Potential code smells or anti-patterns (e.g., missing accessors, data classes, deep inheritance)\n\n" +
+		    "Please provide actionable feedback, citing specific metric values or class names where appropriate.";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

@@ -540,7 +540,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 			return null;
 		});
 
-		// ✅ Esegue il task in un nuovo thread
+		// Esegue il task in un nuovo thread
 		new Thread(futureTask).start();
 		return futureTask;
 	}
@@ -583,7 +583,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 				for (File logFile : selectedLogFiles) {
 					System.out.println("Processing file: " + logFile.getAbsolutePath());
 
-					// ✅ Ora `checkConformance()` è chiamato separatamente per ogni file
+					// Ora `checkConformance()` è chiamato separatamente per ogni file
 					Future<Void> task = checkConformance(logFile, () -> {
 						try {
 							ConformanceMethod conformanceMethod = ConformanceMethod.values()[checkingMethodComboBox.getSelectedIndex()];
@@ -612,7 +612,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 						}
 					});
 
-					// ✅ Aspettiamo che il task termini prima di passare al successivo
+					// Aspettiamo che il task termini prima di passare al successivo
 					try {
 						task.get(); // Blocca l'esecuzione finché il task non è completato
 					} catch (InterruptedException | ExecutionException ex) {
@@ -621,7 +621,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 					}
 				}
 
-				// ✅ Dopo l'ultimo file, creazione dello ZIP
+				// Dopo l'ultimo file, creazione dello ZIP
 				System.out.println("All files processed. Creating ZIP...");
 
 				if (!allReportFiles.isEmpty()) {

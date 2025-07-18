@@ -28,6 +28,7 @@ import com.uniba.mining.feedback.RequirementsTextArea;
 import com.uniba.mining.llm.ParsedResponse;
 import com.uniba.mining.llm.RequestHandler;
 import com.uniba.mining.plugin.Config;
+import com.uniba.mining.sdmetrics.RunSDMetrics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -267,7 +268,7 @@ public class FeedbackHandler {
 		outputPane.setComponentPopupMenu(popupMenu);
 
 	}
-	
+
 
 	private static void addDocumentListener(JTextField textField, JLabel label) {
 		textField.getDocument().addDocumentListener(new DocumentListener() {
@@ -388,17 +389,87 @@ public class FeedbackHandler {
 		return null;
 	}
 
+	//	private void updateConversation(String inputText, String sessionId)
+	//			throws ConnectException, IOException, Exception {
+	//
+	//		String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
+	//		org.dom4j.Document diagramAsXML = DiagramInfo.exportAsXML(diagram);
+	//		
+	//		// CANCELLARE SDMETRICS calculateMetrics)
+	//		try {
+	//			RunSDMetrics.calculateMetrics(getDiagram());
+	//		} catch (IOException e) {
+	//			// TODO Auto-generated catch block
+	//			e.printStackTrace();
+	//		}
+	//		// FINE CANCELLARE
+	//		
+	//		boolean empty = false;
+	//
+	//		if (!inputText.isEmpty()) {
+	//			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
+	//			if (conversationListModel.isEmpty()) {
+	//				Conversation newConversation = createNewConversation(sessionId, inputText, 
+	//						diagramAsText, diagramAsXML);
+	//				conversationListModel.addElement(newConversation);
+	//				conversationList.setSelectedValue(newConversation, true);
+	//				empty = true;
+	//			}
+	//
+	//			Conversation currentConversation = conversationList.getSelectedValue();
+	//
+	//			if (currentConversation != null) {
+	//				// currentConversation.appendMessage(answer + "\n" + response);
+	//
+	//				if (!empty) {
+	//					// add text description of diagrams
+	//					currentConversation.setDiagramAsText(diagramAsText);
+	//					// add query
+	//					currentConversation.setQuery(inputText);
+	//					// add xml description of diagrams
+	//					currentConversation.setDiagramAsXML(diagramAsXML);
+	//				}
+	//
+	//				String answer = prefixAnswer + inputText;
+	//				currentConversation.appendMessage(answer, true);
+	//
+	//				String response = handleFeedback(currentConversation);
+	//				appendToPane(answer);
+	//				if (response != null) {
+	//					response = response.replaceFirst("^[\\r\\n>-]+", "");
+	//					appendToPane(response);
+	//				}
+	//				else
+	//					throw new Exception("no response from the server");
+	//				// currentConversation.appendMessage(answer);
+	//				currentConversation.appendMessage(response, false);
+	//				// currentConversation.setResponse(response);
+	//				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
+	//				conversationTitleField.setText(buildTitle(getDiagramTitle(), currentConversation.getTitle()));
+	//
+	//			}
+	//
+	//			// serializeConversations();
+	//			String diagramId = Application.getIDCurrentDiagram();
+	//			serializeConversations(diagramId);
+	//
+	//			conversationList.revalidate();
+	//			conversationList.repaint();
+	//		}
+	//	}
+
 	private void updateConversation(String inputText, String sessionId)
 			throws ConnectException, IOException, Exception {
 
 		String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
 		org.dom4j.Document diagramAsXML = DiagramInfo.exportAsXML(diagram);
+
 		boolean empty = false;
 
 		if (!inputText.isEmpty()) {
-			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
+			// Crea nuova conversazione se necessario
 			if (conversationListModel.isEmpty()) {
-				Conversation newConversation = createNewConversation(sessionId, inputText, 
+				Conversation newConversation = createNewConversation(sessionId, inputText,
 						diagramAsText, diagramAsXML);
 				conversationListModel.addElement(newConversation);
 				conversationList.setSelectedValue(newConversation, true);
@@ -408,15 +479,24 @@ public class FeedbackHandler {
 			Conversation currentConversation = conversationList.getSelectedValue();
 
 			if (currentConversation != null) {
-				// currentConversation.appendMessage(answer + "\n" + response);
-
 				if (!empty) {
-					// add text description of diagrams
 					currentConversation.setDiagramAsText(diagramAsText);
-					// add query
-					currentConversation.setQuery(inputText);
-					// add xml description of diagrams
 					currentConversation.setDiagramAsXML(diagramAsXML);
+					currentConversation.setQuery(inputText);
+				}
+
+				// Inserisci dati aggiuntivi se richiesto
+				if (inputText.toLowerCase().contains("modeling feedback")) {
+					inputText += "\n\nViolations detected by RUM:\n"; //+ readRumViolations();
+				}
+				else if (inputText.toLowerCase().contains(Config.FEEDBACK_BUTTON_QUALITY.toLowerCase())) {
+					String metricsSummary = RunSDMetrics.readSdmetricsOutput(getDiagram());
+					// Unisce il prompt guidato con la sintesi dei dati
+					String queryMetricsinputText = Config.QUALITYPROMPT + "\n\n" + metricsSummary;
+					String textAsXML = currentConversation.getDiagramAsText();
+					textAsXML += queryMetricsinputText;
+					currentConversation.setDiagramAsText(textAsXML);
+					//inputText += "\n\n"+RunSDMetrics.readSdmetricsOutput(getDiagram())+"\n"; //+ readRumViolations();
 				}
 
 				String answer = prefixAnswer + inputText;
@@ -427,25 +507,21 @@ public class FeedbackHandler {
 				if (response != null) {
 					response = response.replaceFirst("^[\\r\\n>-]+", "");
 					appendToPane(response);
+				} else {
+					throw new Exception("No response from the server.");
 				}
-				else
-					throw new Exception("no response from the server");
-				// currentConversation.appendMessage(answer);
+
 				currentConversation.appendMessage(response, false);
-				// currentConversation.setResponse(response);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
 				conversationTitleField.setText(buildTitle(getDiagramTitle(), currentConversation.getTitle()));
-
 			}
 
-			// serializeConversations();
-			String diagramId = Application.getIDCurrentDiagram();
-			serializeConversations(diagramId);
-
+			serializeConversations(Application.getIDCurrentDiagram());
 			conversationList.revalidate();
 			conversationList.repaint();
 		}
 	}
+
 
 	private String getDiagramTitle() {
 		IDiagramUIModel diagram = Application.getDiagram();
@@ -661,6 +737,8 @@ public class FeedbackHandler {
 	}
 
 	public void showFeedbackPanel(IDiagramUIModel diagramUIModel) {
+
+
 		setProjectId(Application.getProject().getId());
 		setDiagram(diagramUIModel);
 
@@ -848,7 +926,7 @@ public class FeedbackHandler {
 		JButton saveButton = new JButton("Export as TXT");
 		saveButton.setToolTipText("Click to export the diagram requirements as a text file");
 		saveButton.addActionListener(e -> requirementsTextArea.exportTextToFile());
-	
+
 
 		// Crea il pulsante "Load"
 		JButton loadButton = new JButton("Load Req.");
@@ -865,7 +943,7 @@ public class FeedbackHandler {
 		// Aggiungi i pulsanti al pannello
 		buttonRightPanel.add(saveButton);
 		buttonRightPanel.add(loadButton);
-		
+
 		// Aggiungi il pannello dei pulsanti sotto l'area di testo (SOUTH) nel pannello destro
 		rightPanel.add(buttonRightPanel, BorderLayout.SOUTH);
 
@@ -999,6 +1077,31 @@ public class FeedbackHandler {
 					text = "\n" + text; // aggiungi una nuova linea prima del testo
 				}
 			}
+			/*text = "1. Unnamed Associations Added Without Immediate Naming (alternate precedence):\n"
+					+ "Issue: After adding an association to the class diagram, you did not immediately assign an appropriate name. This practice leads to unclear and ambiguous models.\n"
+					+ "Recommendation:\n"
+					+ "    Always assign a meaningful and consistent name to any association as soon as you add it, clearly specifying the role of the relationship (e.g., \"studentEnrolledInCourse\" instead of leaving it empty or generic).\n"
+					+ "    Get into the habit of verifying immediately after the addition that every relationship follows the naming conventions defined within the project context.\n"
+					+ "2. Class Not Immediately Added After Creating the Class Diagram (chain response):\n"
+					+ "Issue: You created a new class diagram but did not immediately add a class to it. This behavior suggests a lack of initial planning.\n"
+					+ "Recommendation:\n"
+					+ "    Carefully plan which elements to add right after creating the diagram, starting with the main classes to clearly define the scope and initial structure.\n"
+					+ "    Avoid unnecessary intermediate steps, focusing immediately on the coherent development of the UML model.\n"
+					+ "3. Associations Added Without Immediate Naming (not chain succession):\n"
+					+ "Issue: After adding an association to the project, you did not immediately define the name of the relationship, resulting in a sequence of actions that deviates from the expected procedure.\n"
+					+ "Recommendation:\n"
+					+ "    When introducing an association between model elements, immediately specify the name and relevant properties of the relationship to ensure clarity and consistency.\n"
+					+ "    Prepare the relationships you intend to add in advance, clearly defining the name, role, and directionality before performing further operations.\n"
+					+ "4. Aggregations Added Without Immediate Naming (chain precedence):\n"
+					+ "Issue: You introduced aggregations into the class diagram without promptly assigning a name. This process creates confusion and fails to adhere to expected modeling procedures.\n"
+					+ "Recommendation:\n"
+					+ "    When creating an aggregation, clearly define the name of the relationship immediately to explicitly indicate the connection between the aggregating and aggregated classes.\n"
+					+ "    Clarify the meaning of the aggregation relationship through explicit naming and appropriate descriptions, avoiding generic or ambiguous labels.\n"
+					+ "\n"
+					+ "General Recommendations:\n"
+					+ "Promptness of Operations: Follow the expected sequence of UML modeling operations (addition → naming → property definition) carefully. This approach significantly improves the quality of the resulting model and prevents many procedural violations.\n"
+					+ "Pre-activity Preparation: Always have a clear overview of the modeling structure before adding new elements, minimizing unnecessary intermediate steps.\n"
+					+ "Semantic Clarity: Every relationship and class should be clearly identifiable through its name, accurately reflecting its semantic role within the context of the diagram.";*/
 			document.insertString(document.getLength(), text, style);
 		} catch (BadLocationException e) {
 			e.printStackTrace();

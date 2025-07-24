@@ -185,22 +185,41 @@ public class UseCaseInfo {
 	}
 
 	private static String formatUseCaseRelationship(IRelationship rel, IModelElement base, ResourceBundle messages) {
-		String type = rel.getModelType();
-		if ("Extend".equals(type) || "Include".equals(type) || "Association".equals(type)) {
-			IModelElement from = rel.getFrom();
-			IModelElement to = rel.getTo();
-			if (from != null && to != null) {
-				String fromName = from.getName() != null ? from.getName() : "Unknown";
-				String toName = to.getName() != null ? to.getName() : "Unknown";
-				String direction = String.format("%s '%s' %s '%s'",
-						from instanceof IActor ? "Actor" : "Use Case",
-								fromName,
-								messages.getString("relationship." + type.toLowerCase()), // e.g., "includes", "extends"
-								toName);
-				return direction;
-			}
-		}
-		return null;
+	    String type = rel.getModelType();
+	    IModelElement from = rel.getFrom();
+	    IModelElement to = rel.getTo();
+
+	    if (from == null || to == null) {
+	        return null;
+	    }
+
+	    String fromName = from.getName() != null ? from.getName() : "Unknown";
+	    String toName = to.getName() != null ? to.getName() : "Unknown";
+
+	    // Determina il tipo di entità (Actor o Use Case)
+	    String fromType = (from instanceof IActor) ? "Actor" : "Use Case";
+	    String toType = (to instanceof IActor) ? "Actor" : "Use Case";
+
+	    // Supporta Extend, Include, Association, Generalization
+	    switch (type) {
+	        case "Extend":
+	        case "Include":
+	        case "Association":
+	            return String.format("%s '%s' %s '%s'",
+	                    fromType,
+	                    fromName,
+	                    messages.getString("relationship." + type.toLowerCase()),
+	                    toName);
+	        case "Generalization":
+	            return String.format("%s '%s' %s %s '%s'",
+	                    fromType,
+	                    fromName,
+	                    messages.getString("relationship.generalization"),
+	                    toType,
+	                    toName);
+	        default:
+	            return null; // ignora altri tipi di relazione
+	    }
 	}
 
 

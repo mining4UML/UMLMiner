@@ -41,27 +41,27 @@ public class DiagramInfo {
 	public DiagramInfo(String language) {
 		messages = Language.getInstance(language).getMessages();
 	}
-	
-	public static String getTypeDescription(IDiagramUIModel diagram) {
-	    if (messages == null) {
-	        messages = Language.getInstance("en").getMessages(); // fallback
-	    }
 
-	    if (diagram instanceof IClassDiagramUIModel) {
-	        return messages.getString("diagram.type.class");
-	    } else if (diagram instanceof IUseCaseDiagramUIModel) {
-	        return messages.getString("diagram.type.use");
-	    } else {
-	        return messages.getString("diagram.type.generic");
-	    }
+	public static String getTypeDescription(IDiagramUIModel diagram) {
+		if (messages == null) {
+			messages = Language.getInstance("en").getMessages(); // fallback
+		}
+
+		if (diagram instanceof IClassDiagramUIModel) {
+			return messages.getString("diagram.type.class");
+		} else if (diagram instanceof IUseCaseDiagramUIModel) {
+			return messages.getString("diagram.type.use");
+		} else {
+			return messages.getString("diagram.type.generic");
+		}
 	}
 
-	
+
 	public static ResourceBundle getMessages() {
-	    if (messages == null) {
-	        messages = Language.getInstance("en").getMessages(); // fallback in caso non inizializzato
-	    }
-	    return messages;
+		if (messages == null) {
+			messages = Language.getInstance("en").getMessages(); // fallback in caso non inizializzato
+		}
+		return messages;
 	}
 
 
@@ -83,221 +83,7 @@ public class DiagramInfo {
 					messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
 		}
 	}
-	/*
-	public static String exportInformation(IProject project, String language) throws Exception {
 
-		messages = Language.getInstance(language).getMessages();
-		IDiagramUIModel[] diagrams = project.toDiagramArray();
-
-		// Crea una stringa per memorizzare l'output
-		StringBuilder output = new StringBuilder();
-
-		if (diagrams.length == 0) {
-			// Mostra un messaggio se non ci sono diagrammi delle classi nel progetto
-			throw new Exception(
-					messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
-		}
-		// Controllo del numero di diagrammi di tipo classe
-		int classDiagramCount = 0;
-		for (IDiagramUIModel diagram : diagrams) {
-			if (diagram instanceof IClassDiagramUIModel) {
-				classDiagramCount++;
-			}
-		}
-
-		if (classDiagramCount == 0) {
-			throw new Exception(
-					messages.getString("class.project.absence") + "\n" + messages.getString("feedback.problem"));
-		} else {
-
-			System.out.println("numero diagrammi:" + diagrams.length);
-			printInfoProject(project, diagrams, output);
-			output.append(String.format(messages.getString("rows.separator")));
-
-			int numElements = 0;
-
-			for (IDiagramUIModel diagram : diagrams) {
-				System.out.println(diagram.getType());
-				Thread.sleep(10000);
-
-				if (diagram.getType().equals("ClassDiagram")) {
-					// Ora puoi accedere alle informazioni del diagramma
-
-					String diagramName = diagram.getName();
-					String diagramType = diagram.getType();
-
-					// if (diagram instanceof IClassDiagramUIModel) {
-					IClassDiagramUIModel classInfo = (IClassDiagramUIModel) diagram;
-					if (classInfo.getDefaultPackage() != null)
-						System.out.println(classInfo.getDefaultPackage().getName());
-
-					// }
-					// Informazioni del diagramma
-					System.out.println("Diagramma: " + diagramName + " - Tipo: " + diagramType);
-
-					if (diagram.getName() != null) {
-						output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
-								diagram.getName(), messages.getString("class.diagram.contains")));
-
-					} else {
-						output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
-								messages.getString("class.diagran.noname"),
-								messages.getString("class.diagram.contains")));
-					}
-
-					IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
-					numElements += diagramElements.length;
-					for (IDiagramElement diagramElement : diagramElements) {
-						IModelElement modelElement = diagramElement.getModelElement();
-
-						if (modelElement instanceof IClass) {
-							IClass classe = (IClass) modelElement;
-
-							output.append(String.format("- %s", classe.getName() != null ? classe.getName() : "---"));
-							IModelElement parent = classe.getParent();
-							if (parent != null) {
-								output.append(String.format("  %s",
-										parent.getName() != null ? " whose package is " + parent.getName() : "---"));
-								output.append(String.format(" and default package: %s",
-										classInfo.getDefaultPackage().getName()));
-								output.append(String.format("%n"));
-							}
-						}
-					}
-
-					// Assumi che l'array di elementi del modello non sia vuoto
-					// if (modelClassElements != null && modelClassElements.length > 0) {
-
-					for (IDiagramElement diagramElement : diagramElements) {
-						IModelElement modelElement = diagramElement.getModelElement();
-
-						// Itera sugli elementi del modello delle classi
-						// for (IDiagramElement modelElement : modelClassElements) {
-
-						if (modelElement instanceof IClass) {
-							IClass classe = (IClass) modelElement;
-
-							if (classe.getParent() != null && classe.getParent().getParent() != null) {
-								System.out.println(classe.getParent().getParent().getName() != null
-										? classe.getParent().getParent().getName()
-												: "non c'è parent model");
-							} else {
-								System.out.println("Parent o Parent Model è null");
-							}
-
-							Optional.ofNullable(classe).map(c -> c.getMasterView()).map(mv -> mv.getModelElement())
-							.map(me -> me.getName()).ifPresent(name -> System.out.println("*********" + name));
-
-							Optional.ofNullable(classe).ifPresent(c -> System.out.println("Classe: " + c.getName()));
-
-							output.append(getInfoAttributes(classe));
-
-							// Aggiungi informazioni sulle operazioni della classe
-							IOperation[] operazioni = classe.toOperationArray();
-							if (operazioni != null && operazioni.length > 0) {
-								output.append(String.format("\n%s %s\n", classe.getName(),
-										messages.getString("class.operations")));
-								for (IOperation operazione : operazioni) {
-									output.append(String.format("- %s %s(",
-											operazione.getVisibility() != null ? operazione.getVisibility()
-													: " visibilità non definita",
-													operazione.getName()));
-
-									// Aggiungi parametri dell'operazione se presenti
-									IParameter[] parametri = operazione.toParameterArray();
-									if (parametri != null && parametri.length > 0) {
-										// output.append(". I parametri sono: ");
-										for (IParameter parametro : parametri) {
-											output.append(String.format("%s: %s, ", parametro.getName(),
-													parametro.getTypeAsString()));
-										}
-										// Rimuovi l'ultima virgola aggiunta
-										output.setLength(output.length() - 2);
-									}
-									output.append(")");
-
-									output.append(String.format((": %s"),
-											operazione.getReturnTypeAsString() != null
-											? operazione.getReturnTypeAsString()
-													: "void"));
-
-									// Vai a capo dopo ogni operazione
-									output.append("\n");
-								}
-							} else {
-								output.append(String.format("\n%s %s", messages.getString("class.operations.empty"),
-										classe.getName()));
-							}
-
-							Iterator<IRelationship> ex = classe.toRelationshipIterator();
-
-							// prova metodo relazioni
-							StringBuilder simpleRel = simpleRelationships(classe);
-							boolean almenoUnaRelazione = false;
-
-							if (simpleRel != null) {
-								output.append(String.format("%n %s %s:", messages.getString("class.relationships"),
-										classe.getName()));
-								output.append(simpleRel.toString());
-								almenoUnaRelazione = true;
-							}
-
-							StringBuilder assRel = fromEndRelationships(classe);
-							if (assRel != null) {
-								if (almenoUnaRelazione == false)
-									output.append(String.format("%n %s %s:", messages.getString("class.relationships"),
-											classe.getName()));
-								output.append(assRel.toString());
-							}
-
-							// info sul fatto che la classe sia in una view master o auxiliary
-							Optional<String> optionalMessage = Optional.ofNullable(diagramElement)
-									.filter(element -> !element.isMasterView()) // Verifica se diagramElement non è una
-									// vista principale
-									.map(element -> {
-										if (modelElement != null && modelElement.getMasterView() != null
-												&& modelElement.getMasterView().getDiagramUIModel() != null) {
-											return "\nClass " + classe.getName()
-											+ " is an auxiliary view. Master view is in "
-											+ modelElement.getMasterView().getDiagramUIModel().getName()
-											+ " diagram";
-										} else {
-											return ""; // Se uno dei valori è null, restituisci una stringa vuota
-										}
-									});
-
-							output.append(optionalMessage.orElse(""));
-
-						}
-
-						// Vai a capo tra le classi
-						output.append("\n");
-					}
-
-					// Rimuovi tutti i caratteri di nuova riga alla fine
-					while (output.length() > 0 && output.charAt(output.length() - 1) == '\n') {
-						output.deleteCharAt(output.length() - 1);
-					}
-
-					// Write the StringBuilder content to the file
-					// add two separation rows
-					output.append(String.format(messages.getString("rows.separator")));
-
-					// output.setLength(0);
-				} // chiusura if
-			} // chiusura iterazione sui diagrammi
-			if (numElements == 0) {
-				// andrebbe separata la gestione della lingua del feedback dalla lingua usata
-				// per le GUI
-				messages = Language.getInstance("en").getMessages();
-				throw new Exception(messages.getString("class.project.elements.absence") + "\n"
-						+ messages.getString("feedback.problem"));
-			}
-		} // chiusura else quando ci sono diagrammi
-		// Restituisci l'output sotto forma di stringa
-		return output.toString();
-	}
-	 */
 	public static String exportInformation(IProject project, String language, IDiagramUIModel diagram) throws Exception {
 		messages = Language.getInstance(language).getMessages();
 		StringBuilder output = new StringBuilder();
@@ -314,32 +100,49 @@ public class DiagramInfo {
 			throw new Exception(messages.getString("class.project.elements.absence") + "\n"
 					+ messages.getString("feedback.problem"));
 		} else {
-			for (IDiagramElement diagramElement : diagramElements) {
-				IModelElement modelElement = diagramElement.getModelElement();
+			if (diagram instanceof IClassDiagramUIModel) {
+				for (IDiagramElement diagramElement : diagramElements) {
+					IModelElement modelElement = diagramElement.getModelElement();
 
-				if (modelElement instanceof IClass && diagram instanceof IClassDiagramUIModel) {
-					IClass classe = (IClass) modelElement;
-					ClasseInfo.appendClassInfo(output, classe);
-					output.append(ClasseInfo.getInfoAttributes(classe, messages));
-					ClasseInfo.appendOperations(output, messages, classe);
-					ClasseInfo.appendRelationships(output, messages, diagramElement, classe);
-					appendViewInfo(output, diagramElement, classe);
-				} else if (modelElement instanceof IUseCase && diagram instanceof IUseCaseDiagramUIModel) {
-					IUseCase useCase = (IUseCase) modelElement;
-					output.append(String.format("Use Case: %s\n", useCase.getName()));
-					output.append(String.format("Description: %s\n", useCase.getDocumentation()));
-				} else if (modelElement instanceof IActor && diagram instanceof IUseCaseDiagramUIModel) {
-					IActor actor = (IActor) modelElement;
-					output.append(String.format("Actor: %s\n", actor.getName()));
-					output.append(String.format("Description: %s\n", actor.getDocumentation()));
+					if (modelElement instanceof IClass) {
+						IClass classe = (IClass) modelElement;
+						ClasseInfo.appendClassInfo(output, classe);
+						output.append(ClasseInfo.getInfoAttributes(classe, messages));
+						ClasseInfo.appendOperations(output, messages, classe);
+						ClasseInfo.appendRelationships(output, messages, diagramElement, classe);
+						appendViewInfo(output, diagramElement, classe);
+						output.append("\n");
+					}
 				}
+			} else if (diagram instanceof IUseCaseDiagramUIModel) {
+				for (IDiagramElement diagramElement : diagramElements) {
+					IModelElement modelElement = diagramElement.getModelElement();
 
-				output.append("\n");
+					if (modelElement instanceof IUseCase) {
+						UseCaseInfo.appendUseCaseInfo(output, (IUseCase) modelElement, messages);
+					} else if (modelElement instanceof IActor) {
+						UseCaseInfo.appendActorInfo(output, (IActor) modelElement, messages);
+					}
+					output.append("\n");
+					// Aggiungi relazioni tra attori e use case evitando duplicati
+					//UseCaseInfo.appendRelationships(output,messages,  diagramElements);
+				}
+				UseCaseInfo.appendRelationships(output,messages, diagramElements);
+
 			}
+
 			while (output.length() > 0 && (output.charAt(output.length() - 1) == '\n'
 					|| Character.isWhitespace(output.charAt(output.length() - 1)))) {
 				output.deleteCharAt(output.length() - 1);
 			}
+			// Sostituisce 2 o più righe vuote consecutive con una sola
+			//String cleaned = output.toString().replaceAll("(?m)(\\s*\\n){2,}", "\n\n");
+			// Rimuove tutte le righe vuote
+			String cleaned = output.toString().replaceAll("(?m)^[ \t]*\r?\n", "");  
+
+			// Aggiorna il contenuto del StringBuilder
+			output.setLength(0);
+			output.append(cleaned);
 		}
 		return output.toString();
 	}
@@ -445,15 +248,15 @@ public class DiagramInfo {
 		}
 		if (diagramName != null) {
 			output.append(String.format("\n%s %s %s %s%n",
-				typeDescription, 
-				messages.getString("uml.diagram.intro"),
-				diagram.getName(),
-				messages.getString("uml.diagram.contains")));
+					typeDescription, 
+					messages.getString("uml.diagram.intro"),
+					diagram.getName(),
+					messages.getString("uml.diagram.contains")));
 		} else {
 			output.append(String.format("\n%s %s %s%n",
-				typeDescription,
-				messages.getString("uml.diagram.noname"),
-				messages.getString("uml.diagram.contains")));
+					typeDescription,
+					messages.getString("uml.diagram.noname"),
+					messages.getString("uml.diagram.contains")));
 		}
 	}
 

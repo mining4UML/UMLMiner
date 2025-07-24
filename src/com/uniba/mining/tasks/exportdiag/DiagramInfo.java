@@ -10,21 +10,25 @@ import java.util.Set;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
+import com.uniba.mining.plugin.Config;
 import com.uniba.mining.utils.exportXMLCustomized;
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ModelConvertionManager;
 import com.vp.plugin.diagram.IClassDiagramUIModel;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramUIModel;
+import com.vp.plugin.diagram.IUseCaseDiagramUIModel;
+import com.vp.plugin.model.IActor;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IProject;
+import com.vp.plugin.model.IUseCase;
 
 import org.dom4j.*;
 
 /**
  * 
- * Author: pasquale ardimento Last version: 06 February 2024
+ * Author: pasquale ardimento Last version: 24 july 2025
  */
 public class DiagramInfo {
 
@@ -37,6 +41,29 @@ public class DiagramInfo {
 	public DiagramInfo(String language) {
 		messages = Language.getInstance(language).getMessages();
 	}
+	
+	public static String getTypeDescription(IDiagramUIModel diagram) {
+	    if (messages == null) {
+	        messages = Language.getInstance("en").getMessages(); // fallback
+	    }
+
+	    if (diagram instanceof IClassDiagramUIModel) {
+	        return messages.getString("diagram.type.class");
+	    } else if (diagram instanceof IUseCaseDiagramUIModel) {
+	        return messages.getString("diagram.type.use");
+	    } else {
+	        return messages.getString("diagram.type.generic");
+	    }
+	}
+
+	
+	public static ResourceBundle getMessages() {
+	    if (messages == null) {
+	        messages = Language.getInstance("en").getMessages(); // fallback in caso non inizializzato
+	    }
+	    return messages;
+	}
+
 
 
 
@@ -272,66 +299,48 @@ public class DiagramInfo {
 	}
 	 */
 	public static String exportInformation(IProject project, String language, IDiagramUIModel diagram) throws Exception {
-		// Ottieni i messaggi nella lingua specificata
 		messages = Language.getInstance(language).getMessages();
-		// Crea una stringa per memorizzare l'output
 		StringBuilder output = new StringBuilder();
-		// Controllo che il diagramma passato non sia null
+
 		if (diagram == null) {
 			throw new IllegalArgumentException("Diagram cannot be null");
 		}
-		// Informazioni di base del diagramma
+
 		appendDiagramInfo(output, diagram);
-		// Elementi contenuti nel diagramma
 		IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
-		// Se non ci sono elementi nel diagramma, solleva un'eccezione
+
 		if (diagramElements.length == 0) {
 			messages = Language.getInstance("en").getMessages();
 			throw new Exception(messages.getString("class.project.elements.absence") + "\n"
 					+ messages.getString("feedback.problem"));
-		}
-		// altrimenti itera sugli elementi del diagramma passato in input
-		else  {		
+		} else {
 			for (IDiagramElement diagramElement : diagramElements) {
 				IModelElement modelElement = diagramElement.getModelElement();
 
 				if (modelElement instanceof IClass && diagram instanceof IClassDiagramUIModel) {
-					// Aggiungi informazioni specifiche per le classi in un diagramma di classi
 					IClass classe = (IClass) modelElement;
 					ClasseInfo.appendClassInfo(output, classe);
 					output.append(ClasseInfo.getInfoAttributes(classe, messages));
 					ClasseInfo.appendOperations(output, messages, classe);
 					ClasseInfo.appendRelationships(output, messages, diagramElement, classe);
 					appendViewInfo(output, diagramElement, classe);
-				} /*else if (diagram instanceof IWebDiagramUIModel)  {
-					String modelType = modelElement.getModelType(); // retrieve model type as string
-					output.append(modelType);
-				}*/
-				/*else if (modelElement instanceof IUseCase && diagram instanceof IUseCaseDiagramUIModel) {
-	            // Aggiungi informazioni specifiche per i casi d'uso in un diagramma di casi d'uso
-	           IUseCase useCase = (IUseCase) modelElement;
-	            appendUseCaseInfo(output, useCase);
-	            appendActors(output, useCase);
-	            appendAssociations(output, messages, diagramElement, useCase);
-	        } else if (modelElement instanceof IComponent && diagram instanceof IComponentDiagramUIModel) {
-	            // Aggiungi informazioni specifiche per i componenti in un diagramma di componenti
-	            /*IComponent component = (IComponent) modelElement;
-	            appendComponentInfo(output, component);
-	            appendInterfaces(output, messages, component);
-	            appendDependencies(output, messages, diagramElement, component);
-			}*/
+				} else if (modelElement instanceof IUseCase && diagram instanceof IUseCaseDiagramUIModel) {
+					IUseCase useCase = (IUseCase) modelElement;
+					output.append(String.format("Use Case: %s\n", useCase.getName()));
+					output.append(String.format("Description: %s\n", useCase.getDocumentation()));
+				} else if (modelElement instanceof IActor && diagram instanceof IUseCaseDiagramUIModel) {
+					IActor actor = (IActor) modelElement;
+					output.append(String.format("Actor: %s\n", actor.getName()));
+					output.append(String.format("Description: %s\n", actor.getDocumentation()));
+				}
 
-				// Aggiungi separatore tra gli elementi
 				output.append("\n");
 			}
-			// Rimuovi caratteri di nuova riga e spazi vuoti finali
-			while (output.length() > 0 && (output.charAt(output.length() - 1) == '\n' 
+			while (output.length() > 0 && (output.charAt(output.length() - 1) == '\n'
 					|| Character.isWhitespace(output.charAt(output.length() - 1)))) {
 				output.deleteCharAt(output.length() - 1);
 			}
 		}
-
-		// Restituisci l'output sotto forma di stringa
 		return output.toString();
 	}
 
@@ -425,15 +434,26 @@ public class DiagramInfo {
 	// Metodi privati per parti comuni
 
 	private static void appendDiagramInfo(StringBuilder output, IDiagramUIModel diagram) {
-		// Aggiungi informazioni di base sul diagramma
 		String diagramName = diagram.getName();
-		if (diagramName != null) {
-			output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
-					diagram.getName(), messages.getString("class.diagram.contains")));
+		String typeDescription;
+		if (diagram instanceof IClassDiagramUIModel) {
+			typeDescription = messages.getString("diagram.type.class");
+		} else if (diagram instanceof IUseCaseDiagramUIModel) {
+			typeDescription = messages.getString("diagram.type.use");
 		} else {
-			output.append(String.format("\n%s %s %s%n", messages.getString("class.diagram.intro"),
-					messages.getString("class.diagram.noname"),
-					messages.getString("class.diagram.contains")));
+			typeDescription = messages.getString("diagram.type.generic");
+		}
+		if (diagramName != null) {
+			output.append(String.format("\n%s %s %s %s%n",
+				typeDescription, 
+				messages.getString("uml.diagram.intro"),
+				diagram.getName(),
+				messages.getString("uml.diagram.contains")));
+		} else {
+			output.append(String.format("\n%s %s %s%n",
+				typeDescription,
+				messages.getString("uml.diagram.noname"),
+				messages.getString("uml.diagram.contains")));
 		}
 	}
 

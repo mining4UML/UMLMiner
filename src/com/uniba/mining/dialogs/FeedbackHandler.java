@@ -32,6 +32,7 @@ import com.uniba.mining.sdmetrics.RunSDMetrics;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.dom4j.Document;
 
@@ -472,6 +473,7 @@ public class FeedbackHandler {
 			if (conversationListModel.isEmpty()) {
 				Conversation newConversation = createNewConversation(sessionId, inputText,
 						diagramAsText, diagramAsXML);
+
 				conversationListModel.addElement(newConversation);
 				conversationList.setSelectedValue(newConversation, true);
 				empty = true;
@@ -484,6 +486,7 @@ public class FeedbackHandler {
 					currentConversation.setDiagramAsText(diagramAsText);
 					currentConversation.setDiagramAsXML(diagramAsXML);
 					currentConversation.setQuery(inputText);
+					setRequirementsIfPresent(currentConversation); 
 				}
 
 				// Inserisci dati aggiuntivi se richiesto
@@ -492,12 +495,10 @@ public class FeedbackHandler {
 				}
 				else if (inputText.toLowerCase().contains(Config.FEEDBACK_BUTTON_QUALITY.toLowerCase())) {
 					String metricsSummary = RunSDMetrics.readSdmetricsOutput(getDiagram());
-					// Unisce il prompt guidato con la sintesi dei dati
-					String queryMetricsinputText = Config.QUALITYPROMPT + "\n\n" + metricsSummary;
-					String textAsXML = currentConversation.getDiagramAsText();
-					textAsXML += queryMetricsinputText;
-					currentConversation.setDiagramAsText(textAsXML);
-					//inputText += "\n\n"+RunSDMetrics.readSdmetricsOutput(getDiagram())+"\n"; //+ readRumViolations();
+					String queryMetricsinputText = Config.QUALITYPROMPT;
+					currentConversation.setQuery(queryMetricsinputText);
+					// set the calculated metrics
+					currentConversation.setMetrics(metricsSummary);
 				}
 
 				String answer = prefixAnswer + inputText;
@@ -514,7 +515,9 @@ public class FeedbackHandler {
 
 				currentConversation.appendMessage(response, false);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-				conversationTitleField.setText(buildTitle(getDiagramTitle(), currentConversation.getTitle()));
+				//conversationTitleField.setText(buildTitle(getDiagramTitle(), currentConversation.getTitle()));
+				conversationTitleField.setText(buildTitle(getDiagram(), currentConversation.getTitle()));
+
 			}
 
 			serializeConversations(Application.getIDCurrentDiagram());
@@ -551,6 +554,15 @@ public class FeedbackHandler {
 		ConversationsSerializer.serializeConversations(conversations, diagramId);
 	}
 
+
+	private void setRequirementsIfPresent(Conversation conversation) {
+		String requirementsText = requirementsTextArea.getRequirementsTextArea().getText();
+		if (requirementsText != null && !requirementsText.trim().equals(Config.DIAGRAM_ABSENT_REQUIREMENT)) {
+			conversation.setRequirements(requirementsText);
+		}
+	}
+
+
 	private Conversation createNewConversation(String sessionId, String query, 
 			String diagramAsText, org.dom4j.Document diagramAsXML) {
 
@@ -561,6 +573,9 @@ public class FeedbackHandler {
 						diagramAsText,
 						diagramAsXML,
 						query, prefixAnswer);
+
+		setRequirementsIfPresent(newConversation); 
+
 		newConversation.appendMessage(outputPane.getText(), false);
 		System.out.println(newConversation.toString());
 		return newConversation;
@@ -697,7 +712,8 @@ public class FeedbackHandler {
 			if (newTitle != null && !newTitle.isEmpty()) {
 				selectedConversation.setTitle(newTitle);
 				// Aggiorna il testo nella casella di testo del titolo della conversazione
-				conversationTitleField.setText(buildTitle(getDiagramTitle(), newTitle));
+				//conversationTitleField.setText(buildTitle(getDiagramTitle(), newTitle));
+				conversationTitleField.setText(buildTitle(getDiagram(),newTitle));
 				// Aggiorna la visualizzazione della lista delle conversazioni
 				conversationListModel.setElementAt(selectedConversation, conversationList.getSelectedIndex());
 				// serializeConversations();
@@ -738,18 +754,26 @@ public class FeedbackHandler {
 	}
 
 	public void showFeedbackPanel(IDiagramUIModel diagramUIModel) {
-
-
 		setProjectId(Application.getProject().getId());
 		setDiagram(diagramUIModel);
 
-		if (panel == null)
+		if (getDiagram() == null) {
+			System.err.println("[FeedbackHandler] Diagram is null – cannot show feedback panel.");
+			return;
+		}
+
+		if (panel == null) {
 			createPanel();
-		else {
+		} else {
 			clearPanel(getDiagram().getId());
-			// Load serialized conversations with the diagramId
+			// Personalizzazione dei bottoni qui
+			if (queryButtons != null) {
+				boolean isClassDiagram = getDiagram().getType().equals("ClassDiagram");
+				queryButtons.customizeItems(true, isClassDiagram);
+			}
 			loadSerializedConversations(getDiagram().getId());
 		}
+
 		Application.getViewManager().showMessagePaneComponent(panelId, title, panel);
 		forceUpdateView();
 		requirementsTextArea.printReqFound(getDiagram());
@@ -768,41 +792,86 @@ public class FeedbackHandler {
 		panel.revalidate();
 	}
 
+
+	/*
+	 * // Azzera i contenuti visivi
+inputField.setText("");
+outputPane.setText("");
+	 */
+	//	private void createNewChat() throws Exception {
+	//		// Ottieni il testo dalla JTextPane
+	//		String query = outputPane.getText();
+	//
+	//		// Controlla se l'inputText non è vuoto o uguale al messaggio di feedback
+	//		// predefinito
+	//		if (!query.isEmpty() && !query.equals(PLACEHOLDER)) {
+	//			// i valori sessionId, projectId, etc.
+	//			String sessionId = generateSessionId();
+	//			String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
+	//			Document diagramAsXML = DiagramInfo.exportAsXML(getDiagram());
+	//			// Crea una nuova istanza di Conversation
+	//			Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), 
+	//					diagramAsText, diagramAsXML,
+	//					query, prefixAnswer);
+	//
+	//			// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
+	//			conversationListModel.addElement(newConversation);
+	//
+	//			// Aggiorna la visualizzazione della GUI
+	//			conversationList.revalidate();
+	//			conversationList.repaint();
+	//
+	//			// Imposta la nuova istanza di Conversation come selezionata nella lista delle
+	//			// conversazioni
+	//			conversationList.setSelectedValue(newConversation, true);
+	//			System.out.println(
+	//					"\n\ndimensione della lista delle conversazioni:" + conversationList.getModel().getSize() + "\n\n");
+	//
+	//			// Azzera il contenuto della JTextPane
+	//			outputPane.setText("");
+	//
+	//		}
+	//		else
+	//			inputField.requestFocusInWindow();
+	//	}
+
 	private void createNewChat() throws Exception {
+		inputField.setText("");
+		outputPane.setText("");
 		// Ottieni il testo dalla JTextPane
 		String query = outputPane.getText();
 
 		// Controlla se l'inputText non è vuoto o uguale al messaggio di feedback
 		// predefinito
-		if (!query.isEmpty() && !query.equals(PLACEHOLDER)) {
-			// i valori sessionId, projectId, etc.
-			String sessionId = generateSessionId();
-			String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
-			Document diagramAsXML = DiagramInfo.exportAsXML(getDiagram());
-			// Crea una nuova istanza di Conversation
-			Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), 
-					diagramAsText, diagramAsXML,
-					query, prefixAnswer);
+		//if (!query.isEmpty() && !query.equals(PLACEHOLDER)) {
+		// i valori sessionId, projectId, etc.
+		String sessionId = generateSessionId();
+		String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
+		Document diagramAsXML = DiagramInfo.exportAsXML(getDiagram());
+		// Crea una nuova istanza di Conversation
+		Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), 
+				diagramAsText, diagramAsXML,
+				query, prefixAnswer);
 
-			// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
-			conversationListModel.addElement(newConversation);
+		// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
+		conversationListModel.addElement(newConversation);
 
-			// Aggiorna la visualizzazione della GUI
-			conversationList.revalidate();
-			conversationList.repaint();
+		// Aggiorna la visualizzazione della GUI
+		conversationList.revalidate();
+		conversationList.repaint();
 
-			// Imposta la nuova istanza di Conversation come selezionata nella lista delle
-			// conversazioni
-			conversationList.setSelectedValue(newConversation, true);
-			System.out.println(
-					"\n\ndimensione della lista delle conversazioni:" + conversationList.getModel().getSize() + "\n\n");
+		// Imposta la nuova istanza di Conversation come selezionata nella lista delle
+		// conversazioni
+		conversationList.setSelectedValue(newConversation, true);
+		System.out.println(
+				"\n\ndimensione della lista delle conversazioni:" + conversationList.getModel().getSize() + "\n\n");
 
-			// Azzera il contenuto della JTextPane
-			outputPane.setText("");
+		// Azzera il contenuto della JTextPane
+		outputPane.setText("");
 
-		}
-		else
-			inputField.requestFocusInWindow();
+		//}
+		//else
+		inputField.requestFocusInWindow();
 	}
 
 	private static JLabel createHelpLabel() {
@@ -827,13 +896,13 @@ public class FeedbackHandler {
 		// Pannello principale diviso in due parti: sinistra e destra
 		JPanel mainPanel = new JPanel(new BorderLayout());
 
-		newChatButton.addActionListener(e -> {
-			try {
-				createNewChat();
-			} catch (Exception e1) {
-				GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", e1.getMessage());
-			}
-		});
+		//		newChatButton.addActionListener(e -> {
+		//			try {
+		//				createNewChat();
+		//			} catch (Exception e1) {
+		//				GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", e1.getMessage());
+		//			}
+		//		});
 
 		// Pannello sinistro contiene il pulsante "New Chat" e la lista delle
 		// conversazioni
@@ -884,11 +953,29 @@ public class FeedbackHandler {
 		JLabel instructionLabel = new JLabel("Click or type for feedback: ");
 		buttonPanel.add(instructionLabel);
 
-		buttonPanel = queryButtons.addButtons(buttonPanel);
+		buttonPanel = queryButtons.addButtons(buttonPanel, getDiagram());
+		for (Component c : buttonPanel.getComponents()) {
+		    c.addMouseListener(new MouseAdapter() {
+		        @Override
+		        public void mouseClicked(MouseEvent e) {
+		            refreshIfDiagramChanged();
+		        }
+		    });
+		}
 		buttonPanel.add(createHelpLabel());
 
 		inputAndButtonPanel.add(buttonPanel, gbcButtonPanel); // Aggiungi buttonPanel con i vincoli
 
+		inputAndButtonPanel.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        IDiagramUIModel currentDiagram = Application.getDiagram();
+		        if (!currentDiagram.equals(getDiagram())) {
+		            showFeedbackPanel(currentDiagram);
+		        }
+		    }
+		});
+		
 		// Vincoli per inputField (sotto)
 		GridBagConstraints gbcInputField = new GridBagConstraints();
 		gbcInputField.gridx = 0;
@@ -967,7 +1054,8 @@ public class FeedbackHandler {
 
 			if (selectedConversation != null) {
 				conversationTitleField.setText(
-						buildTitle(getDiagramTitle(), selectedConversation.getTitle()));
+						buildTitle(getDiagram(), selectedConversation.getTitle()));
+
 				String conversationContent = selectedConversation.getConversationContent();
 				outputPane.setText("");
 				String[] lines = conversationContent.split("\n");
@@ -984,15 +1072,28 @@ public class FeedbackHandler {
 
 		return panel;
 	}
+	
+	private void refreshIfDiagramChanged() {
+	    IDiagramUIModel currentDiagram = Application.getDiagram();
+	    if (!currentDiagram.equals(getDiagram())) {
+	        showFeedbackPanel(currentDiagram);
+	    }
+	}
 
-	private String buildTitle(String diagramTitle, String chatTitle) {
-		if (diagramTitle == null || diagramTitle.isEmpty()) {
-			diagramTitle = "Untitled Diagram";
-		}
-		if (chatTitle == null || chatTitle.isEmpty()) {
-			chatTitle = "Untitled Chat";
-		}
-		return "Class Diagram: " + diagramTitle + " - Chat: " + chatTitle;
+	private String buildTitle(IDiagramUIModel diagram, String chatTitle) {
+		ResourceBundle messages = DiagramInfo.getMessages();  // oppure rendi messages privato e accedi solo con metodi
+
+		String typeDescription = DiagramInfo.getTypeDescription(diagram);
+
+		String diagramName = (diagram != null && diagram.getName() != null && !diagram.getName().isEmpty())
+				? diagram.getName()
+						: messages.getString("uml.diagram.noname");
+
+		chatTitle = (chatTitle != null && !chatTitle.isEmpty())
+				? chatTitle
+						: messages.getString("uml.chat.untitled");
+
+		return String.format("%s: %s – Chat: %s", typeDescription, diagramName, chatTitle);
 	}
 
 	public void loadSerializedConversations() {
@@ -1078,31 +1179,6 @@ public class FeedbackHandler {
 					text = "\n" + text; // aggiungi una nuova linea prima del testo
 				}
 			}
-			/*text = "1. Unnamed Associations Added Without Immediate Naming (alternate precedence):\n"
-					+ "Issue: After adding an association to the class diagram, you did not immediately assign an appropriate name. This practice leads to unclear and ambiguous models.\n"
-					+ "Recommendation:\n"
-					+ "    Always assign a meaningful and consistent name to any association as soon as you add it, clearly specifying the role of the relationship (e.g., \"studentEnrolledInCourse\" instead of leaving it empty or generic).\n"
-					+ "    Get into the habit of verifying immediately after the addition that every relationship follows the naming conventions defined within the project context.\n"
-					+ "2. Class Not Immediately Added After Creating the Class Diagram (chain response):\n"
-					+ "Issue: You created a new class diagram but did not immediately add a class to it. This behavior suggests a lack of initial planning.\n"
-					+ "Recommendation:\n"
-					+ "    Carefully plan which elements to add right after creating the diagram, starting with the main classes to clearly define the scope and initial structure.\n"
-					+ "    Avoid unnecessary intermediate steps, focusing immediately on the coherent development of the UML model.\n"
-					+ "3. Associations Added Without Immediate Naming (not chain succession):\n"
-					+ "Issue: After adding an association to the project, you did not immediately define the name of the relationship, resulting in a sequence of actions that deviates from the expected procedure.\n"
-					+ "Recommendation:\n"
-					+ "    When introducing an association between model elements, immediately specify the name and relevant properties of the relationship to ensure clarity and consistency.\n"
-					+ "    Prepare the relationships you intend to add in advance, clearly defining the name, role, and directionality before performing further operations.\n"
-					+ "4. Aggregations Added Without Immediate Naming (chain precedence):\n"
-					+ "Issue: You introduced aggregations into the class diagram without promptly assigning a name. This process creates confusion and fails to adhere to expected modeling procedures.\n"
-					+ "Recommendation:\n"
-					+ "    When creating an aggregation, clearly define the name of the relationship immediately to explicitly indicate the connection between the aggregating and aggregated classes.\n"
-					+ "    Clarify the meaning of the aggregation relationship through explicit naming and appropriate descriptions, avoiding generic or ambiguous labels.\n"
-					+ "\n"
-					+ "General Recommendations:\n"
-					+ "Promptness of Operations: Follow the expected sequence of UML modeling operations (addition → naming → property definition) carefully. This approach significantly improves the quality of the resulting model and prevents many procedural violations.\n"
-					+ "Pre-activity Preparation: Always have a clear overview of the modeling structure before adding new elements, minimizing unnecessary intermediate steps.\n"
-					+ "Semantic Clarity: Every relationship and class should be clearly identifiable through its name, accurately reflecting its semantic role within the context of the diagram.";*/
 			document.insertString(document.getLength(), text, style);
 		} catch (BadLocationException e) {
 			e.printStackTrace();

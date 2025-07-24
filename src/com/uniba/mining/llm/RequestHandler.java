@@ -79,12 +79,37 @@ public class RequestHandler {
 		return ResponseParser.parseResponse(responseRef.get());
 	}
 
+//	private ApiRequest createApiRequest(Conversation conversation) throws IOException {
+//		String diagramId = conversation.getDiagramId();
+//		Path path = LogStreamer.getRequirementsDirectory();
+//		String requirements = FileUtilities.loadFileContent(diagramId, path);
+//		String user = LogStreamer.getUsername();
+//		user += "-" + Application.getProductInfo();
+//
+//		return new ApiRequest(
+//				conversation.getSessionId(),
+//				projectId,
+//				diagramId,
+//				conversation.getQueryId(),
+//				conversation.getDiagramAsText(),
+//				conversation.getDiagramAsXML(),
+//				requirements,
+//				user,
+//				conversation.getQuery()
+//				);
+//	}
+	
 	private ApiRequest createApiRequest(Conversation conversation) throws IOException {
 		String diagramId = conversation.getDiagramId();
 		Path path = LogStreamer.getRequirementsDirectory();
-		String requirements = FileUtilities.loadFileContent(diagramId, path);
+		String requirementsFromFile = FileUtilities.loadFileContent(diagramId, path);
 		String user = LogStreamer.getUsername();
 		user += "-" + Application.getProductInfo();
+
+		// Usa i requirements già salvati nella Conversation se disponibili, altrimenti quelli da file
+		String finalRequirements = conversation.getRequirements() != null && !conversation.getRequirements().isBlank()
+				? conversation.getRequirements()
+				: requirementsFromFile;
 
 		return new ApiRequest(
 				conversation.getSessionId(),
@@ -93,11 +118,14 @@ public class RequestHandler {
 				conversation.getQueryId(),
 				conversation.getDiagramAsText(),
 				conversation.getDiagramAsXML(),
-				requirements,
+				finalRequirements,
+				conversation.getProcess(),
+				conversation.getMetrics(),
 				user,
 				conversation.getQuery()
-				);
+		);
 	}
+
 
 	private ApiResponse sendApiRequest(ApiRequest request) throws IOException {
 		RestClient client = new RestClient();

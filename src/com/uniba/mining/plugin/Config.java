@@ -61,7 +61,6 @@ public class Config {
 			.getProperty("actions.Feedback.labelRequ");
 
 
-
 	public static final String FEEDBACK_NODIAGRAM_OPENED= pluginProperties.getProperty("dialogs.feedback.nodiagraopened");
 	public static final String DIALOG_FEEDBACK_MESSAGE_PLACEHOLDER = pluginProperties.getProperty("dialogs.feedback.placeholder");
 	public static final String FEEDBACK_BUTTON_ADD = pluginProperties.getProperty("dialogs.feedback.button.add");
@@ -85,6 +84,9 @@ public class Config {
 	public static final String FEEDBACK_BUTTON_MODELING = "Provide feedback on the modeling process";
 	public static final String FEEDBACK_BUTTON_QUALITY = "Provide feedback on the design quality";
 
+	public static final String DIAGRAM_ABSENT_REQUIREMENT = pluginProperties
+			.getProperty("diagram.absent.req");
+	
 
 	public static final String QUALITYPROMPT = 
 			"You are an expert in object-oriented software design.\n" +

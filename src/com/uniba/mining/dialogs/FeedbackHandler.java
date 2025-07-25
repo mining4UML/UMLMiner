@@ -316,6 +316,7 @@ public class FeedbackHandler {
 						System.out.println(Application.getProject().getName());
 						// Ottieni l'ID della sessione dalla conversazione selezionata
 						Conversation selectedConversation = conversationList.getSelectedValue();
+
 						String sessionId = selectedConversation != null ? selectedConversation.getSessionId()
 								: generateSessionId();
 
@@ -466,42 +467,44 @@ public class FeedbackHandler {
 		String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
 		org.dom4j.Document diagramAsXML = DiagramInfo.exportAsXML(diagram);
 
-		boolean empty = false;
+		boolean newConvCreated = false;
 
 		if (!inputText.isEmpty()) {
-			// Crea nuova conversazione se necessario
-			if (conversationListModel.isEmpty()) {
-				Conversation newConversation = createNewConversation(sessionId, inputText,
-						diagramAsText, diagramAsXML);
-
+			if (conversationListModel.isEmpty() || conversationList.getSelectedValue() == null) {
+				if (sessionId == null) sessionId = generateSessionId();
+				Conversation newConversation = createNewConversation(sessionId, inputText, diagramAsText, diagramAsXML);
 				conversationListModel.addElement(newConversation);
 				conversationList.setSelectedValue(newConversation, true);
-				empty = true;
+				newConvCreated = true;
 			}
 
 			Conversation currentConversation = conversationList.getSelectedValue();
 
 			if (currentConversation != null) {
-				if (!empty) {
+				if (!newConvCreated) {
+					currentConversation.setProjectId(projectId);
+					if(currentConversation.getSessionId().equals(""))
+						currentConversation.setSessionId(generateSessionId());
+					if(currentConversation.getQueryId().equals("0"))
+						currentConversation.setQueryId(prefixAnswer);
 					currentConversation.setDiagramAsText(diagramAsText);
+					currentConversation.setDiagramId(getDiagram().getId());
 					currentConversation.setDiagramAsXML(diagramAsXML);
 					currentConversation.setQuery(inputText);
-					setRequirementsIfPresent(currentConversation); 
+					setRequirementsIfPresent(currentConversation);
 				}
 
-				// Inserisci dati aggiuntivi se richiesto
+				String queryText = inputText;
 				if (inputText.toLowerCase().contains("modeling feedback")) {
-					inputText += "\n\nViolations detected by RUM:\n"; //+ readRumViolations();
-				}
-				else if (inputText.toLowerCase().contains(Config.FEEDBACK_BUTTON_QUALITY.toLowerCase())) {
+					queryText += "\n\nViolations detected by RUM:\n";
+				} else if (inputText.toLowerCase().contains(Config.FEEDBACK_BUTTON_QUALITY.toLowerCase())) {
 					String metricsSummary = RunSDMetrics.readSdmetricsOutput(getDiagram());
-					String queryMetricsinputText = Config.QUALITYPROMPT;
-					currentConversation.setQuery(queryMetricsinputText);
-					// set the calculated metrics
+					currentConversation.setQuery(Config.QUALITYPROMPT);
 					currentConversation.setMetrics(metricsSummary);
+					queryText = Config.QUALITYPROMPT;
 				}
 
-				String answer = prefixAnswer + inputText;
+				String answer = prefixAnswer + queryText;
 				currentConversation.appendMessage(answer, true);
 
 				String response = handleFeedback(currentConversation);
@@ -515,9 +518,7 @@ public class FeedbackHandler {
 
 				currentConversation.appendMessage(response, false);
 				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-				//conversationTitleField.setText(buildTitle(getDiagramTitle(), currentConversation.getTitle()));
 				conversationTitleField.setText(buildTitle(getDiagram(), currentConversation.getTitle()));
-
 			}
 
 			serializeConversations(Application.getIDCurrentDiagram());
@@ -525,6 +526,7 @@ public class FeedbackHandler {
 			conversationList.repaint();
 		}
 	}
+
 
 
 	private String getDiagramTitle() {
@@ -841,17 +843,14 @@ outputPane.setText("");
 		// Ottieni il testo dalla JTextPane
 		String query = outputPane.getText();
 
-		// Controlla se l'inputText non è vuoto o uguale al messaggio di feedback
-		// predefinito
-		//if (!query.isEmpty() && !query.equals(PLACEHOLDER)) {
-		// i valori sessionId, projectId, etc.
-		String sessionId = generateSessionId();
-		String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
-		Document diagramAsXML = DiagramInfo.exportAsXML(getDiagram());
+		//String sessionId = generateSessionId();
+		//String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
+		//Document diagramAsXML = DiagramInfo.exportAsXML(getDiagram());
 		// Crea una nuova istanza di Conversation
-		Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), 
+		Conversation newConversation = new Conversation();
+		/*Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), 
 				diagramAsText, diagramAsXML,
-				query, prefixAnswer);
+				query, prefixAnswer);*/
 
 		// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
 		conversationListModel.addElement(newConversation);

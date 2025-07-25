@@ -225,9 +225,9 @@ import org.dom4j.Document;
 public class Conversation implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private StringBuilder conversationContent;
+	private StringBuilder conversationContent=new StringBuilder();
 	private String title;
-	private String sessionId;
+	private String sessionId="";
 	private String projectId;
 	private String diagramId;
 	private int queryId;
@@ -245,6 +245,7 @@ public class Conversation implements Serializable {
 	private String process = "";
 	private String metrics = "";
 
+	public Conversation() {};
 	public Conversation(String sessionId, String projectId, String diagramId, String diagramAsText,
 			Document diagramAsXML, String query, String prefixAnswer) {
 		this.sessionId = sessionId;
@@ -258,7 +259,8 @@ public class Conversation implements Serializable {
 		this.query = query;
 		addQuery(query);
 		//timestampList.add(currentTimestamp());
-		this.conversationContent = new StringBuilder();
+		if(conversationContent==null)
+			this.conversationContent = new StringBuilder();
 	}
 
 	private void addDiagramAsText(String diagramAsText) {
@@ -285,7 +287,7 @@ public class Conversation implements Serializable {
 		}
 		conversationContent.append(message);
 	}
-	
+
 	private int calculateQueryId(String prefixAnswer) {
 		int count = 1;
 		if (conversationContent != null) {
@@ -296,6 +298,11 @@ public class Conversation implements Serializable {
 		return count;
 	}
 
+
+	public void setQueryId(String prefixAnswer) {
+		this.prefixAnswer = prefixAnswer;
+		this.queryId = calculateQueryId(prefixAnswer);
+	}
 	public String getConversationContent() {
 		return getSerializedOverview();
 	}
@@ -391,16 +398,25 @@ public class Conversation implements Serializable {
 	public void setMetrics(String metrics) {
 		this.metrics = metrics != null ? metrics : "";
 	}
-	
-	
+
+
 	private String getSerializedOverview() {
 		StringBuilder builder = new StringBuilder();
 		String sep = "********** ";
 
-		int numItems = Math.min(Math.min(diagramAsTextList.size(), queryList.size()), responseList.size());
-		for (int i = 0; i < numItems; i++) {
-			builder.append(sep + "QUERY (" + timestampList.get(i) + ") " + sep + "\n").append(queryList.get(i)).append("\n");
-			builder.append(sep + "RESPONSE " + sep + "\n").append(responseList.get(i)).append("\n\n");
+		int numQueries = queryList.size();
+
+		if (responseList.size() < numQueries || timestampList.size() < numQueries) {
+			System.err.println("[Warning] Inconsistent list sizes: queries=" + numQueries +
+					", responses=" + responseList.size() + ", timestamps=" + timestampList.size());
+			numQueries = Math.min(Math.min(queryList.size(), responseList.size()), timestampList.size());
+		}
+
+		for (int i = 0; i < numQueries; i++) {
+			builder.append(sep + "QUERY (" + timestampList.get(i) + ") " + sep + "\n")
+			.append(queryList.get(i)).append("\n");
+			builder.append(sep + "RESPONSE " + sep + "\n")
+			.append(responseList.get(i)).append("\n\n");
 		}
 
 		return builder.toString();

@@ -89,7 +89,10 @@ public class DiagramInfo {
 		StringBuilder output = new StringBuilder();
 
 		if (diagram == null) {
-			throw new IllegalArgumentException("Diagram cannot be null");
+			messages = Language.getInstance("en").getMessages();
+			throw new Exception(messages.getString("diagram.project.nodiagram") + "\n"
+					+ messages.getString("feedback.problem"));
+			
 		}
 
 		appendDiagramInfo(output, diagram);
@@ -97,7 +100,7 @@ public class DiagramInfo {
 
 		if (diagramElements.length == 0) {
 			messages = Language.getInstance("en").getMessages();
-			throw new Exception(messages.getString("class.project.elements.absence") + "\n"
+			throw new Exception(messages.getString("diagram.project.elements.absence") + "\n"
 					+ messages.getString("feedback.problem"));
 		} else {
 			if (diagram instanceof IClassDiagramUIModel) {
@@ -146,93 +149,6 @@ public class DiagramInfo {
 		}
 		return output.toString();
 	}
-
-
-	/**
-	 * Questa versione funziona 11 novembre 2024
-	 * @param project
-	 * @param language
-	 * @param diagram
-	 * @return
-	 * @throws Exception
-	 */
-	/*	public static String exportInformation(IProject project, String language, IDiagramUIModel diagram) throws Exception {
-		// Ottieni i messaggi nella lingua specificata
-		messages = Language.getInstance(language).getMessages();
-
-		// Crea una stringa per memorizzare l'output
-		StringBuilder output = new StringBuilder();
-
-		// Controllo che il diagramma passato non sia null
-		if (diagram == null) {
-			throw new IllegalArgumentException("Diagram cannot be null");
-		}
-
-		// CANCELLARE
-//		if (diagram instanceof IWebDiagramUIModel) {
-//			appendDiagramInfo(output, diagram);
-//			System.out.println(output.toString());	
-//			Thread.sleep(10000);
-//		}
-
-		// Controllo se il diagramma è un diagramma di classe
-		if (!(diagram instanceof IClassDiagramUIModel)) {
-			throw new IllegalArgumentException("Only class diagrams are supported");
-		}
-
-
-
-		// Informazioni di base del diagramma
-		appendDiagramInfo(output, diagram);
-
-		// Itera sugli elementi del diagramma passato in input
-		IDiagramElement[] diagramElements = diagram.toDiagramElementArray();
-		for (IDiagramElement diagramElement : diagramElements) {
-			IModelElement modelElement = diagramElement.getModelElement();
-
-			if (modelElement instanceof IClass) {
-				IClass classe = (IClass) modelElement;
-
-				// Aggiunge informazioni sulle classi
-				appendClassInfo(output, classe);
-
-				// Aggiunge informazioni sugli attributi della classe
-				output.append(getInfoAttributes(classe));
-
-				// Aggiunge informazioni sulle operazioni della classe
-				appendOperations(output, messages, classe);
-
-				// Aggiunge informazioni sulle relazioni della classe
-				appendRelationships(output, messages, diagramElement, classe);
-
-				// Aggiungi le informazioni sulle relazioni semplici
-	            //output.append(simpleRelationships(classe));
-
-	            // Chiamata al metodo per le informazioni sulla vista principale o ausiliaria
-	            appendViewInfo(output, diagramElement, classe);
-
-			}
-
-			// Aggiungi separatore tra le classi
-			output.append("\n");
-		}
-
-		// Se non ci sono elementi nel diagramma, solleva un'eccezione
-		if (diagramElements.length == 0) {
-			messages = Language.getInstance("en").getMessages();
-			throw new Exception(messages.getString("class.project.elements.absence") + "\n"
-					+ messages.getString("feedback.problem"));
-		}
-
-		// Rimuovi caratteri di nuova riga e spazi vuoti finali
-		while (output.length() > 0 && (output.charAt(output.length() - 1) == '\n' 
-				|| Character.isWhitespace(output.charAt(output.length() - 1)))) {
-			output.deleteCharAt(output.length() - 1);
-		}
-
-		// Restituisci l'output sotto forma di stringa
-		return output.toString();
-	}*/
 
 	// Metodi privati per parti comuni
 

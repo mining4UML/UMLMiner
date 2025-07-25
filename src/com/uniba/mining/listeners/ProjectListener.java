@@ -99,7 +99,7 @@ public class ProjectListener implements IProjectListener {
 			System.out.println(Application.getDiagram().getId());
 			// qui si dovrebbe verificare che ci sia almeno un diagramma altrimenti feedback
 			// del menu disabilitato
-			FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram()); // Chiamata al metodo statico
+		//	FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram()); // Chiamata al metodo statico
 		}
 	}
 

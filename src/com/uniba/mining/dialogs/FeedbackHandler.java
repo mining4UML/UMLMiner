@@ -335,27 +335,37 @@ public class FeedbackHandler {
 	}
 
 	private void addFocusListenerToOutputPane() {
-		// Aggiunge un listener di focus all'outputPane
-		outputPane.addFocusListener(new FocusListener() {
+	    ResourceBundle messages = DiagramInfo.getMessages();
 
-			// Metodo chiamato quando il focus viene guadagnato sull'outputPane
-			@Override
-			public void focusGained(FocusEvent e) {
-				// aggiorna il pannello di feedback solo se il diagramma è cambiato
-				if (!Application.getDiagram().equals(getDiagram())) {
-					showFeedbackPanel(Application.getDiagram());
-				} else
-					requirementsTextArea.printReqFound(getDiagram());
-			}
+	    outputPane.addFocusListener(new FocusListener() {
 
-			// Metodo chiamato quando il focus viene perso sull'outputPane
-			@Override
-			public void focusLost(FocusEvent e) {
-				// Implementazione non necessaria per il focus perso
-				// Potrebbe essere vuoto se non ci sono azioni specifiche da eseguire
-			}
-		});
+	        @Override
+	        public void focusGained(FocusEvent e) {
+	            IDiagramUIModel currentDiagram = Application.getDiagram();
+
+	            if (currentDiagram == null) {
+	                // Mostra un messaggio utente o logga senza lanciare eccezione
+	                System.err.println(messages.getString("diagram.project.nodiagram") + "\n"
+	                        + messages.getString("feedback.problem"));
+	                Application.getViewManager().removeMessagePaneComponent(panelId);
+	                return;
+	            }
+
+	            // Verifica se il diagramma attuale è diverso da quello già caricato
+	            if (diagram == null || !currentDiagram.equals(getDiagram())) {
+	                showFeedbackPanel(currentDiagram);
+	            } else {
+	                requirementsTextArea.printReqFound(getDiagram());
+	            }
+	        }
+
+	        @Override
+	        public void focusLost(FocusEvent e) {
+	            // Nessuna azione richiesta
+	        }
+	    });
 	}
+
 
 	private void processUserInput(String sessionId) throws ConnectException, IOException, Exception {
 		// Acquisisco il testo dall'inputField
@@ -760,8 +770,9 @@ public class FeedbackHandler {
 		setDiagram(diagramUIModel);
 
 		if (getDiagram() == null) {
-			System.err.println("[FeedbackHandler] Diagram is null – cannot show feedback panel.");
-			return;
+			 // Chiudi il pannello di feedback
+			Application.getViewManager().removeMessagePaneComponent(panelId);
+		    return;
 		}
 
 		if (panel == null) {
@@ -954,27 +965,27 @@ outputPane.setText("");
 
 		buttonPanel = queryButtons.addButtons(buttonPanel, getDiagram());
 		for (Component c : buttonPanel.getComponents()) {
-		    c.addMouseListener(new MouseAdapter() {
-		        @Override
-		        public void mouseClicked(MouseEvent e) {
-		            refreshIfDiagramChanged();
-		        }
-		    });
+			c.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					refreshIfDiagramChanged();
+				}
+			});
 		}
 		buttonPanel.add(createHelpLabel());
 
 		inputAndButtonPanel.add(buttonPanel, gbcButtonPanel); // Aggiungi buttonPanel con i vincoli
 
 		inputAndButtonPanel.addMouseListener(new MouseAdapter() {
-		    @Override
-		    public void mouseClicked(MouseEvent e) {
-		        IDiagramUIModel currentDiagram = Application.getDiagram();
-		        if (!currentDiagram.equals(getDiagram())) {
-		            showFeedbackPanel(currentDiagram);
-		        }
-		    }
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				IDiagramUIModel currentDiagram = Application.getDiagram();
+				if (!currentDiagram.equals(getDiagram())) {
+					showFeedbackPanel(currentDiagram);
+				}
+			}
 		});
-		
+
 		// Vincoli per inputField (sotto)
 		GridBagConstraints gbcInputField = new GridBagConstraints();
 		gbcInputField.gridx = 0;
@@ -1071,12 +1082,12 @@ outputPane.setText("");
 
 		return panel;
 	}
-	
+
 	private void refreshIfDiagramChanged() {
-	    IDiagramUIModel currentDiagram = Application.getDiagram();
-	    if (!currentDiagram.equals(getDiagram())) {
-	        showFeedbackPanel(currentDiagram);
-	    }
+		IDiagramUIModel currentDiagram = Application.getDiagram();
+		if (!currentDiagram.equals(getDiagram())) {
+			showFeedbackPanel(currentDiagram);
+		}
 	}
 
 	private String buildTitle(IDiagramUIModel diagram, String chatTitle) {
@@ -1183,4 +1194,21 @@ outputPane.setText("");
 			e.printStackTrace();
 		}
 	}
+	public void hideFeedbackPanelIfShown(IDiagramUIModel diagram) {
+	    if (panel != null && diagram != null && diagram.equals(getDiagram())) {
+	        System.out.println("[FeedbackHandler] Hiding feedback panel for diagram: " + diagram.getName());
+	        Application.getViewManager().removeMessagePaneComponent(panelId);
+	        panel = null;
+	        setDiagram(null);
+	    } else if (diagram == null && panel != null) {
+	        System.out.println("[FeedbackHandler] Hiding feedback panel (no diagram currently open)");
+	        Application.getViewManager().removeMessagePaneComponent(panelId);
+	        panel = null;
+	        setDiagram(null);
+	    } else {
+	        System.out.println("[FeedbackHandler] No feedback panel to hide or diagram does not match.");
+	    }
+	}
+
+
 }

@@ -26,7 +26,7 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 		});
 		System.out.println(diagramUIModel.getId());
 		// quando creo un nuovo diagramma o aggiungo uno esistente aggiorno il pannello
-		FeedbackHandler.getInstance().showFeedbackPanel(diagramUIModel); // Chiamata al metodo statico
+//		FeedbackHandler.getInstance().showFeedbackPanel(diagramUIModel); // Chiamata al metodo statico
 	}
 
 	@Override
@@ -38,9 +38,9 @@ public class ProjectDiagramListener implements IProjectDiagramListener {
 		if (FeedbackHandler.toBeClosed(project)) {
 			FeedbackHandler.closeFeedBackPanel();
 		}
-		else
-			// Chiamata al metodo statico
-			FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram()); 
+//		else
+//			// Chiamata al metodo statico
+//			FeedbackHandler.getInstance().showFeedbackPanel(Application.getDiagram()); 
 	}
 
 }

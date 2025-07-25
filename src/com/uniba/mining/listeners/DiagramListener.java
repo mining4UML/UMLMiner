@@ -12,6 +12,7 @@ import com.uniba.mining.logging.LogActivity.ModelType;
 import com.uniba.mining.logging.LogExtractor;
 import com.uniba.mining.logging.Logger;
 import com.uniba.mining.utils.Application;
+import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener2;
 import com.vp.plugin.diagram.IDiagramUIModel;
@@ -90,6 +91,25 @@ public class DiagramListener implements IDiagramListener2 {
 	@Override
 	public void diagramUIModelLoaded(IDiagramUIModel diagramUIModel) {
 		logger.info("%s \"%s\" loaded", diagramUIModel.getType(), diagramUIModel.getName());
+
+
+		System.out.println("Diagram loaded: " + diagramUIModel.getName());
+		
+		
+		logger.info("Diagram loaded: %s \"%s\"", diagramUIModel.getType(), diagramUIModel.getName());
+		// da correggere!!!
+		Logger.createEvent(LogActivity.UPDATE_DIAGRAM, diagramUIModel, "diagramUIModelLoaded", "diagramUIModelLoaded");
+
+		
+
+		IDiagramUIModel active = ApplicationManager.instance().getDiagramManager().getActiveDiagram();
+		if (active != null && active.equals(diagramUIModel)) {
+			System.out.println("Diagram is also currently displayed to the user.");
+			// codice da eseguire quando è effettivamente visibile
+		}
+
+
+
 	}
 
 	@Override
@@ -117,8 +137,9 @@ public class DiagramListener implements IDiagramListener2 {
 					diagramUIModel.getType(), diagramUIModel.getName(), 
 					diagramUIModel.getId());
 			diagramId= diagramUIModel.getId();
-			FeedbackHandler.getInstance().showFeedbackPanel(diagramUIModel);
+			//FeedbackHandler.getInstance().showFeedbackPanel(diagramUIModel);
 		}		
 
 	}
+
 }

@@ -103,16 +103,12 @@ package com.uniba.mining.tasks.exportdiag;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.model.IAssociation;
-import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IActor;
-import com.vp.plugin.model.IInclude;
-import com.vp.plugin.model.IExtend;
 import com.vp.plugin.model.IRelationship;
 import com.vp.plugin.model.IRelationshipEnd;
 import com.vp.plugin.model.IUseCase;
@@ -121,18 +117,90 @@ import com.vp.plugin.model.IModelElement;
 public class UseCaseInfo {
 
 	public static void appendActorInfo(StringBuilder output, IActor actor, ResourceBundle messages) {
-		output.append(String.format("\nActor: %s", actor.getName()));
-		if (actor.getDocumentation() != null && !actor.getDocumentation().isEmpty()) {
-			output.append(String.format("\nDescription: %s", actor.getDocumentation()));
+		output.append(String.format("\nActor: %s", actor.getName() != null ? actor.getName() : "Unnamed"));
+
+		// Actor ID
+		if (actor.getId() != null) {
+			output.append(String.format(", ID: %s", actor.getId()));
 		}
+
+		// Description
+		if (actor.getDocumentation() != null && !actor.getDocumentation().isEmpty()) {
+			output.append(String.format(", Description: %s", actor.getDocumentation()));
+		}
+		// Visibility
+		if (actor.getVisibility() != null && !actor.getVisibility().isEmpty()) {
+			output.append(String.format(", Visibility: %s", actor.getVisibility()));
+		}
+
+		// Flag
+		output.append(", Flags: ");
+		boolean hasFlag = false;
+
+		if (actor.isAbstract()) {
+			output.append("Abstract ");
+			hasFlag = true;
+		}
+		if (actor.isFinalSpecialization()) {
+			output.append("Final Specialization ");
+			hasFlag = true;
+		}
+		if (actor.isLeaf()) {
+			output.append("Leaf ");
+			hasFlag = true;
+		}
+		if (actor.isRoot()) {
+			output.append("Root ");
+			hasFlag = true;
+		}
+		if (actor.isBusinessModel()) {
+			output.append("Business Model ");
+			hasFlag = true;
+		}
+
+		if (!hasFlag) {
+			output.append("None");
+		}
+
 		output.append("\n");
 	}
 
 	public static void appendUseCaseInfo(StringBuilder output, IUseCase useCase, ResourceBundle messages) {
 		output.append(String.format("\nUse Case: %s", useCase.getName()));
 		if (useCase.getDocumentation() != null && !useCase.getDocumentation().isEmpty()) {
-			output.append(String.format("\nDescription: %s", useCase.getDocumentation()));
+			output.append(String.format(", Description: %s", useCase.getDocumentation()));
 		}
+		if (useCase.getPreConditions() != null && useCase.getPreConditions().isEmpty()) {
+			output.append(String.format(", Pre-conditions: %s", useCase.getPreConditions()));
+		}
+		if (useCase.getPostConditions() != null && useCase.getPostConditions().isEmpty()) {
+			output.append(String.format(", Post-conditions: %s", useCase.getPostConditions()));
+		}
+		// Flag booleani (non tutti sono applicabili a UseCase, ma puoi filtrare quelli supportati)
+		output.append(", Flags: ");
+		boolean hasFlag = false;
+
+		if (useCase.isAbstract()) {
+			output.append("Abstract ");
+			hasFlag = true;
+		}
+		if (useCase.isLeaf()) {
+			output.append("Leaf ");
+			hasFlag = true;
+		}
+		if (useCase.isRoot()) {
+			output.append("Root ");
+			hasFlag = true;
+		}
+		if (useCase.isBusinessModel()) {
+			output.append("Business Model ");
+			hasFlag = true;
+		}
+
+		if (!hasFlag) {
+			output.append("None");
+		}
+
 		output.append("\n");
 	}
 
@@ -200,27 +268,39 @@ public class UseCaseInfo {
 	    String fromType = (from instanceof IActor) ? "Actor" : "Use Case";
 	    String toType = (to instanceof IActor) ? "Actor" : "Use Case";
 
-	    // Supporta Extend, Include, Association, Generalization
+	    // Descrizione della relazione, se presente
+	    String description = (rel.getDescription() != null && !rel.getDescription().trim().isEmpty())
+	            ? String.format(" — Description: %s", rel.getDescription().trim())
+	            : "";
+
+	    // Supporta Extend, Include, Association, Generalization, ecc.
 	    switch (type) {
 	        case "Extend":
 	        case "Include":
 	        case "Association":
-	            return String.format("%s '%s' %s '%s'",
+	        case "Dependency":
+	        case "Realization":
+	            return String.format("%s '%s' %s '%s'%s",
 	                    fromType,
 	                    fromName,
 	                    messages.getString("relationship." + type.toLowerCase()),
-	                    toName);
+	                    toName,
+	                    description);
 	        case "Generalization":
-	            return String.format("%s '%s' %s %s '%s'",
+	            return String.format("%s '%s' %s %s '%s'%s",
 	                    fromType,
 	                    fromName,
 	                    messages.getString("relationship.generalization"),
 	                    toType,
-	                    toName);
-	        default:
-	            return null; // ignora altri tipi di relazione
+	                    toName,
+	                    description);
+	        default: {
+	            System.err.println("Not catched relation: " + type.toLowerCase());
+	            return null;
+	        }
 	    }
 	}
+
 
 
 	private static void handleAssociation(StringBuilder output, IAssociation association, IModelElement source, ResourceBundle messages) {

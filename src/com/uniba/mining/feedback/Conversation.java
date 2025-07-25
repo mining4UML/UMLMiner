@@ -1,5 +1,7 @@
 package com.uniba.mining.feedback;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -189,23 +191,29 @@ public class Conversation implements Serializable {
 		StringBuilder builder = new StringBuilder();
 		String sep = "********** ";
 
-		int numQueries = queryList.size();
+		int numQueries = queryList != null ? queryList.size() : 0;
+		int numResponses = responseList != null ? responseList.size() : 0;
+		int numTimestamps = (timestampList != null) ? timestampList.size() : 0;
 
-		if (responseList.size() < numQueries || timestampList.size() < numQueries) {
-			System.err.println("[Warning] Inconsistent list sizes: queries=" + numQueries +
-					", responses=" + responseList.size() + ", timestamps=" + timestampList.size());
-			numQueries = Math.min(Math.min(queryList.size(), responseList.size()), timestampList.size());
-		}
+		int numItems = Math.min(numQueries, numResponses); // timestamp può mancare
 
-		for (int i = 0; i < numQueries; i++) {
-			builder.append(sep + "QUERY (" + timestampList.get(i) + ") " + sep + "\n")
-			.append(queryList.get(i)).append("\n");
-			builder.append(sep + "RESPONSE " + sep + "\n")
-			.append(responseList.get(i)).append("\n\n");
+		for (int i = 0; i < numItems; i++) {
+			String timestamp = (timestampList != null && i < numTimestamps)
+				? timestampList.get(i)
+				: "No timestamp available";
+
+			builder.append(sep)
+			       .append("QUERY (").append(timestamp).append(") ").append(sep).append("\n")
+			       .append(queryList.get(i)).append("\n");
+			builder.append(sep)
+			       .append("RESPONSE ").append(sep).append("\n")
+			       .append(responseList.get(i)).append("\n\n");
 		}
 
 		return builder.toString();
 	}
+
+
 
 	@Override
 	public String toString() {
@@ -239,5 +247,24 @@ public class Conversation implements Serializable {
 
 		return builder.toString();
 	}
+	
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject(); // Richiama la deserializzazione di default
+
+		// Inizializza i nuovi campi se null (per compatibilità con versioni precedenti)
+		if (timestampList == null) {
+			timestampList = new ArrayList<>();
+		}
+		if (process == null) {
+			process = "";
+		}
+		if (metrics == null) {
+			metrics = "";
+		}
+		if (conversationContent == null) {
+			conversationContent = new StringBuilder();
+		}
+	}
+
 }
 

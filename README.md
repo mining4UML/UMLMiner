@@ -23,6 +23,9 @@ Modeling events captured are related to:
 ## Installation
 UML Miner comes as a zip file. To install it in Visual Paradigm it only necessary to select  "Help > Install Plugin" from the application toolbar. 
 
+## Official Web site
+https://sites.google.com/view/uml-miner/home-page
+
 ## Debugging configuration
 Information on how to debug UML Miner in Eclipse IDE are available at https://knowhow.visual-paradigm.com/openapi/debug-plugins-eclipse/
 

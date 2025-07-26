@@ -36,8 +36,10 @@ First release is going to be published (28th June 2023).
 ## Team members
 The team members, listed in alphabetical order, are:
 - Pasquale Ardimento -  Department of Computer Science, University of Bari Aldo Moro (responsible of project)
-- Lerina Aversano - Department of Engineering, Università degli Studi del Sannio, 82100 Benevento, Italy
 - Mario Luca Bernardi - Department of Engineering, Università degli Studi del Sannio, 82100 Benevento, Italy
-- Vito Alessandro Carella - Department of Computer Science, University of Bari Aldo Moro
 - Marta Cimitile - Department of Law and Economics, Unitelma Sapienza University, 00161 Rome, Italy
 - Michele Scalera - Department of Computer Science, University of Bari Aldo Moro
+
+## Former Team Members
+- Lerina Aversano - Department of Engineering, Università degli Studi del Sannio, 82100 Benevento, Italy
+- Vito Alessandro Carella - Department of Computer Science, University of Bari Aldo Moro

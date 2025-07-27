@@ -157,41 +157,50 @@ public class RunSDMetrics {
 
 
 	private static String summarizeSdmetricsStats(Path csvFilePath) {
-		StringBuilder summary = new StringBuilder();
-		summary.append("The following metrics were computed with SDMetrics:\n\n");
+	    StringBuilder summary = new StringBuilder();
+	    summary.append("The following use case metrics were computed using SDMetrics:\n\n");
 
-		try (BufferedReader reader = Files.newBufferedReader(csvFilePath)) {
-			String header = reader.readLine(); // salta intestazione
-			if (header == null || !header.startsWith("Name,")) {
-				return "Invalid SDMetrics file format.";
-			}
+	    try (BufferedReader reader = Files.newBufferedReader(csvFilePath)) {
+	        String header = reader.readLine(); // Read the header
+	        if (header == null || !header.startsWith("Name,")) {
+	            return "Invalid SDMetrics file format.";
+	        }
 
-			String line;
-			int count = 0;
-			while ((line = reader.readLine()) != null && count < 10) { // limita a 10 righe per chiarezza
-				String[] tokens = line.split(",");
-				if (tokens.length >= 6) {
-					String metricName = tokens[0].trim();
-					String mean = tokens[3].trim();
-					String max = tokens[5].trim();
+	        String line;
+	        int count = 0;
+	        while ((line = reader.readLine()) != null && count < 10) {
+	            String[] tokens = line.split(",", -1); // include empty trailing tokens
+	            if (tokens.length >= 8) {
+	                String name = tokens[0].trim();
+	                String domain = tokens[1].trim();
+	                String description = tokens[2].trim();
+	                String mean = tokens[3].trim();
+	                String median = tokens[4].trim();
+	                String stddev = tokens[5].trim();
+	                String min = tokens[6].trim();
+	                String max = tokens[7].trim();
 
+	                summary.append(String.format("- %s (domain: %s)%n", name, domain));
+	                if (!description.isEmpty()) {
+	                    summary.append(String.format("  Description: %s%n", description));
+	                }
+	                summary.append(String.format("  Stats: Mean = %s, Median = %s, StdDev = %s, Min = %s, Max = %s%n%n",
+	                        mean, median, stddev, min, max));
+	                count++;
+	            }
+	        }
 
-					summary.append("- ").append(metricName)
-					.append(" (Mean=").append(mean)
-					.append(", Max=").append(max).append(")\n");
-				}
-			}
+	        if (count == 0) {
+	            summary.append("No significant metrics found.\n");
+	        }
 
-			if (count == 0) {
-				summary.append("All metrics are zero or not significant.\n");
-			}
+	    } catch (IOException e) {
+	        return "Error reading SDMetrics summary: " + e.getMessage();
+	    }
 
-		} catch (IOException e) {
-			return "Error reading SDMetrics summary: " + e.getMessage();
-		}
-
-		return summary.toString();
+	    return summary.toString();
 	}
+
 
 	private static String summarizePerClassMetrics(Path csvFilePath) {
 		StringBuilder summary = new StringBuilder();

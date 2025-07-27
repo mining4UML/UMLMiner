@@ -88,11 +88,14 @@ public class Config {
 			.getProperty("diagram.absent.req");
 	
 
-	public static final String QUALITYPROMPT = 
-		    "You are an expert in object-oriented software design.\n" +
-		    "The following metrics were computed with SDMetrics and summarize key " +
-		    "structural characteristics of the analyzed diagram. " +
-		    "Provide actionable feedback always citing specific metric values and element names where appropriate.";
+	public static final String QUALITYPROMPT =
+		    "You are a novel in object-oriented software design and model evaluation.\n" +
+		    "The following metrics were computed using SDMetrics and describe important structural and semantic aspects " +
+		    "of the diagram.\n" +
+		    "Analyze the metrics with a focus on qualitative insights: identify design strengths, highlight potential flaws, " +
+		    "and suggest concrete improvements to the model.\n" +
+		    "Whenever possible, refer explicitly to specific metric values and model elements " +
+		    "to support your feedback. Do not limit yourself to describing values—explain what they imply and how the model can be enhanced.";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

@@ -349,7 +349,7 @@ public class VPXmlToXMIConverter {
 	        writer.println("<xmi:XMI xmlns:xmi=\"http://www.omg.org/spec/XMI/2.1\" xmlns:uml=\"http://www.omg.org/spec/UML/20090901\">");
 	        writer.println("  <uml:Model xmi:type=\"uml:Model\" name=\"VPConvertedModel\">");
 
-	     // Precarica tutti gli ID degli attori e dei casi d'uso
+	        // Precarica tutti gli ID degli attori e dei casi d'uso
 	        List<Node> allNodes = doc.selectNodes("//Actor[not(@Idref)] | //UseCase[not(@Idref)]");
 	        for (Node node : allNodes) {
 	            if (!(node instanceof Element)) continue;
@@ -359,35 +359,26 @@ public class VPXmlToXMIConverter {
 	                idToXmiId.put(id, UUID.randomUUID().toString());
 	            }
 	        }
-	        
-	        // Pre-processing include/extend/extensionpoint
+
+	        // Casi d'uso
 	        Map<String, List<String>> usecaseToIncludes = new HashMap<>();
 	        Map<String, List<String>> usecaseToExtends = new HashMap<>();
 	        Map<String, String> usecaseToExtensionPoint = new HashMap<>();
-	        List<String> includeDefs = new ArrayList<>();
-	        List<String> extendDefs = new ArrayList<>();
-	        List<String> extensionPointDefs = new ArrayList<>();
+	        Map<String, String> usecaseToEPId = new HashMap<>();
+	        Map<String, List<String>> usecaseToIncludeIds = new HashMap<>();
+	        Map<String, List<String>> usecaseToExtendIds = new HashMap<>();
 
 	        // Include
 	        List<Node> includes = doc.selectNodes("//ModelRelationshipContainer[@Name='Include']//Include");
 	        for (Node inc : includes) {
 	            Element el = (Element) inc;
-	            String from = el.attributeValue("From"); // includingCase
-	            String to = el.attributeValue("To");     // included use case
-
-	            String fromXmiId = idToXmiId.get(from);  // nuova variabile
-	            String toXmiId = idToXmiId.get(to);      // nuova variabile
-
-	            if (fromXmiId != null && toXmiId != null) { // condizione aggiornata
-	                String includeId = UUID.randomUUID().toString(); // nome variabile più chiaro
-
-	                usecaseToIncludes.computeIfAbsent(from, k -> new ArrayList<>()).add(includeId);
-
-	                includeDefs.add(String.format(
-	                    "  <usecaseinclude xmi:id=\"%s\" xmi:type=\"uml:Include\" addition=\"%s\"/>",
-	                    includeId, toXmiId)); // uso del vero ID XMI del use case incluso
+	            String from = el.attributeValue("From");
+	            String to = el.attributeValue("To");
+	            String fromXmiId = idToXmiId.get(from);
+	            String toXmiId = idToXmiId.get(to);
+	            if (fromXmiId != null && toXmiId != null) {
+	                usecaseToIncludes.computeIfAbsent(from, k -> new ArrayList<>()).add(toXmiId);
 	            }
-
 	        }
 
 	        // Extend
@@ -396,51 +387,50 @@ public class VPXmlToXMIConverter {
 	            Element el = (Element) ext;
 	            String from = el.attributeValue("From");
 	            String to = el.attributeValue("To");
-	            String extId = UUID.randomUUID().toString();
-	            String extensionPointId = UUID.randomUUID().toString();
-	            if (idToXmiId.containsKey(to)) {
-	                usecaseToExtends.computeIfAbsent(from, k -> new ArrayList<>()).add(extId);
+	            String fromXmiId = idToXmiId.get(from);
+	            String toXmiId = idToXmiId.get(to);
+	            String extensionPointId = "ep_" + UUID.randomUUID();
+	            if (fromXmiId != null && toXmiId != null) {
+	                usecaseToExtends.computeIfAbsent(from, k -> new ArrayList<>()).add(toXmiId);
 	                usecaseToExtensionPoint.put(from, extensionPointId);
-
-	                extensionPointDefs.add(String.format(
-	                        "  <extensionpoint xmi:id=\"%s\" xmi:type=\"uml:ExtensionPoint\" name=\"autogenEP\"/>",
-	                        extensionPointId));
-	                extendDefs.add(String.format(
-	                        "  <usecaseextend xmi:id=\"%s\" xmi:type=\"uml:Extend\" extendedCase=\"%s\" usecaseextensionpoint=\"%s\"/>",
-	                        extId, idToXmiId.get(to), extensionPointId));
 	            }
 	        }
 
-	        // Casi d'uso
+	        // Scrittura UseCase
 	        List<Node> usecases = doc.selectNodes("//UseCase[not(@Idref)]");
 	        for (Node uc : usecases) {
 	            if (!(uc instanceof Element)) continue;
 	            Element el = (Element) uc;
 	            String id = el.attributeValue("Id");
 	            String name = escapeXml(el.attributeValue("Name", "UnnamedUseCase"));
-	            String xmiId = idToXmiId.get(id); // Usa l'ID già precaricato
-
-	            // Attributi aggiuntivi
+	            String xmiId = idToXmiId.get(id);
 	            String isAbstract = el.attributeValue("Abstract", "false");
 	            String isLeaf = el.attributeValue("Leaf", "false");
 	            String visibility = el.attributeValue("Visibility", "public");
 
-	            String includeAttr = String.join(" ", usecaseToIncludes.getOrDefault(id, Collections.emptyList()));
-	            String extendAttr = String.join(" ", usecaseToExtends.getOrDefault(id, Collections.emptyList()));
-	            String epId = usecaseToExtensionPoint.get(id);
-
-	            writer.printf("    <packagedElement xmi:type=\"uml:UseCase\" xmi:id=\"%s\" name=\"%s\" visibility=\"%s\" isAbstract=\"%s\" isLeaf=\"%s\"",
+	            writer.printf("    <packagedElement xmi:type=\"uml:UseCase\" xmi:id=\"%s\" name=\"%s\" visibility=\"%s\" isAbstract=\"%s\" isLeaf=\"%s\">%n",
 	                    xmiId, name, visibility, isAbstract, isLeaf);
 
-	            if (!includeAttr.isEmpty()) writer.printf(" include=\"%s\"", includeAttr);
-	            if (!extendAttr.isEmpty()) writer.printf(" extend=\"%s\"", extendAttr);
-	            writer.printf(" extensionPoint=\"%s\"", epId != null ? epId : "");
-	            writer.println("/>");
+	            if (usecaseToExtensionPoint.containsKey(id)) {
+	                writer.printf("      <ownedMember xmi:type=\"uml:ExtensionPoint\" xmi:id=\"%s\" name=\"autogenEP\"/>%n",
+	                        usecaseToExtensionPoint.get(id));
+	            }
+
+	            List<String> includesList = usecaseToIncludes.getOrDefault(id, Collections.emptyList());
+	            for (String includedId : includesList) {
+	                writer.printf("      <include xmi:type=\"uml:Include\" xmi:id=\"%s\" addition=\"%s\"/>%n", UUID.randomUUID(), includedId);
+	            }
+
+	            List<String> extendsListIds = usecaseToExtends.getOrDefault(id, Collections.emptyList());
+	            for (String extendedId : extendsListIds) {
+	                String extPointId = usecaseToExtensionPoint.get(id);
+	                writer.printf("      <extend xmi:type=\"uml:Extend\" xmi:id=\"%s\" extendedCase=\"%s\" extensionLocation=\"%s\"/>%n", UUID.randomUUID(), extendedId, extPointId);
+	            }
+
+	            writer.println("    </packagedElement>");
 	        }
 
-	        
-	     // Attori
-	     // Attori
+	        // Attori
 	        List<Node> actors = doc.selectNodes("//Actor[not(@Idref)]");
 	        for (Node actor : actors) {
 	            if (!(actor instanceof Element)) continue;
@@ -448,21 +438,15 @@ public class VPXmlToXMIConverter {
 	            String id = el.attributeValue("Id");
 	            String name = escapeXml(el.attributeValue("Name", "UnnamedActor"));
 	            String xmiId = idToXmiId.get(id);
-
-	            // Attributi opzionali
 	            String isAbstract = el.attributeValue("Abstract", "false");
 	            String isLeaf = el.attributeValue("Leaf", "false");
 	            String visibility = el.attributeValue("Visibility", "public");
 
-	            writer.printf(
-	                "    <packagedElement xmi:type=\"uml:Actor\" xmi:id=\"%s\" name=\"%s\" visibility=\"%s\" isAbstract=\"%s\" isLeaf=\"%s\"/>%n",
-	                xmiId, name, visibility, isAbstract, isLeaf
-	            );
+	            writer.printf("    <packagedElement xmi:type=\"uml:Actor\" xmi:id=\"%s\" name=\"%s\" visibility=\"%s\" isAbstract=\"%s\" isLeaf=\"%s\"/>%n",
+	                    xmiId, name, visibility, isAbstract, isLeaf);
 	        }
 
-
-
-	        // Associazioni attore–caso d’uso
+	        // Associazioni
 	        List<Node> associations = doc.selectNodes("//ModelRelationshipContainer[@Name='Association']//Association");
 	        for (Node assocNode : associations) {
 	            if (!(assocNode instanceof Element)) continue;
@@ -472,16 +456,13 @@ public class VPXmlToXMIConverter {
 	            if (fromEnd != null && toEnd != null) {
 	                Element fromAssoc = fromEnd.element("AssociationEnd");
 	                Element toAssoc = toEnd.element("AssociationEnd");
-
 	                if (fromAssoc != null && toAssoc != null) {
 	                    Element fromType = fromAssoc.element("Type");
 	                    Element toType = toAssoc.element("Type");
 	                    Element fromElement = (fromType != null) ? fromType.element("Actor") : null;
 	                    if (fromElement == null && fromType != null) fromElement = fromType.element("UseCase");
-
 	                    Element toElement = (toType != null) ? toType.element("UseCase") : null;
 	                    if (toElement == null && toType != null) toElement = toType.element("Actor");
-
 	                    if (fromElement != null && toElement != null) {
 	                        String fromIdRef = fromElement.attributeValue("Idref");
 	                        String toIdRef = toElement.attributeValue("Idref");
@@ -490,8 +471,8 @@ public class VPXmlToXMIConverter {
 	                        if (fromXmiId != null && toXmiId != null) {
 	                            String assocXmiId = UUID.randomUUID().toString();
 	                            writer.printf("    <packagedElement xmi:type=\"uml:Association\" xmi:id=\"%s\">%n", assocXmiId);
-	                            writer.printf("      <ownedEnd xmi:id=\"%s\" type=\"%s\"/>%n", UUID.randomUUID(), fromXmiId);
-	                            writer.printf("      <ownedEnd xmi:id=\"%s\" type=\"%s\"/>%n", UUID.randomUUID(), toXmiId);
+	                            writer.printf("      <ownedEnd xmi:id=\"%s\" xmi:type=\"uml:Property\" type=\"%s\" name=\"from\"/>%n", UUID.randomUUID(), fromXmiId);
+	                            writer.printf("      <ownedEnd xmi:id=\"%s\" xmi:type=\"uml:Property\" type=\"%s\" name=\"to\"/>%n", UUID.randomUUID(), toXmiId);
 	                            writer.println("    </packagedElement>");
 	                        }
 	                    }
@@ -500,18 +481,13 @@ public class VPXmlToXMIConverter {
 	        }
 
 	        writer.println("  </uml:Model>");
-
-	        // Appendi include, extend, extensionpoint
-	        includeDefs.forEach(writer::println);
-	        extensionPointDefs.forEach(writer::println);
-	        extendDefs.forEach(writer::println);
-
 	        writer.println("</xmi:XMI>");
 	    }
 
 	    logger.info("Conversione diagramma dei casi d'uso completata. File salvato in: " + xmiFile.getAbsolutePath());
 	    return xmiFile.getAbsolutePath();
 	}
+
 
 
 	private static String escapeXml(String input) {

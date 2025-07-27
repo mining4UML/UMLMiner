@@ -8,13 +8,11 @@
     <packagedElement xmi:type="uml:Actor" xmi:id="actor1" name="Customer" />
 
     <!-- Use Case: Place Order -->
-    <packagedElement
-        xmi:type="uml:UseCase"
-        xmi:id="uc1"
-        name="Place Order"
-        include="inc1"
-        extend="ext1"
-        extensionPoint="ep1"/>
+    <packagedElement xmi:type="uml:UseCase" xmi:id="uc1" name="Place Order">
+      <ownedMember xmi:type="uml:ExtensionPoint" xmi:id="ep1" name="checkDetails"/>
+      <include xmi:type="uml:Include" xmi:id="inc1" addition="uc2"/>
+      <extend xmi:type="uml:Extend" xmi:id="ext1" extendedCase="uc3" extensionLocation="ep1"/>
+    </packagedElement>
 
     <!-- Use Case: Validate Order (included) -->
     <packagedElement xmi:type="uml:UseCase" xmi:id="uc2" name="Validate Order" />
@@ -22,21 +20,11 @@
     <!-- Use Case: Confirm Order (extended) -->
     <packagedElement xmi:type="uml:UseCase" xmi:id="uc3" name="Confirm Order" />
 
-    <!-- Association: actor -> usecase -->
-    <packagedElement xmi:type="uml:Association" xmi:id="assoc1">
-      <ownedEnd xmi:id="id_owned_end1" type="actor1"/>
-      <ownedEnd xmi:id="id_owned_end2" type="uc1"/>
+    <!-- Association: Actor <-> UseCase -->
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc1" name="actorToUseCase">
+      <ownedEnd xmi:id="end1" xmi:type="uml:Property" type="actor1" name="from"/>
+      <ownedEnd xmi:id="end2" xmi:type="uml:Property" type="uc1" name="to"/>
     </packagedElement>
 
   </uml:Model>
-
-  <!-- Extension Point -->
-  <extensionpoint xmi:id="ep1" xmi:type="uml:ExtensionPoint" name="checkDetails"/>
-
-  <!-- Include relationship -->
-  <usecaseinclude xmi:id="inc1" xmi:type="uml:Include" addition="uc2"/>
-
-  <!-- Extend relationship -->
-  <usecaseextend xmi:id="ext1" xmi:type="uml:Extend" extendedcase="uc3" usecaseextensionpoint="ep1"/>
-
 </xmi:XMI>

@@ -89,13 +89,14 @@ public class Config {
 	
 
 	public static final String QUALITYPROMPT =
-		    "You are a novel in object-oriented software design and model evaluation.\n" +
+		    "You are an expert in object-oriented software design and model evaluation.\n" +
 		    "The following metrics were computed using SDMetrics and describe important structural and semantic aspects " +
 		    "of the diagram.\n" +
 		    "Analyze the metrics with a focus on qualitative insights: identify design strengths, highlight potential flaws, " +
 		    "and suggest concrete improvements to the model.\n" +
-		    "Whenever possible, refer explicitly to specific metric values and model elements " +
-		    "to support your feedback. Do not limit yourself to describing values—explain what they imply and how the model can be enhanced.";
+		    "Always support your feedback with specific metric values and the names of the involved model elements. " +
+		    "Each observation or recommendation must be clearly backed by one or more metrics.\n" +
+		    "Do not limit yourself to describing the values—explain their implications for model quality and how they inform possible enhancements.";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

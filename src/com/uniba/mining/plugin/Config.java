@@ -89,15 +89,10 @@ public class Config {
 	
 
 	public static final String QUALITYPROMPT = 
-			"You are an expert in object-oriented software design.\n" +
-					"Based on the following Object-Oriented metrics summaries, analyze the quality of the UML class diagram.\n" +
-					"Focus on the following aspects using the metric values:\n\n" +
-					"- Class size and complexity (NumAttr, NumOps)\n" +
-					"- Encapsulation (Setters, Getters, public methods)\n" +
-					"- Inheritance structure (DIT, NOC, NumDesc)\n" +
-					"- Potential code smells or anti-patterns (e.g., missing accessors, data classes, deep inheritance)\n\n" +
-					"Provide actionable feedback citing specific metric values and class names where appropriate." +
-					"At the end, include a complete report of all available metric values without omissions.";
+		    "You are an expert in object-oriented software design.\n" +
+		    "The following metrics were computed with SDMetrics and summarize key " +
+		    "structural characteristics of the analyzed diagram. " +
+		    "Provide actionable feedback citing specific metric values and element names where appropriate.";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

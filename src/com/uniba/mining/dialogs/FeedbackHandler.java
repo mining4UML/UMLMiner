@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.dom4j.Document;
 
 /**
  * The {@code FeedbackHandler} class is responsible for managing
@@ -335,35 +334,35 @@ public class FeedbackHandler {
 	}
 
 	private void addFocusListenerToOutputPane() {
-	    ResourceBundle messages = DiagramInfo.getMessages();
+		ResourceBundle messages = DiagramInfo.getMessages();
 
-	    outputPane.addFocusListener(new FocusListener() {
+		outputPane.addFocusListener(new FocusListener() {
 
-	        @Override
-	        public void focusGained(FocusEvent e) {
-	            IDiagramUIModel currentDiagram = Application.getDiagram();
+			@Override
+			public void focusGained(FocusEvent e) {
+				IDiagramUIModel currentDiagram = Application.getDiagram();
 
-	            if (currentDiagram == null) {
-	                // Mostra un messaggio utente o logga senza lanciare eccezione
-	                System.err.println(messages.getString("diagram.project.nodiagram") + "\n"
-	                        + messages.getString("feedback.problem"));
-	                Application.getViewManager().removeMessagePaneComponent(panelId);
-	                return;
-	            }
+				if (currentDiagram == null) {
+					// Mostra un messaggio utente o logga senza lanciare eccezione
+					System.err.println(messages.getString("diagram.project.nodiagram") + "\n"
+							+ messages.getString("feedback.problem"));
+					Application.getViewManager().removeMessagePaneComponent(panelId);
+					return;
+				}
 
-	            // Verifica se il diagramma attuale è diverso da quello già caricato
-	            if (diagram == null || !currentDiagram.equals(getDiagram())) {
-	                showFeedbackPanel(currentDiagram);
-	            } else {
-	                requirementsTextArea.printReqFound(getDiagram());
-	            }
-	        }
+				// Verifica se il diagramma attuale è diverso da quello già caricato
+				if (diagram == null || !currentDiagram.equals(getDiagram())) {
+					showFeedbackPanel(currentDiagram);
+				} else {
+					requirementsTextArea.printReqFound(getDiagram());
+				}
+			}
 
-	        @Override
-	        public void focusLost(FocusEvent e) {
-	            // Nessuna azione richiesta
-	        }
-	    });
+			@Override
+			public void focusLost(FocusEvent e) {
+				// Nessuna azione richiesta
+			}
+		});
 	}
 
 
@@ -770,19 +769,20 @@ public class FeedbackHandler {
 		setDiagram(diagramUIModel);
 
 		if (getDiagram() == null) {
-			 // Chiudi il pannello di feedback
+			// Chiudi il pannello di feedback
 			Application.getViewManager().removeMessagePaneComponent(panelId);
-		    return;
+			return;
 		}
 
 		if (panel == null) {
 			createPanel();
 		} else {
 			clearPanel(getDiagram().getId());
-			// Personalizzazione dei bottoni qui
-			if (queryButtons != null) {
-				boolean isClassDiagram = getDiagram().getType().equals("ClassDiagram");
-				queryButtons.customizeItems(true, isClassDiagram);
+			// Buttons customization
+			if (queryButtons != null && getDiagram() != null) {
+				String type = getDiagram().getType();
+				boolean isClassOrUseCaseDiagram = type.equals("ClassDiagram") || type.equals("UseCaseDiagram");
+				queryButtons.customizeItems(true, isClassOrUseCaseDiagram);
 			}
 			loadSerializedConversations(getDiagram().getId());
 		}
@@ -1195,19 +1195,19 @@ outputPane.setText("");
 		}
 	}
 	public void hideFeedbackPanelIfShown(IDiagramUIModel diagram) {
-	    if (panel != null && diagram != null && diagram.equals(getDiagram())) {
-	        System.out.println("[FeedbackHandler] Hiding feedback panel for diagram: " + diagram.getName());
-	        Application.getViewManager().removeMessagePaneComponent(panelId);
-	        panel = null;
-	        setDiagram(null);
-	    } else if (diagram == null && panel != null) {
-	        System.out.println("[FeedbackHandler] Hiding feedback panel (no diagram currently open)");
-	        Application.getViewManager().removeMessagePaneComponent(panelId);
-	        panel = null;
-	        setDiagram(null);
-	    } else {
-	        System.out.println("[FeedbackHandler] No feedback panel to hide or diagram does not match.");
-	    }
+		if (panel != null && diagram != null && diagram.equals(getDiagram())) {
+			System.out.println("[FeedbackHandler] Hiding feedback panel for diagram: " + diagram.getName());
+			Application.getViewManager().removeMessagePaneComponent(panelId);
+			panel = null;
+			setDiagram(null);
+		} else if (diagram == null && panel != null) {
+			System.out.println("[FeedbackHandler] Hiding feedback panel (no diagram currently open)");
+			Application.getViewManager().removeMessagePaneComponent(panelId);
+			panel = null;
+			setDiagram(null);
+		} else {
+			System.out.println("[FeedbackHandler] No feedback panel to hide or diagram does not match.");
+		}
 	}
 
 

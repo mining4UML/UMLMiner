@@ -11,6 +11,24 @@ import javax.swing.JMenuItem;
 import com.uniba.mining.plugin.Config;
 import com.vp.plugin.diagram.IDiagramUIModel;
 
+/**
+ * Manages the creation and behavior of feedback-related buttons 
+ * in the UML Miner interface for Visual Paradigm.
+ * 
+ * <p>This class provides two interactive button menus:
+ * one for general diagram feedback (e.g., contents, improvements, issues, explanations),
+ * and one for analysis feedback (e.g., modeling process and design quality).
+ * 
+ * <p>The buttons generate predefined prompts and inject them into a 
+ * user input field, facilitating interaction with the underlying LLM-based feedback system.
+ * 
+ * <p>It supports conditional activation of the analysis feedback items depending 
+ * on the diagram type, enabling a dynamic and context-aware interface.
+ * 
+ * @author pasqualeardimento
+ */
+
+
 public class QueryButtons {
 
 	private final Color foreGroundColor = Color.BLUE;
@@ -92,7 +110,16 @@ public class QueryButtons {
 		return buttonPanel;
 	}
 
-
+	/**
+	 * Enables or disables the analysis feedback menu items based on the given flags.
+	 * <p>
+	 * This method is used to control the availability of the "Modeling Feedback"
+	 * and "Design Quality Feedback" options in the "Analysis Feedback" menu.
+	 * It should be called after the {@code addButtons} method has initialized the menu items.
+	 *
+	 * @param modelingEnabled {@code true} to enable the "Modeling Feedback" menu item; {@code false} to disable it.
+	 * @param qualityEnabled {@code true} to enable the "Design Quality Feedback" menu item; {@code false} to disable it.
+	 */
 	public void customizeItems(boolean modelingEnabled, boolean qualityEnabled) {
 		if (modelingItem != null) modelingItem.setEnabled(modelingEnabled);
 		if (qualityItem != null) qualityItem.setEnabled(qualityEnabled);

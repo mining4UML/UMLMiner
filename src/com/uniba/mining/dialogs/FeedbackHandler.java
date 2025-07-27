@@ -508,8 +508,8 @@ public class FeedbackHandler {
 					queryText += "\n\nViolations detected by RUM:\n";
 				} else if (inputText.toLowerCase().contains(Config.FEEDBACK_BUTTON_QUALITY.toLowerCase())) {
 					String metricsSummary = RunSDMetrics.readSdmetricsOutput(getDiagram());
-					currentConversation.setQuery(Config.QUALITYPROMPT);
 					currentConversation.setMetrics(metricsSummary);
+					currentConversation.setQuery(Config.QUALITYPROMPT+metricsSummary);
 					queryText = Config.QUALITYPROMPT;
 				}
 

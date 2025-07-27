@@ -92,7 +92,7 @@ public class Config {
 		    "You are an expert in object-oriented software design.\n" +
 		    "The following metrics were computed with SDMetrics and summarize key " +
 		    "structural characteristics of the analyzed diagram. " +
-		    "Provide actionable feedback citing specific metric values and element names where appropriate.";
+		    "Provide actionable feedback always citing specific metric values and element names where appropriate.";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

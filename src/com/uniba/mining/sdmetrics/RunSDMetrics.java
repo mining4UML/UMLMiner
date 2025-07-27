@@ -150,7 +150,7 @@ public class RunSDMetrics {
 	    content.append(summaryEntities).append("\n");
 
 
-	    deleteConvertedXmi();
+	    //deleteConvertedXmi();
 	    return content.toString();
 	}
 

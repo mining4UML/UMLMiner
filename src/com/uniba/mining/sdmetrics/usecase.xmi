@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmlns:xmi="http://www.omg.org/spec/XMI/2.1"
+         xmlns:uml="http://www.omg.org/spec/UML/20090901">
+
+  <uml:Model xmi:type="uml:Model" name="UseCaseTestModel">
+
+    <!-- Actor -->
+    <packagedElement xmi:type="uml:Actor" xmi:id="actor1" name="Customer" />
+
+    <!-- Use Case: Place Order -->
+    <packagedElement
+        xmi:type="uml:UseCase"
+        xmi:id="uc1"
+        name="Place Order"
+        include="inc1"
+        extend="ext1"
+        extensionPoint="ep1"/>
+
+    <!-- Use Case: Validate Order (included) -->
+    <packagedElement xmi:type="uml:UseCase" xmi:id="uc2" name="Validate Order" />
+
+    <!-- Use Case: Confirm Order (extended) -->
+    <packagedElement xmi:type="uml:UseCase" xmi:id="uc3" name="Confirm Order" />
+
+    <!-- Association: actor -> usecase -->
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc1">
+      <ownedEnd xmi:id="id_owned_end1" type="actor1"/>
+      <ownedEnd xmi:id="id_owned_end2" type="uc1"/>
+    </packagedElement>
+
+  </uml:Model>
+
+  <!-- Extension Point -->
+  <extensionpoint xmi:id="ep1" xmi:type="uml:ExtensionPoint" name="checkDetails"/>
+
+  <!-- Include relationship -->
+  <usecaseinclude xmi:id="inc1" xmi:type="uml:Include" addition="uc2"/>
+
+  <!-- Extend relationship -->
+  <usecaseextend xmi:id="ext1" xmi:type="uml:Extend" extendedcase="uc3" usecaseextensionpoint="ep1"/>
+
+</xmi:XMI>

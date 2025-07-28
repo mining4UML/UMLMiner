@@ -29,10 +29,6 @@ https://sites.google.com/view/uml-miner/home-page
 ## Debugging configuration
 Information on how to debug UML Miner in Eclipse IDE are available at https://knowhow.visual-paradigm.com/openapi/debug-plugins-eclipse/
 
-## Development
-The development of UML Miner has been started by Ardimento Pasquale and was later continued by Pasquale Ardimento and Vito Alessandro Carella.
-First release is going to be published (28th June 2023).
-
 ## Team members
 The team members, listed in alphabetical order, are:
 - Pasquale Ardimento -  Department of Computer Science, University of Bari Aldo Moro (responsible of project)

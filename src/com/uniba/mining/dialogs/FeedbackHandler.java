@@ -505,12 +505,12 @@ public class FeedbackHandler {
 
 				String queryText = inputText;
 				if (inputText.toLowerCase().contains("modeling feedback")) {
-					queryText += "\n\nViolations detected by RUM:\n";
+					//queryText += "\n\nViolations detected by RUM:\n"; TO DO
 				} else if (inputText.toLowerCase().contains(Config.FEEDBACK_BUTTON_QUALITY.toLowerCase())) {
 					String metricsSummary = RunSDMetrics.readSdmetricsOutput(getDiagram());
 					currentConversation.setMetrics(metricsSummary);
 					currentConversation.setQuery(Config.QUALITYPROMPT+metricsSummary);
-					queryText = Config.QUALITYPROMPT;
+					queryText = Config.QUALITYPROMPT+metricsSummary;
 				}
 
 				String answer = prefixAnswer + queryText;

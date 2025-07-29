@@ -176,7 +176,7 @@ public class RunSDMetrics {
 
 	private static String summarizeSdmetricsStats(Path csvFilePath) {
 		StringBuilder summary = new StringBuilder();
-		summary.append("The following use case metrics were computed using SDMetrics:\n\n");
+		summary.append("The following metrics were computed using SDMetrics:\n\n");
 
 		try (BufferedReader reader = Files.newBufferedReader(csvFilePath)) {
 			String header = reader.readLine(); // Read the header

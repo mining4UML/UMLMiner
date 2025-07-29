@@ -790,6 +790,7 @@ public class FeedbackHandler {
 		Application.getViewManager().showMessagePaneComponent(panelId, title, panel);
 		forceUpdateView();
 		requirementsTextArea.printReqFound(getDiagram());
+		refreshSelectedConversation(); // <-- aggiunto qui
 	}
 
 	/**
@@ -801,10 +802,12 @@ public class FeedbackHandler {
 	 * </p>
 	 */
 	private void forceUpdateView() {
-		panel.repaint();
 		panel.revalidate();
-	}
+		panel.repaint();
+		conversationList.revalidate();
+		conversationList.repaint();
 
+	}
 
 	/*
 	 * // Azzera i contenuti visivi
@@ -1060,27 +1063,45 @@ outputPane.setText("");
 		loadSerializedConversations();
 
 		conversationList.addListSelectionListener(e -> {
-			Conversation selectedConversation = conversationList.getSelectedValue();
-
-			if (selectedConversation != null) {
-				conversationTitleField.setText(
-						buildTitle(getDiagram(), selectedConversation.getTitle()));
-
-				String conversationContent = selectedConversation.getConversationContent();
-				outputPane.setText("");
-				String[] lines = conversationContent.split("\n");
-				for (String line : lines) {
-					Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
-					appendToPane(line + "\n", textColor);
-
-				}
-			} else {
-				conversationTitleField.setText(buildTitle(null,getDiagramTitle()));
-				outputPane.setText("");
-			}
+			refreshSelectedConversation();
+//			Conversation selectedConversation = conversationList.getSelectedValue();
+//
+//			if (selectedConversation != null) {
+//				conversationTitleField.setText(
+//						buildTitle(getDiagram(), selectedConversation.getTitle()));
+//
+//				String conversationContent = selectedConversation.getConversationContent();
+//				outputPane.setText("");
+//				String[] lines = conversationContent.split("\n");
+//				for (String line : lines) {
+//					Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
+//					appendToPane(line + "\n", textColor);
+//
+//				}
+//			} else {
+//				conversationTitleField.setText(buildTitle(null,getDiagramTitle()));
+//				outputPane.setText("");
+//			}
 		});
 
 		return panel;
+	}
+	
+	private void refreshSelectedConversation() {
+		Conversation selected = conversationList.getSelectedValue();
+		if (selected != null) {
+			conversationTitleField.setText(buildTitle(getDiagram(), selected.getTitle()));
+			String conversationContent = selected.getConversationContent();
+			outputPane.setText("");
+			String[] lines = conversationContent.split("\n");
+			for (String line : lines) {
+				Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
+				appendToPane(line + "\n", textColor);
+			}
+		} else {
+			conversationTitleField.setText(buildTitle(null, getDiagramTitle()));
+			outputPane.setText("");
+		}
 	}
 
 	private void refreshIfDiagramChanged() {

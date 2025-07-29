@@ -4,15 +4,24 @@
 
   <uml:Model xmi:type="uml:Model" name="UseCaseTestModel">
 
-    <!-- Actor -->
-    <packagedElement xmi:type="uml:Actor" xmi:id="actor1" name="Customer" />
+    <!-- Superclasse: Actor Person -->
+    <packagedElement xmi:type="uml:Actor" xmi:id="actor2" name="Person" />
+
+    <!-- Sottoclasse: Actor Customer con generalizzazione -->
+    <packagedElement xmi:type="uml:Actor" xmi:id="actor1" name="Customer">
+      <generalization xmi:type="uml:Generalization" xmi:id="gen1" general="actor2" />
+    </packagedElement>
 
     <!-- Use Case: Place Order -->
     <packagedElement xmi:type="uml:UseCase" xmi:id="uc1" name="Place Order">
-      <ownedMember xmi:type="uml:ExtensionPoint" xmi:id="ep1" name="checkDetails"/>
+      <extensionPoint xmi:type="uml:ExtensionPoint" xmi:id="ep1" name="checkDetails"/>
       <include xmi:type="uml:Include" xmi:id="inc1" addition="uc2"/>
       <extend xmi:type="uml:Extend" xmi:id="ext1" extendedCase="uc3" extensionLocation="ep1"/>
+      <generalization xmi:type="uml:Generalization" xmi:id="gen2" general="uc4" />
     </packagedElement>
+    
+    <!-- Use Case: Place Order (specification) -->
+    <packagedElement xmi:type="uml:UseCase" xmi:id="uc4" name="Place Order spec" />
 
     <!-- Use Case: Validate Order (included) -->
     <packagedElement xmi:type="uml:UseCase" xmi:id="uc2" name="Validate Order" />
@@ -20,10 +29,12 @@
     <!-- Use Case: Confirm Order (extended) -->
     <packagedElement xmi:type="uml:UseCase" xmi:id="uc3" name="Confirm Order" />
 
-    <!-- Association: Actor <-> UseCase -->
+    <!-- Association: Customer <-> Place Order -->
     <packagedElement xmi:type="uml:Association" xmi:id="assoc1" name="actorToUseCase">
-      <ownedEnd xmi:id="end1" xmi:type="uml:Property" type="actor1" name="from"/>
-      <ownedEnd xmi:id="end2" xmi:type="uml:Property" type="uc1" name="to"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="end1" name="from" type="actor1" association="assoc1"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="end2" name="to" type="uc1" association="assoc1"/>
+      <memberEnd xmi:idref="end1"/>
+      <memberEnd xmi:idref="end2"/>
     </packagedElement>
 
   </uml:Model>

@@ -123,10 +123,28 @@ public class RunSDMetrics {
 		String diagramType = type.replace("Diagram", ""); // es: "Class", "UseCase"
 
 		// 1. Riepilogo metriche aggregate (outputDS_<Tipo>.csv)
-		Path dsPath = outputPrefix.resolve("outputDS_" + diagramType + ".csv");
-		String summaryStats = summarizeSdmetricsStats(dsPath);
-		content.append("### SDMetrics Summary (").append(diagramType).append(") ###\n")
-		.append(summaryStats).append("\n");
+		// 1. Riepilogo metriche aggregate (outputDS_<Tipo>.csv)
+		if ("UseCase".equals(diagramType)) {
+			// Per i diagrammi dei casi d'uso, includi sia Actor che UseCase
+			String[] subtypes = { "Actor", "UseCase" };
+			for (String subtype : subtypes) {
+				Path dsPath = outputPrefix.resolve("outputDS_" + subtype + ".csv");
+				if (Files.exists(dsPath)) {
+					String summaryStats = summarizeSdmetricsStats(dsPath);
+					content.append("### SDMetrics Summary (").append(subtype).append(") ###\n")
+					.append(summaryStats).append("\n");
+				}
+			}
+		} else {
+			// Per altri diagrammi (es. Class)
+			Path dsPath = outputPrefix.resolve("outputDS_" + diagramType + ".csv");
+			if (Files.exists(dsPath)) {
+				String summaryStats = summarizeSdmetricsStats(dsPath);
+				content.append("### SDMetrics Summary (").append(diagramType).append(") ###\n")
+				.append(summaryStats).append("\n");
+			}
+		}
+
 
 		// 2. Riepilogo metriche per entità (output_<Tipo>.csv)
 		Path entityPath = outputPrefix.resolve("output_" + diagramType + ".csv");

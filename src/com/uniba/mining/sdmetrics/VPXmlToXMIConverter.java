@@ -14,14 +14,16 @@ import com.uniba.mining.logging.LogStreamer;
  * Converts UML diagrams exported from Visual Paradigm in XML format 
  * into XMI files compatible with the SDMetrics analysis tool.
  * 
+ * <p>To understand how to transform an XML file into a XMI, refer to xmiTrans2_0.xml</p>
+ * 
  * <p>The class supports both class diagrams and use case diagrams. 
  * It automatically detects the diagram type from the input document 
- * and generates the appropriate XMI structure.
+ * and generates the appropriate XMI structure.</p>
  * 
  * <p>The generated XMI conforms to the metamodel used by SDMetrics, 
- * enabling automated metric computation and quality analysis.
+ * enabling automated metric computation and quality analysis.</p>
  * 
- * <p>A logging mechanism is integrated to trace the conversion process and capture errors.
+ * <p>A logging mechanism is integrated to trace the conversion process and capture errors.</p>
  *
  * <p>Typical usage:
  * <pre>
@@ -213,6 +215,42 @@ public class VPXmlToXMIConverter {
 				}
 			}
 
+			// Generalizations tra Use Case
+			Map<String, List<String>> usecaseToGeneralizations = new HashMap<>();
+			List<Node> generalizations = doc.selectNodes("//ModelRelationshipContainer[@Name='Generalization']//Generalization");
+			for (Node genNode : generalizations) {
+				if (!(genNode instanceof Element)) continue;
+				Element genEl = (Element) genNode;
+				String from = genEl.attributeValue("From");
+				String to = genEl.attributeValue("To");
+				if (from != null && to != null && idToXmiId.containsKey(from) && idToXmiId.containsKey(to)) {
+					usecaseToGeneralizations
+					.computeIfAbsent(from, k -> new ArrayList<>())
+					.add(to);
+				}
+			}
+
+			// Generalizations tra Attori
+			Map<String, List<String>> actorToGeneralizations = new HashMap<>();
+			List<Node> actorGenerals = doc.selectNodes("//ModelRelationshipContainer[@Name='Generalization']//Generalization");
+			for (Node genNode : actorGenerals) {
+				if (!(genNode instanceof Element)) continue;
+				Element genEl = (Element) genNode;
+				String from = genEl.attributeValue("From");
+				String to = genEl.attributeValue("To");
+
+				// Entrambi devono essere attori noti
+				if (from != null && to != null && idToXmiId.containsKey(from) && idToXmiId.containsKey(to)) {
+					// Verifica che entrambi i nodi siano effettivamente <Actor>
+					Node fromNode = doc.selectSingleNode("//Actor[@Id='" + from + "']");
+					Node toNode = doc.selectSingleNode("//Actor[@Id='" + to + "']");
+					if (fromNode != null && toNode != null) {
+						actorToGeneralizations.computeIfAbsent(from, k -> new ArrayList<>()).add(to);
+					}
+				}
+			}
+
+
 			// Scrittura UseCase
 			List<Node> usecases = doc.selectNodes("//UseCase[not(@Idref)]");
 			for (Node uc : usecases) {
@@ -229,7 +267,7 @@ public class VPXmlToXMIConverter {
 						xmiId, name, visibility, isAbstract, isLeaf);
 
 				if (usecaseToExtensionPoint.containsKey(id)) {
-					writer.printf("      <ownedMember xmi:type=\"uml:ExtensionPoint\" xmi:id=\"%s\" name=\"autogenEP\"/>%n",
+					writer.printf("      <extensionPoint xmi:type=\"uml:ExtensionPoint\" xmi:id=\"%s\" name=\"autogenEP\"/>%n",
 							usecaseToExtensionPoint.get(id));
 				}
 
@@ -242,6 +280,15 @@ public class VPXmlToXMIConverter {
 				for (String extendedId : extendsListIds) {
 					String extPointId = usecaseToExtensionPoint.get(id);
 					writer.printf("      <extend xmi:type=\"uml:Extend\" xmi:id=\"%s\" extendedCase=\"%s\" extensionLocation=\"%s\"/>%n", UUID.randomUUID(), extendedId, extPointId);
+				}
+
+				List<String> generalizationTargets = usecaseToGeneralizations.getOrDefault(id, Collections.emptyList());
+				for (String targetId : generalizationTargets) {
+					String targetXmiId = idToXmiId.get(targetId);
+					if (targetXmiId != null) {
+						writer.printf("      <generalization xmi:type=\"uml:Generalization\" xmi:id=\"%s\" general=\"%s\"/>%n",
+								UUID.randomUUID(), targetXmiId);
+					}
 				}
 
 				writer.println("    </packagedElement>");
@@ -259,8 +306,19 @@ public class VPXmlToXMIConverter {
 				String isLeaf = el.attributeValue("Leaf", "false");
 				String visibility = el.attributeValue("Visibility", "public");
 
-				writer.printf("    <packagedElement xmi:type=\"uml:Actor\" xmi:id=\"%s\" name=\"%s\" visibility=\"%s\" isAbstract=\"%s\" isLeaf=\"%s\"/>%n",
+				writer.printf("    <packagedElement xmi:type=\"uml:Actor\" xmi:id=\"%s\" name=\"%s\" visibility=\"%s\" isAbstract=\"%s\" isLeaf=\"%s\">%n",
 						xmiId, name, visibility, isAbstract, isLeaf);
+
+				List<String> generalizationTargets = actorToGeneralizations.getOrDefault(id, Collections.emptyList());
+				for (String targetId : generalizationTargets) {
+					String targetXmiId = idToXmiId.get(targetId);
+					if (targetXmiId != null) {
+						writer.printf("      <generalization xmi:type=\"uml:Generalization\" xmi:id=\"%s\" general=\"%s\"/>%n",
+								UUID.randomUUID(), targetXmiId);
+					}
+				}
+
+				writer.println("    </packagedElement>");
 			}
 
 			// Associazioni

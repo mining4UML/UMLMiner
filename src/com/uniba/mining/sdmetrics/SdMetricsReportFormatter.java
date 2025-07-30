@@ -26,6 +26,23 @@ public class SdMetricsReportFormatter {
             this.max = max;
         }
     }
+    
+    public static class RuleViolation {
+        public final String elementName;
+        public final String ruleCode;
+        public final String category;
+        public final String severity;
+        public final String description;
+
+        public RuleViolation(String elementName, String ruleCode, String category, String severity, String description) {
+            this.elementName = elementName;
+            this.ruleCode = ruleCode;
+            this.category = category;
+            this.severity = severity;
+            this.description = description;
+        }
+    }
+
 
     public static class ElementMetricRow {
         public String elementName;
@@ -85,6 +102,27 @@ public class SdMetricsReportFormatter {
         }
         return rows;
     }
+    
+    public static List<RuleViolation> parseViolationsCsv(Path csvFilePath) throws IOException {
+        List<RuleViolation> violations = new ArrayList<>();
+        try (BufferedReader reader = Files.newBufferedReader(csvFilePath)) {
+            String header = reader.readLine(); // skip header
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",", -1);
+                if (tokens.length >= 6) {
+                    String element = tokens[0].trim();
+                    String rule = tokens[1].trim();
+                    String category = tokens[3].trim();
+                    String severity = tokens[4].trim();
+                    String description = tokens[5].trim();
+                    violations.add(new RuleViolation(element, rule, category, severity, description));
+                }
+            }
+        }
+        return violations;
+    }
+
 
     public static String formatReport(String diagramType, List<MetricSummary> summaries, List<ElementMetricRow> rows) {
         StringBuilder sb = new StringBuilder();
@@ -123,4 +161,27 @@ public class SdMetricsReportFormatter {
 
         return sb.toString();
     }
+    
+    public static String formatViolations(String elementType, List<RuleViolation> violations) {
+        if (violations.isEmpty()) {
+            return "No rule violations found for " + elementType + " elements.\n";
+        }
+
+        Map<String, List<RuleViolation>> grouped = violations.stream()
+                .collect(Collectors.groupingBy(v -> v.elementName, LinkedHashMap::new, Collectors.toList()));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\uD83D\uDEA8 Design Rule Violations for ").append(elementType).append(" elements:\n\n");
+
+        for (Map.Entry<String, List<RuleViolation>> entry : grouped.entrySet()) {
+            sb.append("• **").append(entry.getKey()).append("**:\n");
+            for (RuleViolation v : entry.getValue()) {
+                sb.append(String.format("   - Rule `%s` [%s, %s]: %s\n", v.ruleCode, v.category, v.severity, v.description));
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
+
 }

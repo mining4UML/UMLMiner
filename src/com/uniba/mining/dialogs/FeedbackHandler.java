@@ -101,7 +101,7 @@ public class FeedbackHandler {
 	}
 
 	private FeedbackHandler() {
-
+		
 		inputField = new LimitedTextField();
 		inputField.setText(PLACEHOLDER);
 		inputField.setBackground(Color.WHITE);
@@ -143,15 +143,6 @@ public class FeedbackHandler {
 		conversationTitleField.setBorder(null);
 
 		newChatButton = new JButton("New Chat");
-		// Imposta il colore del testo a bianco
-		//newChatButton.setForeground(Color.WHITE);
-		// Imposta il colore di sfondo come quello usato in Eclipse per i pulsanti attivi
-		//Color eclipseButtonBackground = UIManager.getColor("Button.select");
-		//newChatButton.setBackground(eclipseButtonBackground);
-		// Assicurati che il colore di sfondo sia visibile
-		//newChatButton.setFocusPainted(false);
-		//newChatButton.setBorderPainted(false);
-		//newChatButton.setOpaque(false);
 		// Imposta le dimensioni preferite del pulsante
 		// Rimuovi il bordo del pulsante e il contenuto del testo
 		newChatButton.setBorderPainted(false);
@@ -808,49 +799,7 @@ public class FeedbackHandler {
 		conversationList.repaint();
 
 	}
-
-	/*
-	 * // Azzera i contenuti visivi
-inputField.setText("");
-outputPane.setText("");
-	 */
-	//	private void createNewChat() throws Exception {
-	//		// Ottieni il testo dalla JTextPane
-	//		String query = outputPane.getText();
-	//
-	//		// Controlla se l'inputText non è vuoto o uguale al messaggio di feedback
-	//		// predefinito
-	//		if (!query.isEmpty() && !query.equals(PLACEHOLDER)) {
-	//			// i valori sessionId, projectId, etc.
-	//			String sessionId = generateSessionId();
-	//			String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
-	//			Document diagramAsXML = DiagramInfo.exportAsXML(getDiagram());
-	//			// Crea una nuova istanza di Conversation
-	//			Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), 
-	//					diagramAsText, diagramAsXML,
-	//					query, prefixAnswer);
-	//
-	//			// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
-	//			conversationListModel.addElement(newConversation);
-	//
-	//			// Aggiorna la visualizzazione della GUI
-	//			conversationList.revalidate();
-	//			conversationList.repaint();
-	//
-	//			// Imposta la nuova istanza di Conversation come selezionata nella lista delle
-	//			// conversazioni
-	//			conversationList.setSelectedValue(newConversation, true);
-	//			System.out.println(
-	//					"\n\ndimensione della lista delle conversazioni:" + conversationList.getModel().getSize() + "\n\n");
-	//
-	//			// Azzera il contenuto della JTextPane
-	//			outputPane.setText("");
-	//
-	//		}
-	//		else
-	//			inputField.requestFocusInWindow();
-	//	}
-
+	
 	private void createNewChat() throws Exception {
 		inputField.setText("");
 		outputPane.setText("");
@@ -1230,6 +1179,5 @@ outputPane.setText("");
 			System.out.println("[FeedbackHandler] No feedback panel to hide or diagram does not match.");
 		}
 	}
-
 
 }

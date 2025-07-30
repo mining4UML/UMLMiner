@@ -230,18 +230,18 @@ public class VPXmlToXMIConverter {
 				}
 			}
 
-			// Generalizations tra Attori
+			// Generalizations between Actors
 			Map<String, List<String>> actorToGeneralizations = new HashMap<>();
-			List<Node> actorGenerals = doc.selectNodes("//ModelRelationshipContainer[@Name='Generalization']//Generalization");
+			List<Node> actorGenerals = doc.selectNodes("//ModelRelationshipContainer[@Name='Generalization']/ModelChildren/Generalization");
+
 			for (Node genNode : actorGenerals) {
 				if (!(genNode instanceof Element)) continue;
 				Element genEl = (Element) genNode;
 				String from = genEl.attributeValue("From");
 				String to = genEl.attributeValue("To");
 
-				// Entrambi devono essere attori noti
+				// Both must be actors with known IDs
 				if (from != null && to != null && idToXmiId.containsKey(from) && idToXmiId.containsKey(to)) {
-					// Verifica che entrambi i nodi siano effettivamente <Actor>
 					Node fromNode = doc.selectSingleNode("//Actor[@Id='" + from + "']");
 					Node toNode = doc.selectSingleNode("//Actor[@Id='" + to + "']");
 					if (fromNode != null && toNode != null) {

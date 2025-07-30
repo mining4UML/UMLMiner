@@ -3,6 +3,9 @@ package com.uniba.mining.sdmetrics;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.dom4j.Document;
 
@@ -105,8 +108,74 @@ public class RunSDMetrics {
 			System.err.println("SDMetrics finished with error. Error code: " + exitCode);
 		}
 	}
+//	public static String readSdmetricsOutput(IDiagramUIModel diagram) {
+//		// Calcolo delle metriche
+//		try {
+//			calculateMetrics(diagram);
+//		} catch (IOException | InterruptedException e) {
+//			e.printStackTrace();
+//			return "Error running SDMetrics: " + e.getMessage();
+//		}
+//
+//		StringBuilder content = new StringBuilder();
+//
+//		Path outputPrefix = LogStreamer.getSDMetricsOutputDirectory();
+//
+//		// Identifica tipo di diagramma (es. "Class", "UseCase", ecc.)
+//		String type = diagram.getType(); // es: "ClassDiagram", "UseCaseDiagram"
+//		String diagramType = type.replace("Diagram", ""); // es: "Class", "UseCase"
+//
+//		// 1. Riepilogo metriche aggregate (outputDS_<Tipo>.csv)
+//		// 1. Riepilogo metriche aggregate (outputDS_<Tipo>.csv)
+//		if ("UseCase".equals(diagramType)) {
+//			// Per i diagrammi dei casi d'uso, includi sia Actor che UseCase
+//			String[] subtypes = { "Actor", "UseCase" };
+//			for (String subtype : subtypes) {
+//				Path dsPath = outputPrefix.resolve("outputDS_" + subtype + ".csv");
+//				if (Files.exists(dsPath)) {
+//					String summaryStats = summarizeSdmetricsStats(dsPath);
+//					content.append(subtype).append(" metrics\n")
+//					.append(summaryStats).append("\n");
+//				}
+//			}
+//		} else {
+//			// Per altri diagrammi (es. Class)
+//			Path dsPath = outputPrefix.resolve("outputDS_" + diagramType + ".csv");
+//			if (Files.exists(dsPath)) {
+//				String summaryStats = summarizeSdmetricsStats(dsPath);
+//				content.append(diagramType).append(" metrics\n")
+//				.append(summaryStats).append("\n");
+//			}
+//		}
+//
+//
+//		// 2. Riepilogo metriche per entità (output_<Tipo>.csv)
+//		Path entityPath = outputPrefix.resolve("output_" + diagramType + ".csv");
+//		String summaryEntities;
+//
+//		switch (diagramType) {
+//		case "Class":
+//			summaryEntities = summarizePerClassMetrics(entityPath);
+//			content.append("### Per-Class Metric Summary ###\n");
+//			break;
+//		case "UseCase":
+//			summaryEntities = summarizePerUseCaseMetrics(entityPath);
+//			content.append("### Per-UseCase Metric Summary ###\n");
+//			break;
+//		default:
+//			summaryEntities = "Metric summary for diagram type '" + diagramType + "' is not yet implemented.\n";
+//			content.append("### Per-" + diagramType + " Metric Summary ###\n");
+//			break;
+//		}
+//
+//		content.append(summaryEntities).append("\n");
+//
+//
+//		//deleteConvertedXmi();
+//		return content.toString();
+//	}
+
 	public static String readSdmetricsOutput(IDiagramUIModel diagram) {
-		// Calcolo delle metriche
 		try {
 			calculateMetrics(diagram);
 		} catch (IOException | InterruptedException e) {
@@ -114,115 +183,107 @@ public class RunSDMetrics {
 			return "Error running SDMetrics: " + e.getMessage();
 		}
 
-		StringBuilder content = new StringBuilder();
-
 		Path outputPrefix = LogStreamer.getSDMetricsOutputDirectory();
+		String type = diagram.getType();
+		String diagramType = type.replace("Diagram", "");
 
-		// Identifica tipo di diagramma (es. "Class", "UseCase", ecc.)
-		String type = diagram.getType(); // es: "ClassDiagram", "UseCaseDiagram"
-		String diagramType = type.replace("Diagram", ""); // es: "Class", "UseCase"
+		StringBuilder report = new StringBuilder();
+		Map<String, String> labelMap = MetricLabels.getDefaultLabels();
 
-		// 1. Riepilogo metriche aggregate (outputDS_<Tipo>.csv)
-		// 1. Riepilogo metriche aggregate (outputDS_<Tipo>.csv)
-		if ("UseCase".equals(diagramType)) {
-			// Per i diagrammi dei casi d'uso, includi sia Actor che UseCase
-			String[] subtypes = { "Actor", "UseCase" };
-			for (String subtype : subtypes) {
-				Path dsPath = outputPrefix.resolve("outputDS_" + subtype + ".csv");
-				if (Files.exists(dsPath)) {
-					String summaryStats = summarizeSdmetricsStats(dsPath);
-					content.append("### SDMetrics Summary (").append(subtype).append(") ###\n")
-					.append(summaryStats).append("\n");
-				}
-			}
-		} else {
-			// Per altri diagrammi (es. Class)
-			Path dsPath = outputPrefix.resolve("outputDS_" + diagramType + ".csv");
-			if (Files.exists(dsPath)) {
-				String summaryStats = summarizeSdmetricsStats(dsPath);
-				content.append("### SDMetrics Summary (").append(diagramType).append(") ###\n")
-				.append(summaryStats).append("\n");
+		List<String> subtypes = diagramType.equals("UseCase") ? List.of("Actor", "UseCase") : List.of(diagramType);
+
+		for (String subtype : subtypes) {
+			Path summaryPath = outputPrefix.resolve("outputDS_" + subtype + ".csv");
+			Path entityPath = outputPrefix.resolve("output_" + subtype + ".csv");
+
+			if (!Files.exists(summaryPath)) continue;
+
+			try {
+				List<SdMetricsReportFormatter.MetricSummary> summaries =
+					SdMetricsReportFormatter.parseSummaryCsv(summaryPath, labelMap);
+				List<SdMetricsReportFormatter.ElementMetricRow> details =
+					Files.exists(entityPath)
+						? SdMetricsReportFormatter.parseElementLevelCsv(entityPath)
+						: Collections.emptyList();
+
+				report.append(SdMetricsReportFormatter.formatReport(subtype, summaries, details)).append("\n");
+			} catch (IOException e) {
+				report.append("Error reading SDMetrics results for ").append(subtype).append(": ").append(e.getMessage()).append("\n");
 			}
 		}
 
-
-		// 2. Riepilogo metriche per entità (output_<Tipo>.csv)
-		Path entityPath = outputPrefix.resolve("output_" + diagramType + ".csv");
-		String summaryEntities;
-
-		switch (diagramType) {
-		case "Class":
-			summaryEntities = summarizePerClassMetrics(entityPath);
-			content.append("### Per-Class Metric Summary ###\n");
-			break;
-		case "UseCase":
-			summaryEntities = summarizePerUseCaseMetrics(entityPath);
-			content.append("### Per-UseCase Metric Summary ###\n");
-			break;
-		default:
-			summaryEntities = "Metric summary for diagram type '" + diagramType + "' is not yet implemented.\n";
-			content.append("### Per-" + diagramType + " Metric Summary ###\n");
-			break;
-		}
-
-		content.append(summaryEntities).append("\n");
-
-
-		//deleteConvertedXmi();
-		return content.toString();
+		return report.toString();
 	}
 
 
-
+	/**
+	 * Generates a textual summary of SDMetrics statistical output from a CSV file.
+	 * <p>
+	 * This method is designed to process CSV files named according to the pattern
+	 * {@code outputDS_UMLElement.csv}, where {@code UMLElement} refers to the type
+	 * of UML element analyzed (e.g., {@code Actor}, {@code Usecase}, {@code Class}, etc.).
+	 * <p>
+	 * The CSV file must follow the SDMetrics statistical summary format, which includes
+	 * a header with the following columns:
+	 * <pre>
+	 * Name,Sum,N,Mean,StdDev,Max,99th,97.5th,95th,90th,75th,50th,Min
+	 * </pre>
+	 * and one row per computed metric.
+	 * <p>
+	 * For each metric, the method extracts the metric name, number of elements (N),
+	 * total sum, mean, standard deviation, minimum, and maximum, and includes them
+	 * in a concise textual summary. Only the first 10 metrics in the file are reported.
+	 *
+	 * @param csvFilePath the path to the SDMetrics CSV summary file
+	 * @return a formatted string summarizing up to 10 metrics from the file,
+	 *         or an error message if the file format is invalid or unreadable
+	 */
 	private static String summarizeSdmetricsStats(Path csvFilePath) {
-		StringBuilder summary = new StringBuilder();
-		summary.append("The following metrics were computed using SDMetrics:\n\n");
+	    StringBuilder summary = new StringBuilder();
+	    summary.append("The following metrics were computed:\n");
 
-		try (BufferedReader reader = Files.newBufferedReader(csvFilePath)) {
-			String header = reader.readLine(); // Read the header
-			if (header == null || !header.startsWith("Name,")) {
-				return "Invalid SDMetrics file format.";
-			}
+	    try (BufferedReader reader = Files.newBufferedReader(csvFilePath)) {
+	        String header = reader.readLine(); // Legge l'intestazione
+	        if (header == null || !header.startsWith("Name,")) {
+	            return "Invalid SDMetrics file format.";
+	        }
 
-			String line;
-			int count = 0;
-			while ((line = reader.readLine()) != null && count < 10) {
-				String[] tokens = line.split(",", -1); // include empty trailing tokens
-				if (tokens.length >= 8) {
-					String name = tokens[0].trim();
-					String domain = tokens[1].trim();
-					String description = tokens[2].trim();
-					String mean = tokens[3].trim();
-					String median = tokens[4].trim();
-					String stddev = tokens[5].trim();
-					String min = tokens[6].trim();
-					String max = tokens[7].trim();
+	        String line;
+	        int count = 0;
+	        while ((line = reader.readLine()) != null && count < 10) {
+	            String[] tokens = line.split(",", -1); // Include anche campi vuoti
+	            if (tokens.length >= 13) {
+	                String name = tokens[0].trim();
+	                String sum = tokens[1].trim();
+	                String n = tokens[2].trim();
+	                String mean = tokens[3].trim();
+	                String stddev = tokens[4].trim();
+	                String max = tokens[5].trim();
+	                String min = tokens[12].trim();
 
-					summary.append(String.format("- %s (domain: %s)%n", name, domain));
-					if (!description.isEmpty()) {
-						summary.append(String.format("  Description: %s%n", description));
-					}
-					summary.append(String.format("  Stats: Mean = %s, Median = %s, StdDev = %s, Min = %s, Max = %s%n%n",
-							mean, median, stddev, min, max));
-					count++;
-				}
-			}
+	                summary.append(String.format("- %s%n", name));
+	                summary.append(String.format("  Stats: N = %s, Sum = %s, Mean = %s, StdDev = %s, Min = %s, Max = %s%n%n",
+	                        n, sum, mean, stddev, min, max));
+	                count++;
+	            }
+	        }
 
-			if (count == 0) {
-				summary.append("No significant metrics found.\n");
-			}
+	        if (count == 0) {
+	            summary.append("No metrics found in the file.\n");
+	        }
 
-		} catch (IOException e) {
-			return "Error reading SDMetrics summary: " + e.getMessage();
-		}
+	    } catch (IOException e) {
+	        return "Error reading SDMetrics summary: " + e.getMessage();
+	    }
 
-		return summary.toString();
+	    return summary.toString();
 	}
+
 
 
 	private static String summarizePerClassMetrics(Path csvFilePath) {
 		StringBuilder summary = new StringBuilder();
-		summary.append("Class-level design metrics from SDMetrics:\n\n");
+		summary.append("Class-level design metrics:\n");
 
 		try (BufferedReader reader = Files.newBufferedReader(csvFilePath)) {
 			String headerLine = reader.readLine(); // intestazione
@@ -333,7 +394,7 @@ public class RunSDMetrics {
 
 	private static String summarizePerUseCaseMetrics(Path csvFilePath) {
 		StringBuilder summary = new StringBuilder();
-		summary.append("UseCase-level design metrics from SDMetrics:\n\n");
+		summary.append("Use Case-level design metrics:\n");
 
 		try (BufferedReader reader = Files.newBufferedReader(csvFilePath)) {
 			String headerLine = reader.readLine(); // intestazione

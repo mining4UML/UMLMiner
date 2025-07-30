@@ -89,14 +89,17 @@ public class Config {
 	
 
 	public static final String QUALITYPROMPT =
-		    "You are an expert in object-oriented software design and model evaluation.\n" +
-		    "The following metrics were computed using SDMetrics and describe important structural and semantic aspects " +
-		    "of the diagram.\n" +
-		    "Analyze the metrics with a focus on qualitative insights: identify design strengths, highlight potential flaws, " +
-		    "and suggest concrete improvements to the model.\n" +
-		    "Always support your feedback with specific metric values and the names of the involved model elements. " +
-		    "Each observation or recommendation must be clearly backed by one or more metrics.\n" +
-		    "Do not limit yourself to describing the values—explain their implications for model quality and how they inform possible enhancements.";
+		    "You are an expert in object-oriented software design and UML model evaluation.\n" +
+		    "You will receive a set of metrics computed with SDMetrics, summarizing structural and semantic properties of a UML model.\n" +
+		    "Your task is to critically assess the model’s design quality based on these metrics.\n\n" +
+
+		    "In your feedback:\n" +
+		    "- Highlight strengths and areas of good design (e.g., appropriate coupling, use of abstraction).\n" +
+		    "- Identify potential issues or design smells (e.g., excessive complexity, poor modularity).\n" +
+		    "- Suggest concrete improvements to the model where applicable.\n\n" +
+
+		    "Always back your observations with specific metric values and model element names.\n" +
+		    "Do not merely describe the numbers—explain what they mean for the design quality and how they inform possible refinements.";
 
 	public static String getExternalToolPath(ExternalTool externalTool) {
 		return extProperties.getProperty(String.join(".", externalTool.getName(), "path"));

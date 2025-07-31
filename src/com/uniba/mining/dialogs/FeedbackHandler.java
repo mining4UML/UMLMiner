@@ -101,7 +101,7 @@ public class FeedbackHandler {
 	}
 
 	private FeedbackHandler() {
-		
+
 		inputField = new LimitedTextField();
 		inputField.setText(PLACEHOLDER);
 		inputField.setBackground(Color.WHITE);
@@ -496,13 +496,14 @@ public class FeedbackHandler {
 
 				String queryText = inputText;
 				if (inputText.toLowerCase().contains("modeling feedback")) {
-					//queryText += "\n\nViolations detected by RUM:\n"; TO DO
+					// queryText += "\n\nViolations detected by RUM:\n"; TO DO
 				} else if (inputText.toLowerCase().contains(Config.FEEDBACK_BUTTON_QUALITY.toLowerCase())) {
 					String metricsSummary = RunSDMetrics.readSdmetricsOutput(getDiagram());
-					currentConversation.setMetrics(metricsSummary);
-					currentConversation.setQuery(Config.QUALITYPROMPT+metricsSummary);
-					queryText = Config.QUALITYPROMPT+metricsSummary;
+					currentConversation.addMetric(metricsSummary);  // AGGIUNTO CORRETTAMENTE ALLA LISTA
+					currentConversation.setQuery(Config.QUALITYPROMPT + metricsSummary);
+					queryText = Config.QUALITYPROMPT + metricsSummary;
 				}
+
 
 				String answer = prefixAnswer + queryText;
 				currentConversation.appendMessage(answer, true);
@@ -560,7 +561,7 @@ public class FeedbackHandler {
 	private void setRequirementsIfPresent(Conversation conversation) {
 		String requirementsText = requirementsTextArea.getRequirementsTextArea().getText();
 		if (requirementsText != null && !requirementsText.trim().equals(Config.DIAGRAM_ABSENT_REQUIREMENT)) {
-			conversation.setRequirements(requirementsText);
+			conversation.addRequirement(requirementsText.trim());
 		}
 	}
 
@@ -799,7 +800,7 @@ public class FeedbackHandler {
 		conversationList.repaint();
 
 	}
-	
+
 	private void createNewChat() throws Exception {
 		inputField.setText("");
 		outputPane.setText("");
@@ -1013,29 +1014,29 @@ public class FeedbackHandler {
 
 		conversationList.addListSelectionListener(e -> {
 			refreshSelectedConversation();
-//			Conversation selectedConversation = conversationList.getSelectedValue();
-//
-//			if (selectedConversation != null) {
-//				conversationTitleField.setText(
-//						buildTitle(getDiagram(), selectedConversation.getTitle()));
-//
-//				String conversationContent = selectedConversation.getConversationContent();
-//				outputPane.setText("");
-//				String[] lines = conversationContent.split("\n");
-//				for (String line : lines) {
-//					Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
-//					appendToPane(line + "\n", textColor);
-//
-//				}
-//			} else {
-//				conversationTitleField.setText(buildTitle(null,getDiagramTitle()));
-//				outputPane.setText("");
-//			}
+			//			Conversation selectedConversation = conversationList.getSelectedValue();
+			//
+			//			if (selectedConversation != null) {
+			//				conversationTitleField.setText(
+			//						buildTitle(getDiagram(), selectedConversation.getTitle()));
+			//
+			//				String conversationContent = selectedConversation.getConversationContent();
+			//				outputPane.setText("");
+			//				String[] lines = conversationContent.split("\n");
+			//				for (String line : lines) {
+			//					Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
+			//					appendToPane(line + "\n", textColor);
+			//
+			//				}
+			//			} else {
+			//				conversationTitleField.setText(buildTitle(null,getDiagramTitle()));
+			//				outputPane.setText("");
+			//			}
 		});
 
 		return panel;
 	}
-	
+
 	private void refreshSelectedConversation() {
 		Conversation selected = conversationList.getSelectedValue();
 		if (selected != null) {
@@ -1078,6 +1079,7 @@ public class FeedbackHandler {
 
 	public void loadSerializedConversations() {
 		if (getDiagram().getId() != null) {
+			conversationListModel.clear(); // <-- EVITA DUPLICATI
 			List<Conversation> serializedConversations = ConversationsSerializer
 					.deserializeConversations(getDiagram().getId());
 			// serve reimpostare il valore di conversationCounter? controllare
@@ -1106,6 +1108,7 @@ public class FeedbackHandler {
 
 	public void loadSerializedConversations(String diagramId) {
 		if (diagramId != null) {
+			conversationListModel.clear(); // <-- EVITA DUPLICATI
 			List<Conversation> serializedConversations = ConversationsSerializer.deserializeConversations(diagramId);
 			// serve reimpostare il valore di conversationCounter? controllare
 			conversationCounter = 0;

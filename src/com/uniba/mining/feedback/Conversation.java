@@ -12,9 +12,9 @@ import org.dom4j.Document;
 public class Conversation implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private StringBuilder conversationContent=new StringBuilder();
+	private StringBuilder conversationContent = new StringBuilder();
 	private String title;
-	private String sessionId="";
+	private String sessionId = "";
 	private String projectId;
 	private String diagramId;
 	private int queryId;
@@ -28,11 +28,12 @@ public class Conversation implements Serializable {
 	private List<String> responseList = new ArrayList<>();
 	private String prefixAnswer;
 
-	private String requirements = "";
-	private String process = "";
-	private String metrics = "";
+	private List<String> requirementsList = new ArrayList<>();
+	private List<String> processList = new ArrayList<>();
+	private List<String> metricsList = new ArrayList<>();
 
-	public Conversation() {};
+	public Conversation() {}
+
 	public Conversation(String sessionId, String projectId, String diagramId, String diagramAsText,
 			Document diagramAsXML, String query, String prefixAnswer) {
 		this.sessionId = sessionId;
@@ -45,8 +46,7 @@ public class Conversation implements Serializable {
 		this.diagramAsXML = diagramAsXML;
 		this.query = query;
 		addQuery(query);
-		//timestampList.add(currentTimestamp());
-		if(conversationContent==null)
+		if (conversationContent == null)
 			this.conversationContent = new StringBuilder();
 	}
 
@@ -85,11 +85,35 @@ public class Conversation implements Serializable {
 		return count;
 	}
 
-
 	public void setQueryId(String prefixAnswer) {
 		this.prefixAnswer = prefixAnswer;
 		this.queryId = calculateQueryId(prefixAnswer);
 	}
+
+	public void addRequirement(String requirement) {
+		requirementsList.add(requirement != null ? requirement : "");
+	}
+
+	public void addProcess(String process) {
+		processList.add(process != null ? process : "");
+	}
+
+	public void addMetric(String metric) {
+		metricsList.add(metric != null ? metric : "");
+	}
+
+	public List<String> getRequirementsList() {
+		return requirementsList;
+	}
+
+	public List<String> getProcessList() {
+		return processList;
+	}
+
+	public List<String> getMetricsList() {
+		return metricsList;
+	}
+
 	public String getConversationContent() {
 		return getSerializedOverview();
 	}
@@ -143,6 +167,25 @@ public class Conversation implements Serializable {
 		return query;
 	}
 
+
+	public String getRequirements(int index) {
+		return (requirementsList != null && index < requirementsList.size()) ? requirementsList.get(index) : "";
+	}
+
+	public String getProcess(int index) {
+		return (processList != null && index < processList.size()) ? processList.get(index) : "";
+	}
+
+	public String getMetrics(int index) {
+		return (metricsList != null && index < metricsList.size()) ? metricsList.get(index) : "";
+	}
+	
+	public List<String> getQueryList() {
+		return queryList;
+	}
+
+
+
 	public void setQuery(String query) {
 		this.query = query;
 		addQuery(query);
@@ -162,31 +205,6 @@ public class Conversation implements Serializable {
 		this.title = title;
 	}
 
-	public String getRequirements() {
-		return requirements;
-	}
-
-	public void setRequirements(String requirements) {
-		this.requirements = requirements != null ? requirements : "";
-	}
-
-	public String getProcess() {
-		return process;
-	}
-
-	public void setProcess(String process) {
-		this.process = process != null ? process : "";
-	}
-
-	public String getMetrics() {
-		return metrics;
-	}
-
-	public void setMetrics(String metrics) {
-		this.metrics = metrics != null ? metrics : "";
-	}
-
-
 	private String getSerializedOverview() {
 		StringBuilder builder = new StringBuilder();
 		String sep = "********** ";
@@ -195,30 +213,27 @@ public class Conversation implements Serializable {
 		int numResponses = responseList != null ? responseList.size() : 0;
 		int numTimestamps = (timestampList != null) ? timestampList.size() : 0;
 
-		int numItems = Math.min(numQueries, numResponses); // timestamp può mancare
+		int numItems = Math.min(numQueries, numResponses);
 
 		for (int i = 0; i < numItems; i++) {
 			String timestamp = (timestampList != null && i < numTimestamps)
-				? timestampList.get(i)
-				: "No timestamp available";
+					? timestampList.get(i)
+							: "No timestamp available";
 
 			builder.append(sep)
-			       .append("QUERY (").append(timestamp).append(") ").append(sep).append("\n")
-			       .append(queryList.get(i)).append("\n");
+			.append("QUERY (").append(timestamp).append(") ").append(sep).append("\n")
+			.append(queryList.get(i)).append("\n");
 			builder.append(sep)
-			       .append("RESPONSE ").append(sep).append("\n")
-			       .append(responseList.get(i)).append("\n\n");
+			.append("RESPONSE ").append(sep).append("\n")
+			.append(responseList.get(i)).append("\n\n");
 		}
 
 		return builder.toString();
 	}
 
-
-
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		String sep = "********** ";
 
 		builder.append("PROJECT ID: ").append(projectId).append("\n");
 		builder.append("DIAGRAM ID: ").append(diagramId).append("\n");
@@ -228,43 +243,58 @@ public class Conversation implements Serializable {
 		}
 		builder.append("\n\n");
 
+		String blockSeparator = "=".repeat(80);
+		String subsectionSep = "---";
+
 		int numItems = Math.min(Math.min(diagramAsTextList.size(), queryList.size()), responseList.size());
 		for (int i = 0; i < numItems; i++) {
-			builder.append(sep + "DIAGRAM DESCRIPTION " + sep + "\n").append(diagramAsTextList.get(i)).append("\n");
-			builder.append(sep + "QUERY (" + timestampList.get(i) + ") " + sep + "\n").append(queryList.get(i)).append("\n");
-			builder.append(sep + "RESPONSE " + sep + "\n").append(responseList.get(i)).append("\n\n");
-		}
+			String diagram = diagramAsTextList.get(i) != null ? diagramAsTextList.get(i) : "(no diagram)";
+			String timestamp = (timestampList != null && i < timestampList.size() && timestampList.get(i) != null)
+					? timestampList.get(i) : "unknown timestamp";
+			String query = queryList.get(i) != null ? queryList.get(i) : "(no query)";
+			String response = responseList.get(i) != null ? responseList.get(i) : "(no response)";
+			String req = (requirementsList != null && i < requirementsList.size()) ? requirementsList.get(i) : null;
+			String proc = (processList != null && i < processList.size()) ? processList.get(i) : null;
+			String mets = (metricsList != null && i < metricsList.size()) ? metricsList.get(i) : null;
 
-		if (!requirements.isEmpty()) {
-			builder.append(sep + "REQUIREMENTS " + sep + "\n").append(requirements).append("\n");
-		}
-		if (!process.isEmpty()) {
-			builder.append(sep + "PROCESS " + sep + "\n").append(process).append("\n");
-		}
-		if (!metrics.isEmpty()) {
-			builder.append(sep + "METRICS " + sep + "\n").append(metrics).append("\n");
+			builder.append(blockSeparator).append("\n");
+			builder.append("### === FEEDBACK SESSION #").append(i + 1).append(" ===\n");
+			builder.append(blockSeparator).append("\n\n");
+
+			builder.append(subsectionSep).append(" DIAGRAM DESCRIPTION ").append(subsectionSep).append("\n")
+			.append(diagram).append("\n\n");
+
+			builder.append(subsectionSep).append(" QUERY (").append(timestamp).append(") ").append(subsectionSep).append("\n")
+			.append(query).append("\n\n");
+
+			if (req != null && !req.isEmpty()) {
+				builder.append(subsectionSep).append(" REQUIREMENTS ").append(subsectionSep).append("\n")
+				.append(req).append("\n\n");
+			}
+
+			if (proc != null && !proc.isEmpty()) {
+				builder.append(subsectionSep).append(" PROCESS ").append(subsectionSep).append("\n")
+				.append(proc).append("\n\n");
+			}
+
+			if (mets != null && !mets.isEmpty()) {
+				builder.append(subsectionSep).append(" METRICS ").append(subsectionSep).append("\n")
+				.append(mets).append("\n\n");
+			}
+
+			builder.append(subsectionSep).append(" RESPONSE ").append(subsectionSep).append("\n")
+			.append(response).append("\n\n");
 		}
 
 		return builder.toString();
 	}
-	
+
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject(); // Richiama la deserializzazione di default
-
-		// Inizializza i nuovi campi se null (per compatibilità con versioni precedenti)
-		if (timestampList == null) {
-			timestampList = new ArrayList<>();
-		}
-		if (process == null) {
-			process = "";
-		}
-		if (metrics == null) {
-			metrics = "";
-		}
-		if (conversationContent == null) {
-			conversationContent = new StringBuilder();
-		}
+		in.defaultReadObject();
+		if (timestampList == null) timestampList = new ArrayList<>();
+		if (processList == null) processList = new ArrayList<>();
+		if (metricsList == null) metricsList = new ArrayList<>();
+		if (requirementsList == null) requirementsList = new ArrayList<>();
+		if (conversationContent == null) conversationContent = new StringBuilder();
 	}
-
 }
-

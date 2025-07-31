@@ -106,9 +106,11 @@ public class RequestHandler {
 		String user = LogStreamer.getUsername();
 		user += "-" + Application.getProductInfo();
 
+		int lastIndex = conversation.getQueryList().size() - 1;
+
 		// Usa i requirements già salvati nella Conversation se disponibili, altrimenti quelli da file
-		String finalRequirements = conversation.getRequirements() != null && !conversation.getRequirements().isBlank()
-				? conversation.getRequirements()
+		String finalRequirements = conversation.getRequirements(lastIndex) != null && !conversation.getRequirements(lastIndex).isBlank()
+				? conversation.getRequirements(lastIndex)
 				: requirementsFromFile;
 
 		return new ApiRequest(
@@ -119,12 +121,13 @@ public class RequestHandler {
 				conversation.getDiagramAsText(),
 				conversation.getDiagramAsXML(),
 				finalRequirements,
-				conversation.getProcess(),
-				conversation.getMetrics(),
+				conversation.getProcess(lastIndex),
+				conversation.getMetrics(lastIndex),
 				user,
 				conversation.getQuery()
 		);
 	}
+
 
 
 	private ApiResponse sendApiRequest(ApiRequest request) throws IOException {

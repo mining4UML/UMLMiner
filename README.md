@@ -158,7 +158,7 @@ https://sites.google.com/view/uml-miner/home-page
 
 Information on how to debug UML Miner in Eclipse IDE are available at https://knowhow.visual-paradigm.com/openapi/debug-plugins-eclipse/
 
-# Team members
+# Team members (2023-Present)
 
 The team members, listed in alphabetical order, are:
 
@@ -167,7 +167,7 @@ The team members, listed in alphabetical order, are:
 * Marta Cimitile - Department of Law and Economics, Unitelma Sapienza University, 00161 Rome, Italy
 * Michele Scalera - Department of Computer Science, University of Bari Aldo Moro
 
-# Former Team Members
+# Former Team Members (Project inception)
 
 * Lerina Aversano - Department of Engineering, Università degli Studi del Sannio, 82100 Benevento, Italy
 * Vito Alessandro Carella - Department of Computer Science, University of Bari Aldo Moro

@@ -14,6 +14,7 @@ import com.uniba.mining.tasks.exportdiag.DiagramInfo;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -25,15 +26,33 @@ import com.uniba.mining.feedback.ErrorUtils;
 import com.uniba.mining.feedback.LimitedTextField;
 import com.uniba.mining.feedback.QueryButtons;
 import com.uniba.mining.feedback.RequirementsTextArea;
+import com.uniba.mining.llm.LocalOpenAIProvider;
 import com.uniba.mining.llm.ParsedResponse;
 import com.uniba.mining.llm.RequestHandler;
+import com.uniba.mining.logging.LogStreamer;
 import com.uniba.mining.plugin.Config;
 import com.uniba.mining.sdmetrics.RunSDMetrics;
+import com.uniba.mining.processfeedback.core.InterpretedViolation;
+import com.uniba.mining.processfeedback.core.ProcessViolation;
+import com.uniba.mining.processfeedback.core.ViolationInterpretationEngine;
+import com.uniba.mining.processfeedback.uml.UmlViolationRulesFactory;
+import com.uniba.mining.processfeedback.llm.ProcessFeedbackPromptBuilder;
+import com.uniba.mining.processfeedback.parser.RumCsvViolationParser;
+import com.uniba.mining.processfeedback.preprocessing.ViolationPreprocessor;
+
+import com.uniba.mining.processfeedback.ocpm.XesObjectLifecycleExtractor;
+import com.uniba.mining.processfeedback.ocpm.UmlObjectLifecycle;
+import com.uniba.mining.processfeedback.ocpm.UmlLifecycleDynamicsAnalyzer;
+import com.uniba.mining.processfeedback.ocpm.ProcessDynamicsFinding;
+import com.uniba.mining.processfeedback.ocpm.ObjectCentricProcessPromptBuilder;
+
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
-
 
 /**
  * The {@code FeedbackHandler} class is responsible for managing
@@ -62,7 +81,7 @@ public class FeedbackHandler {
 	private DefaultListModel<Conversation> conversationListModel;
 	private JList<Conversation> conversationList;
 	private JButton newChatButton;
-	//private JLabel conversationLabel;
+	// private JLabel conversationLabel;
 	private JTextField conversationTitleField;
 	private RequirementsTextArea requirementsTextArea;
 	private String projectId;
@@ -87,6 +106,10 @@ public class FeedbackHandler {
 
 	private IDiagramUIModel getDiagram() {
 		return diagram;
+	}
+
+	private String getDiagramID() {
+		return diagram.getId();
 	}
 
 	public void clearPanel(String diagramId) {
@@ -119,7 +142,7 @@ public class FeedbackHandler {
 		outputPane.setPreferredSize(new Dimension(400, 200));
 		// white color
 		outputPane.setBackground(new Color(255, 255, 255));
-		inputField.setPreferredSize(new Dimension (outputPane.getWidth(),inputField.getPreferredSize().height));
+		inputField.setPreferredSize(new Dimension(outputPane.getWidth(), inputField.getPreferredSize().height));
 		document = outputPane.getStyledDocument();
 
 		conversationListModel = new DefaultListModel<>();
@@ -129,15 +152,16 @@ public class FeedbackHandler {
 		conversationList.setSelectionBackground(new Color(100, 150, 230)); // Stesso colore DARK_BLUE
 		conversationList.setSelectionForeground(Color.WHITE); // Testo bianco per la selezione
 
-
 		conversationTitleField = new JTextField();
 		conversationTitleField.setEditable(false);
 		conversationTitleField.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
-		//conversationTitleField.setForeground(new Color(34, 139, 34)); // Verde scuro
-		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in grassetto
+		// conversationTitleField.setForeground(new Color(34, 139, 34)); // Verde scuro
+		conversationTitleField.setFont(conversationTitleField.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta
+																								// in grassetto
 		// Imposta il colore di sfondo della casella di testo a quello del panel
 		conversationTitleField.setBackground(UIManager.getColor("Panel.background"));
-		//conversationTitleField.setOpaque(true); // Necessario per garantire che il colore di sfondo sia visibile  
+		// conversationTitleField.setOpaque(true); // Necessario per garantire che il
+		// colore di sfondo sia visibile
 
 		// elimina il bordo
 		conversationTitleField.setBorder(null);
@@ -157,10 +181,12 @@ public class FeedbackHandler {
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
 
 		// Crea l'etichetta
-		//		conversationLabel = new JLabel("Conversation List");
-		//		conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il testo dell'etichetta
-		//		conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
-		//		conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD)); // Imposta l'etichetta in
+		// conversationLabel = new JLabel("Conversation List");
+		// conversationLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centra il
+		// testo dell'etichetta
+		// conversationLabel.setForeground(new Color(34, 139, 34)); // Verde scuro
+		// conversationLabel.setFont(conversationLabel.getFont().deriveFont(Font.BOLD));
+		// // Imposta l'etichetta in
 		// grassetto
 
 		inputField.addFocusListener(new FocusListener() {
@@ -204,8 +230,6 @@ public class FeedbackHandler {
 			}
 		});
 
-
-
 		conversationList.setCellRenderer(new ConversationListCellRenderer());
 
 		conversationList.addMouseListener(new MouseAdapter() {
@@ -218,18 +242,15 @@ public class FeedbackHandler {
 					Point pointWithinCell = new Point(e.getX() - cellBounds.x, e.getY() - cellBounds.y);
 
 					ConversationListCellRenderer renderer = (ConversationListCellRenderer) list.getCellRenderer();
-					Component component = renderer.getListCellRendererComponent(
-							list, 
-							list.getModel().getElementAt(index), 
-							index, 
-							list.isSelectedIndex(index), 
-							list.hasFocus()
-							);
+					Component component = renderer.getListCellRendererComponent(list,
+							list.getModel().getElementAt(index), index, list.isSelectedIndex(index), list.hasFocus());
 
 					if (component instanceof JPanel) {
 						JPanel panel = (JPanel) component;
-						Component iconComponent = panel.getComponent(1); // L'icona dovrebbe essere il secondo componente
-						if (iconComponent.getBounds().contains(pointWithinCell) && SwingUtilities.isLeftMouseButton(e)) {
+						Component iconComponent = panel.getComponent(1); // L'icona dovrebbe essere il secondo
+																			// componente
+						if (iconComponent.getBounds().contains(pointWithinCell)
+								&& SwingUtilities.isLeftMouseButton(e)) {
 							// L'icona è stata cliccata con il tasto sinistro del mouse
 							list.setSelectedIndex(index);
 							showPopupMenu(e);
@@ -239,13 +260,11 @@ public class FeedbackHandler {
 			}
 		});
 
+		// initQueryButtons();
+		queryButtons = new QueryButtons(inputField, PLACEHOLDER);
 
-		//initQueryButtons();
-		queryButtons = new QueryButtons(inputField,PLACEHOLDER);
-
-		//initRequirements();
-		requirementsTextArea = new RequirementsTextArea(getDiagram()); 
-
+		// initRequirements();
+		requirementsTextArea = new RequirementsTextArea(getDiagram());
 
 		addFocusListenerToOutputPane();
 
@@ -259,7 +278,6 @@ public class FeedbackHandler {
 		outputPane.setComponentPopupMenu(popupMenu);
 
 	}
-
 
 	private static void addDocumentListener(JTextField textField, JLabel label) {
 		textField.getDocument().addDocumentListener(new DocumentListener() {
@@ -356,7 +374,6 @@ public class FeedbackHandler {
 		});
 	}
 
-
 	private void processUserInput(String sessionId) throws ConnectException, IOException, Exception {
 		// Acquisisco il testo dall'inputField
 		String inputText = inputField.getText();
@@ -366,17 +383,22 @@ public class FeedbackHandler {
 	}
 
 	/**
-	 * Handles the feedback process by sending a request to the server and obtaining a response.
+	 * Handles the feedback process by sending a request to the server and obtaining
+	 * a response.
 	 *
-	 * <p>This method creates an instance of {@link RequestHandler} with the provided conversation 
-	 * details and the current project ID. It then calls the {@link RequestHandler#sendRequestAndGetResponse()}
-	 * method to perform the request and retrieve the response from the server. If an exception occurs 
-	 * during this process, it is caught and a detailed error message is displayed using 
-	 * {@link ErrorUtils#showDetailedErrorMessage(Exception)}.
+	 * <p>
+	 * This method creates an instance of {@link RequestHandler} with the provided
+	 * conversation details and the current project ID. It then calls the
+	 * {@link RequestHandler#sendRequestAndGetResponse()} method to perform the
+	 * request and retrieve the response from the server. If an exception occurs
+	 * during this process, it is caught and a detailed error message is displayed
+	 * using {@link ErrorUtils#showDetailedErrorMessage(Exception)}.
 	 *
-	 * @param conversation the {@link Conversation} object containing the details of the current conversation,
-	 *                     including session ID, diagram ID, query ID, diagram text, and query text.
-	 * @return the response from the server as a {@link String}, or {@code null} if an exception occurs.
+	 * @param conversation the {@link Conversation} object containing the details of
+	 *                     the current conversation, including session ID, diagram
+	 *                     ID, query ID, diagram text, and query text.
+	 * @return the response from the server as a {@link String}, or {@code null} if
+	 *         an exception occurs.
 	 * @throws IOException if an I/O error occurs during the request process.
 	 */
 
@@ -384,7 +406,7 @@ public class FeedbackHandler {
 		try {
 			RequestHandler requestHandler = new RequestHandler(projectId, conversation);
 			ParsedResponse risposta = requestHandler.sendRequestAndGetResponse();
-			//return requestHandler.sendRequestAndGetResponse().getAnswer();
+			// return requestHandler.sendRequestAndGetResponse().getAnswer();
 			return risposta.getAnswer();
 		} catch (IOException e) {
 			ErrorUtils.showDetailedErrorMessage(e);
@@ -392,143 +414,438 @@ public class FeedbackHandler {
 		return null;
 	}
 
-	//	private void updateConversation(String inputText, String sessionId)
-	//			throws ConnectException, IOException, Exception {
+	// private void updateConversation(String inputText, String sessionId)
+	// throws ConnectException, IOException, Exception {
 	//
-	//		String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
-	//		org.dom4j.Document diagramAsXML = DiagramInfo.exportAsXML(diagram);
-	//		
-	//		// CANCELLARE SDMETRICS calculateMetrics)
-	//		try {
-	//			RunSDMetrics.calculateMetrics(getDiagram());
-	//		} catch (IOException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		}
-	//		// FINE CANCELLARE
-	//		
-	//		boolean empty = false;
+	// String diagramAsText =
+	// DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
+	// org.dom4j.Document diagramAsXML = DiagramInfo.exportAsXML(diagram);
 	//
-	//		if (!inputText.isEmpty()) {
-	//			// Aggiungi il testo alla conversazione corrente solo se non è vuoto
-	//			if (conversationListModel.isEmpty()) {
-	//				Conversation newConversation = createNewConversation(sessionId, inputText, 
-	//						diagramAsText, diagramAsXML);
-	//				conversationListModel.addElement(newConversation);
-	//				conversationList.setSelectedValue(newConversation, true);
-	//				empty = true;
-	//			}
+	// // CANCELLARE SDMETRICS calculateMetrics)
+	// try {
+	// RunSDMetrics.calculateMetrics(getDiagram());
+	// } catch (IOException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// // FINE CANCELLARE
 	//
-	//			Conversation currentConversation = conversationList.getSelectedValue();
+	// boolean empty = false;
 	//
-	//			if (currentConversation != null) {
-	//				// currentConversation.appendMessage(answer + "\n" + response);
+	// if (!inputText.isEmpty()) {
+	// // Aggiungi il testo alla conversazione corrente solo se non è vuoto
+	// if (conversationListModel.isEmpty()) {
+	// Conversation newConversation = createNewConversation(sessionId, inputText,
+	// diagramAsText, diagramAsXML);
+	// conversationListModel.addElement(newConversation);
+	// conversationList.setSelectedValue(newConversation, true);
+	// empty = true;
+	// }
 	//
-	//				if (!empty) {
-	//					// add text description of diagrams
-	//					currentConversation.setDiagramAsText(diagramAsText);
-	//					// add query
-	//					currentConversation.setQuery(inputText);
-	//					// add xml description of diagrams
-	//					currentConversation.setDiagramAsXML(diagramAsXML);
-	//				}
+	// Conversation currentConversation = conversationList.getSelectedValue();
 	//
-	//				String answer = prefixAnswer + inputText;
-	//				currentConversation.appendMessage(answer, true);
+	// if (currentConversation != null) {
+	// // currentConversation.appendMessage(answer + "\n" + response);
 	//
-	//				String response = handleFeedback(currentConversation);
-	//				appendToPane(answer);
-	//				if (response != null) {
-	//					response = response.replaceFirst("^[\\r\\n>-]+", "");
-	//					appendToPane(response);
-	//				}
-	//				else
-	//					throw new Exception("no response from the server");
-	//				// currentConversation.appendMessage(answer);
-	//				currentConversation.appendMessage(response, false);
-	//				// currentConversation.setResponse(response);
-	//				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-	//				conversationTitleField.setText(buildTitle(getDiagramTitle(), currentConversation.getTitle()));
+	// if (!empty) {
+	// // add text description of diagrams
+	// currentConversation.setDiagramAsText(diagramAsText);
+	// // add query
+	// currentConversation.setQuery(inputText);
+	// // add xml description of diagrams
+	// currentConversation.setDiagramAsXML(diagramAsXML);
+	// }
 	//
-	//			}
+	// String answer = prefixAnswer + inputText;
+	// currentConversation.appendMessage(answer, true);
 	//
-	//			// serializeConversations();
-	//			String diagramId = Application.getIDCurrentDiagram();
-	//			serializeConversations(diagramId);
+	// String response = handleFeedback(currentConversation);
+	// appendToPane(answer);
+	// if (response != null) {
+	// response = response.replaceFirst("^[\\r\\n>-]+", "");
+	// appendToPane(response);
+	// }
+	// else
+	// throw new Exception("no response from the server");
+	// // currentConversation.appendMessage(answer);
+	// currentConversation.appendMessage(response, false);
+	// // currentConversation.setResponse(response);
+	// conversationListModel.set(conversationList.getSelectedIndex(),
+	// currentConversation);
+	// conversationTitleField.setText(buildTitle(getDiagramTitle(),
+	// currentConversation.getTitle()));
 	//
-	//			conversationList.revalidate();
-	//			conversationList.repaint();
-	//		}
-	//	}
+	// }
+	//
+	// // serializeConversations();
+	// String diagramId = Application.getIDCurrentDiagram();
+	// serializeConversations(diagramId);
+	//
+	// conversationList.revalidate();
+	// conversationList.repaint();
+	// }
+	// }
 
 	private void updateConversation(String inputText, String sessionId)
-			throws ConnectException, IOException, Exception {
+	        throws ConnectException, IOException, Exception {
 
-		String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
-		org.dom4j.Document diagramAsXML = DiagramInfo.exportAsXML(diagram);
+	    if (inputText == null || inputText.trim().isEmpty()) {
+	        return;
+	    }
 
-		boolean newConvCreated = false;
+	    final String userInput = inputText.trim();
 
-		if (!inputText.isEmpty()) {
-			if (conversationListModel.isEmpty() || conversationList.getSelectedValue() == null) {
-				if (sessionId == null) sessionId = generateSessionId();
-				Conversation newConversation = createNewConversation(sessionId, inputText, diagramAsText, diagramAsXML);
-				conversationListModel.addElement(newConversation);
-				conversationList.setSelectedValue(newConversation, true);
-				newConvCreated = true;
-			}
+	    String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
+	    org.dom4j.Document diagramAsXML = DiagramInfo.exportAsXML(diagram);
 
-			Conversation currentConversation = conversationList.getSelectedValue();
+	    String queryText = userInput;
+	    String processText = "";
+	    String metricsSummary = "";
 
-			if (currentConversation != null) {
-				if (!newConvCreated) {
-					currentConversation.setProjectId(projectId);
-					if(currentConversation.getSessionId().equals(""))
-						currentConversation.setSessionId(generateSessionId());
-					if(currentConversation.getQueryId().equals("0"))
-						currentConversation.setQueryId(prefixAnswer);
-					currentConversation.setDiagramAsText(diagramAsText);
-					currentConversation.setDiagramId(getDiagram().getId());
-					currentConversation.setDiagramAsXML(diagramAsXML);
-					currentConversation.setQuery(inputText);
-					setRequirementsIfPresent(currentConversation);
-				}
+	    boolean addContentRequest =
+	            userInput.equalsIgnoreCase(Config.FEEDBACK_BUTTON_ADD);
 
-				String queryText = inputText;
-				if (inputText.toLowerCase().contains("modeling feedback")) {
-					// queryText += "\n\nViolations detected by RUM:\n"; TO DO
-				} else if (inputText.toLowerCase().contains(Config.FEEDBACK_BUTTON_QUALITY.toLowerCase())) {
-					String metricsSummary = RunSDMetrics.readSdmetricsOutput(getDiagram());
-					currentConversation.addMetric(metricsSummary);  // AGGIUNTO CORRETTAMENTE ALLA LISTA
-					currentConversation.setQuery(Config.QUALITYPROMPT + metricsSummary);
-					queryText = Config.QUALITYPROMPT + metricsSummary;
-				}
+	    boolean improvementRequest =
+	            userInput.equalsIgnoreCase(Config.FEEDBACK_BUTTON_IMROVEMENT);
 
+	    boolean issuesRequest =
+	            userInput.equalsIgnoreCase(Config.FEEDBACK_BUTTON_ISSUES);
 
-				String answer = prefixAnswer + queryText;
-				currentConversation.appendMessage(answer, true);
+	    boolean explainRequest =
+	            userInput.equalsIgnoreCase(Config.FEEDBACK_BUTTON_EXPLAIN);
 
-				String response = handleFeedback(currentConversation);
-				appendToPane(answer);
-				if (response != null) {
-					response = response.replaceFirst("^[\\r\\n>-]+", "");
-					appendToPane(response);
-				} else {
-					throw new Exception("No response from the server.");
-				}
+	    boolean modelingFeedbackRequest =
+	            userInput.equalsIgnoreCase(Config.FEEDBACK_BUTTON_MODELING);
 
-				currentConversation.appendMessage(response, false);
-				conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
-				conversationTitleField.setText(buildTitle(getDiagram(), currentConversation.getTitle()));
-			}
+	    boolean qualityFeedbackRequest =
+	            userInput.equalsIgnoreCase(Config.FEEDBACK_BUTTON_QUALITY);
 
-			serializeConversations(Application.getIDCurrentDiagram());
-			conversationList.revalidate();
-			conversationList.repaint();
-		}
+	    if (issuesRequest) {
+	        queryText = Config.FEEDBACK_ISSUES_PROMPT
+	                + "\n\nStudent request:\n"
+	                + userInput;
+	    } else if (improvementRequest) {
+	        queryText = Config.FEEDBACK_IMPROVEMENT_PROMPT
+	                + "\n\nStudent request:\n"
+	                + userInput;
+	    } else if (explainRequest) {
+	        queryText = Config.FEEDBACK_EXPLAIN_PROMPT
+	                + "\n\nStudent request:\n"
+	                + userInput;
+	    } else if (addContentRequest) {
+	        queryText = Config.FEEDBACK_ADD_CONTENT_PROMPT
+	                + "\n\nStudent request:\n"
+	                + userInput;
+	    } else if (modelingFeedbackRequest) {
+	        Optional<File> xesOpt = findXesLogForDiagram();
+
+	        if (xesOpt.isPresent()) {
+	            XesObjectLifecycleExtractor extractor = new XesObjectLifecycleExtractor();
+	            List<UmlObjectLifecycle> lifecycles = extractor.extract(xesOpt.get());
+
+	            UmlLifecycleDynamicsAnalyzer analyzer = new UmlLifecycleDynamicsAnalyzer();
+	            List<ProcessDynamicsFinding> findings = analyzer.analyze(lifecycles);
+
+	            ObjectCentricProcessPromptBuilder builder = new ObjectCentricProcessPromptBuilder();
+	            processText = builder.build(findings);
+
+	            queryText = Config.OBJECT_CENTRIC_PROCESS_FEEDBACK_PROMPT
+	                    + "\n\n"
+	                    + processText;
+	        } else {
+	            processText = "No readable XES event log was found for this diagram.";
+
+	            queryText = Config.OBJECT_CENTRIC_PROCESS_FEEDBACK_PROMPT
+	                    + "\n\n"
+	                    + processText;
+	        }
+	    } else if (qualityFeedbackRequest) {
+	        metricsSummary = RunSDMetrics.readSdmetricsOutput(getDiagram());
+
+	        queryText = Config.QUALITYPROMPT
+	                + "\n\n"
+	                + metricsSummary;
+	    }
+
+	    boolean newConvCreated = false;
+
+	    if (conversationListModel.isEmpty() || conversationList.getSelectedValue() == null) {
+	        if (sessionId == null || sessionId.isBlank()) {
+	            sessionId = generateSessionId();
+	        }
+
+	        Conversation newConversation =
+	                createNewConversation(sessionId, queryText, diagramAsText, diagramAsXML);
+
+	        conversationListModel.addElement(newConversation);
+	        conversationList.setSelectedValue(newConversation, true);
+	        newConvCreated = true;
+	    }
+
+	    Conversation currentConversation = conversationList.getSelectedValue();
+
+	    if (currentConversation == null) {
+	        throw new Exception("No active conversation available.");
+	    }
+
+	    if (!newConvCreated) {
+	        currentConversation.setProjectId(projectId);
+
+	        if (currentConversation.getSessionId() == null || currentConversation.getSessionId().isBlank()) {
+	            currentConversation.setSessionId(generateSessionId());
+	        }
+
+	        if ("0".equals(currentConversation.getQueryId())) {
+	            currentConversation.setQueryId(prefixAnswer);
+	        }
+
+	        currentConversation.setDiagramAsText(diagramAsText);
+	        currentConversation.setDiagramId(getDiagram().getId());
+	        currentConversation.setDiagramAsXML(diagramAsXML);
+	        currentConversation.setQuery(queryText);
+	    }
+
+	    setRequirementsIfPresent(currentConversation);
+
+	    if (modelingFeedbackRequest) {
+	        currentConversation.addProcess(processText);
+	    }
+
+	    if (qualityFeedbackRequest) {
+	        currentConversation.addMetric(metricsSummary);
+	    }
+
+	    String visibleAnswer = prefixAnswer + userInput;
+	    /*String visibleAnswer =
+	            prefixAnswer
+	            + userInput
+	            + "\n\n================ DEBUG PROMPT ================\n"
+	            + queryText
+	            + "\n=============================================\n";
+	   */ 
+	    
+	    currentConversation.appendMessage(visibleAnswer, true);
+
+	    appendToPane(visibleAnswer);
+
+	    String response = handleFeedback(currentConversation);
+	    
+	    //appendToPane("\n\n================ FINAL PROMPT SENT TO LLM ================\n");
+	    //appendToPane(LocalOpenAIProvider.LAST_DEBUG_PROMPT);
+	    //appendToPane("\n=========================================================\n");
+
+	    if (response == null) {
+	        throw new Exception("No response from the server.");
+	    }
+
+	    response = response.replaceFirst("^[\\r\\n>-]+", "");
+	    appendToPane(response);
+
+	    currentConversation.appendMessage(response, false);
+	    conversationListModel.set(conversationList.getSelectedIndex(), currentConversation);
+	    conversationTitleField.setText(buildTitle(getDiagram(), currentConversation.getTitle()));
+
+	    serializeConversations(Application.getIDCurrentDiagram());
+	    conversationList.revalidate();
+	    conversationList.repaint();
+	}
+	
+	private Optional<File> findXesLogForDiagram() {
+
+	    if (Application.getProject() == null) {
+	        return Optional.empty();
+	    }
+
+	    String projectName = Application.getProject().getName();
+	    String projectId = Application.getProject().getId();
+
+	    if (projectName == null || projectId == null) {
+	        return Optional.empty();
+	    }
+
+	    String logName =
+	            projectName.trim()
+	            + "-"
+	            + projectId.trim()
+	            + LogStreamer.LOG_EXTENSION;
+
+	    File logFile =
+	            LogStreamer
+	                    .getLogsDirectory()
+	                    .resolve(logName)
+	                    .toFile();
+
+	    System.out.println("[OCPM] Expected XES file = "
+	            + logFile.getAbsolutePath());
+
+	    if (logFile.isFile() && logFile.canRead()) {
+	        return Optional.of(logFile);
+	    }
+
+	    /*
+	     * Fallback:
+	     * search the logs directory for the most recent XES file
+	     * belonging to the current project.
+	     */
+	    File logsDir =
+	            LogStreamer
+	                    .getLogsDirectory()
+	                    .toFile();
+
+	    File[] matches =
+	            logsDir.listFiles((dir, name) ->
+	                    name != null
+	                    && name.toLowerCase().endsWith(LogStreamer.LOG_EXTENSION)
+	                    && name.toLowerCase().contains(projectName.toLowerCase())
+	                    && name.toLowerCase().contains(projectId.toLowerCase())
+	            );
+
+	    if (matches != null && matches.length > 0) {
+	        Arrays.sort(
+	                matches,
+	                Comparator.comparingLong(File::lastModified).reversed()
+	        );
+
+	        System.out.println("[OCPM] Fallback XES file = "
+	                + matches[0].getAbsolutePath());
+
+	        return Optional.of(matches[0]);
+	    }
+
+	    System.out.println("[OCPM] No XES log found in "
+	            + logsDir.getAbsolutePath());
+
+	    return Optional.empty();
+	}
+	
+	
+	
+	private void collectMatchingXesFiles(
+	        File directory,
+	        String projectName,
+	        String diagramId,
+	        List<File> matches) {
+
+	    if (directory == null || !directory.isDirectory()) {
+	        return;
+	    }
+
+	    File[] files = directory.listFiles();
+
+	    if (files == null) {
+	        return;
+	    }
+
+	    for (File file : files) {
+
+	        if (file.isDirectory()) {
+	            collectMatchingXesFiles(file, projectName, diagramId, matches);
+	            continue;
+	        }
+
+	        String name = file.getName();
+
+	        if (name == null || !name.toLowerCase().endsWith(".xes")) {
+	            continue;
+	        }
+
+	        String lowerName = name.toLowerCase();
+	        String lowerProjectName = projectName == null ? "" : projectName.toLowerCase();
+	        String lowerDiagramId = diagramId == null ? "" : diagramId.toLowerCase();
+
+	        boolean matchesDiagram =
+	                !lowerDiagramId.isEmpty()
+	                && lowerName.contains(lowerDiagramId);
+
+	        boolean matchesProjectAndDiagram =
+	                !lowerProjectName.isEmpty()
+	                && !lowerDiagramId.isEmpty()
+	                && lowerName.contains(lowerProjectName)
+	                && lowerName.contains(lowerDiagramId);
+
+	        if (matchesDiagram || matchesProjectAndDiagram) {
+	            matches.add(file);
+	        }
+	    }
 	}
 
+	private Optional<File> findViolationsReportForDiagram() {
+		String projectName = (Application.getProject() != null && Application.getProject().getName() != null)
+				? Application.getProject().getName().trim()
+				: "";
+		String projectId = Application.getProject().getId();
+		if (projectId == null)
+			projectId = "";
 
+		final String SUFFIX = "_violations_report.csv";
+
+		// 1) PROVA MATCH ESATTO: costruisci i possibili nomi
+		String[] candidates = new String[] { projectName + projectId + SUFFIX, // es.
+																				// icsoft2025-v6Zc.umDAAAAQpO_violations_report.csv
+				projectName + "." + projectId + SUFFIX, projectName + "_" + projectId + SUFFIX,
+				projectName + "-" + projectId + SUFFIX };
+
+		File reportsDir = LogStreamer.getReportsDirectory().toFile();
+		if (reportsDir == null || !reportsDir.isDirectory())
+			return Optional.empty();
+
+		for (String cand : candidates) {
+			File f = new File(reportsDir, cand);
+			if (f.isFile()) {
+				return Optional.of(f);
+			}
+		}
+
+		// 2) FALLBACK: scan case-insensitive che inizia con projectName+diagramId (o
+		// con separatore) e termina con SUFFIX
+		File[] matches = reportsDir.listFiles((dir, name) -> {
+			if (name == null || !name.endsWith(SUFFIX))
+				return false;
+			return startsWithIgnoreCase(name, projectName + Application.getProject().getId())
+					|| startsWithIgnoreCase(name, projectName + "." + Application.getProject().getId())
+					|| startsWithIgnoreCase(name, projectName + "_" + Application.getProject().getId())
+					|| startsWithIgnoreCase(name, projectName + "-" + Application.getProject().getId());
+		});
+
+		if (matches != null && matches.length > 0) {
+			Arrays.sort(matches, Comparator.comparingLong(File::lastModified).reversed());
+			return Optional.of(matches[0]);
+		}
+
+		// 3) FALLBACK "morbido": contiene projectName poi diagramId (utile se ci sono
+		// caratteri extra in mezzo)
+		File[] loose = reportsDir.listFiles((dir, name) -> {
+			if (name == null || !name.endsWith(SUFFIX))
+				return false;
+			String ln = name.toLowerCase();
+			String pn = projectName.toLowerCase();
+			String id = Application.getProject().getId().toLowerCase();
+			int i1 = ln.indexOf(pn);
+			int i2 = ln.indexOf(id, Math.max(i1, 0));
+			return i1 >= 0 && i2 > i1;
+		});
+
+		if (loose != null && loose.length > 0) {
+			Arrays.sort(loose, Comparator.comparingLong(File::lastModified).reversed());
+			return Optional.of(loose[0]);
+		}
+
+		return Optional.empty();
+	}
+
+	private static boolean startsWithIgnoreCase(String text, String prefix) {
+		if (text == null || prefix == null || prefix.isEmpty() || text.length() < prefix.length())
+			return false;
+		return text.regionMatches(true, 0, prefix, 0, prefix.length());
+	}
+
+	private String csvToString(File csvFile) {
+		try {
+			return java.nio.file.Files.readString(csvFile.toPath());
+		} catch (IOException e) {
+			return "\n[Error reading violations file: " + e.getMessage() + "]";
+		}
+	}
 
 	private String getDiagramTitle() {
 		IDiagramUIModel diagram = Application.getDiagram();
@@ -557,7 +874,6 @@ public class FeedbackHandler {
 		ConversationsSerializer.serializeConversations(conversations, diagramId);
 	}
 
-
 	private void setRequirementsIfPresent(Conversation conversation) {
 		String requirementsText = requirementsTextArea.getRequirementsTextArea().getText();
 		if (requirementsText != null && !requirementsText.trim().equals(Config.DIAGRAM_ABSENT_REQUIREMENT)) {
@@ -565,19 +881,14 @@ public class FeedbackHandler {
 		}
 	}
 
-
-	private Conversation createNewConversation(String sessionId, String query, 
-			String diagramAsText, org.dom4j.Document diagramAsXML) {
+	private Conversation createNewConversation(String sessionId, String query, String diagramAsText,
+			org.dom4j.Document diagramAsXML) {
 
 		// Utilizzo del costruttore con i parametri
-		Conversation newConversation = 
-				new Conversation(sessionId, 
-						projectId, getDiagram().getId(), 
-						diagramAsText,
-						diagramAsXML,
-						query, prefixAnswer);
+		Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), diagramAsText,
+				diagramAsXML, query, prefixAnswer);
 
-		setRequirementsIfPresent(newConversation); 
+		setRequirementsIfPresent(newConversation);
 
 		newConversation.appendMessage(outputPane.getText(), false);
 		System.out.println(newConversation.toString());
@@ -715,8 +1026,8 @@ public class FeedbackHandler {
 			if (newTitle != null && !newTitle.isEmpty()) {
 				selectedConversation.setTitle(newTitle);
 				// Aggiorna il testo nella casella di testo del titolo della conversazione
-				//conversationTitleField.setText(buildTitle(getDiagramTitle(), newTitle));
-				conversationTitleField.setText(buildTitle(getDiagram(),newTitle));
+				// conversationTitleField.setText(buildTitle(getDiagramTitle(), newTitle));
+				conversationTitleField.setText(buildTitle(getDiagram(), newTitle));
 				// Aggiorna la visualizzazione della lista delle conversazioni
 				conversationListModel.setElementAt(selectedConversation, conversationList.getSelectedIndex());
 				// serializeConversations();
@@ -732,18 +1043,18 @@ public class FeedbackHandler {
 		return instance;
 	}
 
-	//	public void showFeedbackPanel(IProject project) {
-	//		setProjectId(Application.getProject().getId());
+	// public void showFeedbackPanel(IProject project) {
+	// setProjectId(Application.getProject().getId());
 	//
-	//		if (panel == null)
-	//			createPanel();
-	//		else {
-	//			// after opened
-	//			clearPanel();
-	//			loadSerializedConversations();
-	//		}
-	//		Application.getViewManager().showMessagePaneComponent(id, title, panel);
-	//	}
+	// if (panel == null)
+	// createPanel();
+	// else {
+	// // after opened
+	// clearPanel();
+	// loadSerializedConversations();
+	// }
+	// Application.getViewManager().showMessagePaneComponent(id, title, panel);
+	// }
 
 	public static boolean toBeClosed(IProject project) {
 		boolean toBeClosed = false;
@@ -807,14 +1118,16 @@ public class FeedbackHandler {
 		// Ottieni il testo dalla JTextPane
 		String query = outputPane.getText();
 
-		//String sessionId = generateSessionId();
-		//String diagramAsText = DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
-		//Document diagramAsXML = DiagramInfo.exportAsXML(getDiagram());
+		// String sessionId = generateSessionId();
+		// String diagramAsText =
+		// DiagramInfo.exportInformation(Application.getProject(), "en", diagram);
+		// Document diagramAsXML = DiagramInfo.exportAsXML(getDiagram());
 		// Crea una nuova istanza di Conversation
 		Conversation newConversation = new Conversation();
-		/*Conversation newConversation = new Conversation(sessionId, projectId, getDiagram().getId(), 
-				diagramAsText, diagramAsXML,
-				query, prefixAnswer);*/
+		/*
+		 * Conversation newConversation = new Conversation(sessionId, projectId,
+		 * getDiagram().getId(), diagramAsText, diagramAsXML, query, prefixAnswer);
+		 */
 
 		// Aggiungi la nuova istanza di Conversation alla lista delle conversazioni
 		conversationListModel.addElement(newConversation);
@@ -832,8 +1145,8 @@ public class FeedbackHandler {
 		// Azzera il contenuto della JTextPane
 		outputPane.setText("");
 
-		//}
-		//else
+		// }
+		// else
 		inputField.requestFocusInWindow();
 	}
 
@@ -859,13 +1172,14 @@ public class FeedbackHandler {
 		// Pannello principale diviso in due parti: sinistra e destra
 		JPanel mainPanel = new JPanel(new BorderLayout());
 
-		//		newChatButton.addActionListener(e -> {
-		//			try {
-		//				createNewChat();
-		//			} catch (Exception e1) {
-		//				GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(), "Feedback", e1.getMessage());
-		//			}
-		//		});
+		// newChatButton.addActionListener(e -> {
+		// try {
+		// createNewChat();
+		// } catch (Exception e1) {
+		// GUI.showErrorMessageDialog(Application.getViewManager().getRootFrame(),
+		// "Feedback", e1.getMessage());
+		// }
+		// });
 
 		// Pannello sinistro contiene il pulsante "New Chat" e la lista delle
 		// conversazioni
@@ -874,7 +1188,7 @@ public class FeedbackHandler {
 		JScrollPane listScrollPane = new JScrollPane(conversationList);
 		listScrollPane.setPreferredSize(new Dimension(200, 200));
 		leftPanel.add(listScrollPane, BorderLayout.CENTER);
-		//leftPanel.add(conversationLabel, BorderLayout.NORTH);
+		// leftPanel.add(conversationLabel, BorderLayout.NORTH);
 
 		mainPanel.add(leftPanel, BorderLayout.WEST);
 
@@ -884,17 +1198,17 @@ public class FeedbackHandler {
 		// Panel to hold conversationTitleField
 		JPanel northPanel = new JPanel(new BorderLayout());
 		northPanel.add(conversationTitleField, BorderLayout.CENTER);
-		//northPanel.add(requirementsTextArea.getPreviewRequirements(), BorderLayout.EAST);
+		// northPanel.add(requirementsTextArea.getPreviewRequirements(),
+		// BorderLayout.EAST);
 
 		// Imposta la dimensione preferita del northPanel a 24 pixel di altezza
 		northPanel.setPreferredSize(new Dimension(northPanel.getPreferredSize().width, 24));
-
 
 		// Add the north panel to the right panel
 		centralPanel.add(northPanel, BorderLayout.NORTH);
 
 		// Add requirementsTextArea to the east region in a JScrollPane
-		//rightPanel = requirementsTextArea.addRTextArea(rightPanel);
+		// rightPanel = requirementsTextArea.addRTextArea(rightPanel);
 
 		// Add outputPane in a JScrollPane to the center region
 		centralPanel.add(new JScrollPane(outputPane), BorderLayout.CENTER);
@@ -970,14 +1284,14 @@ public class FeedbackHandler {
 		// Aggiungi l'area di testo (CENTRO) usando addRTextArea
 		requirementsTextArea.addRTextArea(rightPanel);
 
-		// Crea un pannello per i pulsanti (usiamo FlowLayout per posizionarli affiancati)
+		// Crea un pannello per i pulsanti (usiamo FlowLayout per posizionarli
+		// affiancati)
 		JPanel buttonRightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
 		// Crea il pulsante "Export as TXT"
 		JButton saveButton = new JButton("Export as TXT");
 		saveButton.setToolTipText("Click to export the diagram requirements as a text file");
 		saveButton.addActionListener(e -> requirementsTextArea.exportTextToFile());
-
 
 		// Crea il pulsante "Load"
 		JButton loadButton = new JButton("Load Req.");
@@ -988,20 +1302,19 @@ public class FeedbackHandler {
 			// Mostra il dialogo
 			Application.getViewManager().showDialog(dialogHandler);
 			// Impostiamo il callback che verrà eseguito quando il dialogo verrà chiuso
-			requirementsTextArea.printReqFound(diagram); 
+			requirementsTextArea.printReqFound(diagram);
 		});
 
 		// Aggiungi i pulsanti al pannello
 		buttonRightPanel.add(saveButton);
 		buttonRightPanel.add(loadButton);
 
-		// Aggiungi il pannello dei pulsanti sotto l'area di testo (SOUTH) nel pannello destro
+		// Aggiungi il pannello dei pulsanti sotto l'area di testo (SOUTH) nel pannello
+		// destro
 		rightPanel.add(buttonRightPanel, BorderLayout.SOUTH);
 
-
-
 		// Add requirementsTextArea to the east region in a JScrollPane
-		//rightPanel = requirementsTextArea.addRTextArea(rightPanel);
+		// rightPanel = requirementsTextArea.addRTextArea(rightPanel);
 
 		// Aggiungi il pannello destro al pannello principale nella parte est
 		mainPanel.add(rightPanel, BorderLayout.EAST);
@@ -1014,24 +1327,24 @@ public class FeedbackHandler {
 
 		conversationList.addListSelectionListener(e -> {
 			refreshSelectedConversation();
-			//			Conversation selectedConversation = conversationList.getSelectedValue();
+			// Conversation selectedConversation = conversationList.getSelectedValue();
 			//
-			//			if (selectedConversation != null) {
-			//				conversationTitleField.setText(
-			//						buildTitle(getDiagram(), selectedConversation.getTitle()));
+			// if (selectedConversation != null) {
+			// conversationTitleField.setText(
+			// buildTitle(getDiagram(), selectedConversation.getTitle()));
 			//
-			//				String conversationContent = selectedConversation.getConversationContent();
-			//				outputPane.setText("");
-			//				String[] lines = conversationContent.split("\n");
-			//				for (String line : lines) {
-			//					Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
-			//					appendToPane(line + "\n", textColor);
+			// String conversationContent = selectedConversation.getConversationContent();
+			// outputPane.setText("");
+			// String[] lines = conversationContent.split("\n");
+			// for (String line : lines) {
+			// Color textColor = line.startsWith("You:") ? Color.BLUE : Color.BLACK;
+			// appendToPane(line + "\n", textColor);
 			//
-			//				}
-			//			} else {
-			//				conversationTitleField.setText(buildTitle(null,getDiagramTitle()));
-			//				outputPane.setText("");
-			//			}
+			// }
+			// } else {
+			// conversationTitleField.setText(buildTitle(null,getDiagramTitle()));
+			// outputPane.setText("");
+			// }
 		});
 
 		return panel;
@@ -1062,17 +1375,15 @@ public class FeedbackHandler {
 	}
 
 	private String buildTitle(IDiagramUIModel diagram, String chatTitle) {
-		ResourceBundle messages = DiagramInfo.getMessages();  // oppure rendi messages privato e accedi solo con metodi
+		ResourceBundle messages = DiagramInfo.getMessages(); // oppure rendi messages privato e accedi solo con metodi
 
 		String typeDescription = DiagramInfo.getTypeDescription(diagram);
 
 		String diagramName = (diagram != null && diagram.getName() != null && !diagram.getName().isEmpty())
 				? diagram.getName()
-						: messages.getString("uml.diagram.noname");
+				: messages.getString("uml.diagram.noname");
 
-		chatTitle = (chatTitle != null && !chatTitle.isEmpty())
-				? chatTitle
-						: messages.getString("uml.chat.untitled");
+		chatTitle = (chatTitle != null && !chatTitle.isEmpty()) ? chatTitle : messages.getString("uml.chat.untitled");
 
 		return String.format("%s: %s – Chat: %s", typeDescription, diagramName, chatTitle);
 	}
@@ -1167,6 +1478,7 @@ public class FeedbackHandler {
 			e.printStackTrace();
 		}
 	}
+
 	public void hideFeedbackPanelIfShown(IDiagramUIModel diagram) {
 		if (panel != null && diagram != null && diagram.equals(getDiagram())) {
 			System.out.println("[FeedbackHandler] Hiding feedback panel for diagram: " + diagram.getName());

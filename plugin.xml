@@ -83,6 +83,43 @@
 				<actionController
 					class="com.uniba.mining.actions.FeedbackActionController" />
 			</action>
+	
+	<!-- AI configuration submenu -->
+<menu id="AIConfiguration" label="AI Configuration"
+    ribbonPath="Toolbar/FeedbackChat"
+    icon="assets/icons/settings.png" />
+
+<action id="UseLocalLLM" actionType="generalAction"
+    label="Use Local LLM"
+    tooltip="Use the local OpenAI-compatible LLM server"
+    icon="assets/icons/settings.png"
+    style="normal"
+    ribbonPath="Toolbar/AIConfiguration/#">
+    <actionController
+        class="com.uniba.mining.actions.UseLocalLLMActionController" />
+</action>
+
+<action id="UseRemoteRAG" actionType="generalAction"
+    label="Use Remote RAG + LLM"
+    tooltip="Use the remote RAG-enhanced LLM server"
+    icon="assets/icons/settings.png"
+    style="normal"
+    ribbonPath="Toolbar/AIConfiguration/UseLocalLLM">
+    <actionController
+        class="com.uniba.mining.actions.UseRemoteRAGActionController" />
+</action>
+
+<action id="TestAIConnection" actionType="generalAction"
+    label="Test AI Connection"
+    tooltip="Test the currently selected AI provider"
+    icon="assets/icons/checklist.png"
+    style="normal"
+    ribbonPath="Toolbar/AIConfiguration/UseRemoteRAG">
+    <actionController
+        class="com.uniba.mining.actions.TestAIConnectionActionController" />
+</action>		
+			
+			
 			<!--  <action id="FeedbackRequirements" actionType="generalAction"
 				label="%actions.Feedback.labelRequ"
 				tooltip="%actions.Feedback.tooltipRequ" style="normal"
@@ -96,7 +133,7 @@
 				actionType="generalAction" label="Class Diagram Auto-Gen"
 				tooltip="Automatic Class Diagrams Creation via JSON file"
 				style="normal" icon="assets/icons/class.png"
-				ribbonPath="Toolbar/FeedbackChat">
+				ribbonPath="Toolbar/AIConfiguration">
 				<actionController
 					class="com.uniba.mining.actions.ClassDiagramActionControl" />
 			</action>

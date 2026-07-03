@@ -113,7 +113,7 @@ public class RestClient {
             } else {
                 // Handle error response
                 LOGGER.severe("Server returned an error: " + responseContent.toString());
-                throw new IOException("Server returned an error: " + responseContent.toString());
+                throw new IOException("Server returned an error: " + statusCode+ " "+ responseContent.toString());
             }
 
         } catch (IOException e) {

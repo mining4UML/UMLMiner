@@ -382,6 +382,7 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 						reportRow.put("PropertyValue", valori.getOrDefault("PropertyValue", ""));
 						reportRow.put("RelationshipFrom", valori.getOrDefault("RelationshipFrom", ""));
 						reportRow.put("RelationshipTo", valori.getOrDefault("RelationshipTo", ""));
+						reportRow.put("UMLElementId", valori.getOrDefault("UMLElementId", ""));
 
 						reportData.add(reportRow);
 					}
@@ -460,6 +461,9 @@ public class ConformanceCheckingDialogHandler implements IDialogHandler {
 			}
 			else if (elemento.getKey().equals("RelationshipTo")) {
 				valori.put("RelationshipTo", elemento.getValue().toString());
+			}
+			else if (elemento.getKey().equals("UMLElementId")) {
+				valori.put("UMLElementId", elemento.getValue().toString());
 			}
 		}
 		return valori;

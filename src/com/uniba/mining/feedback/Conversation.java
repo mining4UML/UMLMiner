@@ -32,7 +32,8 @@ public class Conversation implements Serializable {
 	private List<String> processList = new ArrayList<>();
 	private List<String> metricsList = new ArrayList<>();
 
-	public Conversation() {}
+	public Conversation() {
+	}
 
 	public Conversation(String sessionId, String projectId, String diagramId, String diagramAsText,
 			Document diagramAsXML, String query, String prefixAnswer) {
@@ -90,16 +91,26 @@ public class Conversation implements Serializable {
 		this.queryId = calculateQueryId(prefixAnswer);
 	}
 
+	private void setAtCurrentQueryIndex(List<String> list, String value) {
+		int index = Math.max(0, queryList.size() - 1);
+
+		while (list.size() <= index) {
+			list.add("");
+		}
+
+		list.set(index, value != null ? value : "");
+	}
+
 	public void addRequirement(String requirement) {
-		requirementsList.add(requirement != null ? requirement : "");
+		setAtCurrentQueryIndex(requirementsList, requirement);
 	}
 
 	public void addProcess(String process) {
-		processList.add(process != null ? process : "");
+		setAtCurrentQueryIndex(processList, process);
 	}
 
 	public void addMetric(String metric) {
-		metricsList.add(metric != null ? metric : "");
+		setAtCurrentQueryIndex(metricsList, metric);
 	}
 
 	public List<String> getRequirementsList() {
@@ -167,24 +178,29 @@ public class Conversation implements Serializable {
 		return query;
 	}
 
+	private String getAtIndex(List<String> list, int index) {
+		if (list == null || index < 0 || index >= list.size()) {
+			return "";
+		}
+		String value = list.get(index);
+		return value != null ? value : "";
+	}
 
 	public String getRequirements(int index) {
-		return (requirementsList != null && index < requirementsList.size()) ? requirementsList.get(index) : "";
+		return getAtIndex(requirementsList, index);
 	}
 
 	public String getProcess(int index) {
-		return (processList != null && index < processList.size()) ? processList.get(index) : "";
+		return getAtIndex(processList, index);
 	}
 
 	public String getMetrics(int index) {
-		return (metricsList != null && index < metricsList.size()) ? metricsList.get(index) : "";
+		return getAtIndex(metricsList, index);
 	}
-	
+
 	public List<String> getQueryList() {
 		return queryList;
 	}
-
-
 
 	public void setQuery(String query) {
 		this.query = query;
@@ -216,16 +232,12 @@ public class Conversation implements Serializable {
 		int numItems = Math.min(numQueries, numResponses);
 
 		for (int i = 0; i < numItems; i++) {
-			String timestamp = (timestampList != null && i < numTimestamps)
-					? timestampList.get(i)
-							: "No timestamp available";
+			String timestamp = (timestampList != null && i < numTimestamps) ? timestampList.get(i)
+					: "No timestamp available";
 
-			builder.append(sep)
-			.append("QUERY (").append(timestamp).append(") ").append(sep).append("\n")
-			.append(queryList.get(i)).append("\n");
-			builder.append(sep)
-			.append("RESPONSE ").append(sep).append("\n")
-			.append(responseList.get(i)).append("\n\n");
+			builder.append(sep).append("QUERY (").append(timestamp).append(") ").append(sep).append("\n")
+					.append(queryList.get(i)).append("\n");
+			builder.append(sep).append("RESPONSE ").append(sep).append("\n").append(responseList.get(i)).append("\n\n");
 		}
 
 		return builder.toString();
@@ -250,7 +262,8 @@ public class Conversation implements Serializable {
 		for (int i = 0; i < numItems; i++) {
 			String diagram = diagramAsTextList.get(i) != null ? diagramAsTextList.get(i) : "(no diagram)";
 			String timestamp = (timestampList != null && i < timestampList.size() && timestampList.get(i) != null)
-					? timestampList.get(i) : "unknown timestamp";
+					? timestampList.get(i)
+					: "unknown timestamp";
 			String query = queryList.get(i) != null ? queryList.get(i) : "(no query)";
 			String response = responseList.get(i) != null ? responseList.get(i) : "(no response)";
 			String req = (requirementsList != null && i < requirementsList.size()) ? requirementsList.get(i) : null;
@@ -262,28 +275,28 @@ public class Conversation implements Serializable {
 			builder.append(blockSeparator).append("\n\n");
 
 			builder.append(subsectionSep).append(" DIAGRAM DESCRIPTION ").append(subsectionSep).append("\n")
-			.append(diagram).append("\n\n");
+					.append(diagram).append("\n\n");
 
-			builder.append(subsectionSep).append(" QUERY (").append(timestamp).append(") ").append(subsectionSep).append("\n")
-			.append(query).append("\n\n");
+			builder.append(subsectionSep).append(" QUERY (").append(timestamp).append(") ").append(subsectionSep)
+					.append("\n").append(query).append("\n\n");
 
 			if (req != null && !req.isEmpty()) {
-				builder.append(subsectionSep).append(" REQUIREMENTS ").append(subsectionSep).append("\n")
-				.append(req).append("\n\n");
+				builder.append(subsectionSep).append(" REQUIREMENTS ").append(subsectionSep).append("\n").append(req)
+						.append("\n\n");
 			}
 
 			if (proc != null && !proc.isEmpty()) {
-				builder.append(subsectionSep).append(" PROCESS ").append(subsectionSep).append("\n")
-				.append(proc).append("\n\n");
+				builder.append(subsectionSep).append(" PROCESS ").append(subsectionSep).append("\n").append(proc)
+						.append("\n\n");
 			}
 
 			if (mets != null && !mets.isEmpty()) {
-				builder.append(subsectionSep).append(" METRICS ").append(subsectionSep).append("\n")
-				.append(mets).append("\n\n");
+				builder.append(subsectionSep).append(" METRICS ").append(subsectionSep).append("\n").append(mets)
+						.append("\n\n");
 			}
 
-			builder.append(subsectionSep).append(" RESPONSE ").append(subsectionSep).append("\n")
-			.append(response).append("\n\n");
+			builder.append(subsectionSep).append(" RESPONSE ").append(subsectionSep).append("\n").append(response)
+					.append("\n\n");
 		}
 
 		return builder.toString();
@@ -291,10 +304,15 @@ public class Conversation implements Serializable {
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
-		if (timestampList == null) timestampList = new ArrayList<>();
-		if (processList == null) processList = new ArrayList<>();
-		if (metricsList == null) metricsList = new ArrayList<>();
-		if (requirementsList == null) requirementsList = new ArrayList<>();
-		if (conversationContent == null) conversationContent = new StringBuilder();
+		if (timestampList == null)
+			timestampList = new ArrayList<>();
+		if (processList == null)
+			processList = new ArrayList<>();
+		if (metricsList == null)
+			metricsList = new ArrayList<>();
+		if (requirementsList == null)
+			requirementsList = new ArrayList<>();
+		if (conversationContent == null)
+			conversationContent = new StringBuilder();
 	}
 }

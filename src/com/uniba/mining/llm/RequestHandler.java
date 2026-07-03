@@ -98,7 +98,7 @@ public class RequestHandler {
 //				conversation.getQuery()
 //				);
 //	}
-	
+
 	private ApiRequest createApiRequest(Conversation conversation) throws IOException {
 		String diagramId = conversation.getDiagramId();
 		Path path = LogStreamer.getRequirementsDirectory();
@@ -108,31 +108,27 @@ public class RequestHandler {
 
 		int lastIndex = conversation.getQueryList().size() - 1;
 
-		// Usa i requirements già salvati nella Conversation se disponibili, altrimenti quelli da file
-		String finalRequirements = conversation.getRequirements(lastIndex) != null && !conversation.getRequirements(lastIndex).isBlank()
-				? conversation.getRequirements(lastIndex)
-				: requirementsFromFile;
+		// Usa i requirements già salvati nella Conversation se disponibili, altrimenti
+		// quelli da file
+		String finalRequirements = conversation.getRequirements(lastIndex) != null
+				&& !conversation.getRequirements(lastIndex).isBlank() ? conversation.getRequirements(lastIndex)
+						: requirementsFromFile;
 
-		return new ApiRequest(
-				conversation.getSessionId(),
-				projectId,
-				diagramId,
-				conversation.getQueryId(),
-				conversation.getDiagramAsText(),
-				conversation.getDiagramAsXML(),
-				finalRequirements,
-				conversation.getProcess(lastIndex),
-				conversation.getMetrics(lastIndex),
-				user,
-				conversation.getQuery()
-		);
+		return new ApiRequest(conversation.getSessionId(), projectId, diagramId, conversation.getQueryId(),
+				conversation.getDiagramAsText(), conversation.getDiagramAsXML(), finalRequirements,
+				conversation.getProcess(lastIndex), conversation.getMetrics(lastIndex), user, conversation.getQuery());
 	}
 
-
+	/*
+	 * private ApiResponse sendApiRequest(ApiRequest request) throws IOException {
+	 * RestClient client = new RestClient(); return client.sendRequest(request); }
+	 */
 
 	private ApiResponse sendApiRequest(ApiRequest request) throws IOException {
-		RestClient client = new RestClient();
-		return client.sendRequest(request);
+
+		LLMProvider provider = LLMProviderFactory.createProvider();
+
+		return provider.sendRequest(request);
 	}
 
 	/**
